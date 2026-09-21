@@ -1,41 +1,50 @@
 "use client";
 
+import { Bot } from "lucide-react";
+import { DraggableAILauncher } from "./draggable-ai-launcher";
+
+import { Button } from "@/components/ui/button";
+import styles from "./ai-chat-launcher.module.css";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { useAIChat } from "@/registry/blocks/sidebar-03/components/ai-chat";
-import { AskDoc } from "@/registry/blocks/sidebar-03/components/ask-doc";
 import { ChatDialogHeader } from "@/registry/blocks/sidebar-03/components/chat-header";
-import { HoverBorderButton } from "@/registry/blocks/sidebar-03/components/hover-border-button";
 import { ChatStreaming } from "@/registry/blocks/sidebar-03/components/streaming";
-import { Dialog, DialogContent, DialogTrigger } from "@/registry/ui/dialog";
-import { cn } from "@/registry/lib/utils";
-import { SparklesIcon } from "lucide-react";
 
 export const AIChatDialog = () => {
-  const { activeTab, input, setIsDialogOpen, isDialogOpen } = useAIChat();
+  const { setIsDialogOpen, isDialogOpen } = useAIChat();
   return (
     <Dialog onOpenChange={setIsDialogOpen} open={isDialogOpen}>
-      <div className="absolute bottom-4 right-4 md:bottom-10 md:right-10">
+      <DraggableAILauncher>
         <DialogTrigger
-          aria-label="Chat with AI"
+          aria-label="AI와 대화"
+          aria-describedby="ai-launcher-help"
           render={
-            <HoverBorderButton
-              animate={!isDialogOpen}
-              className="flex items-center space-x-2 px-3 py-2 text-sm font-semibold"
+            <Button
+              variant="unstyled"
+              className={`relative isolate size-14 shrink-0 rounded-full border-0 p-0 shadow-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring ${styles.launcher}`}
+              data-open={isDialogOpen || undefined}
             >
-              <SparklesIcon className="size-4" /> <span>Chat With AI</span>
-            </HoverBorderButton>
+              <span aria-hidden="true" className={styles.orbit} />
+              <span
+                aria-hidden="true"
+                className="relative z-10 flex size-full items-center justify-center rounded-full bg-yellow-400 text-3xl leading-none text-black"
+              >
+                <Bot className="size-7" strokeWidth={2} />
+              </span>
+            </Button>
           }
         />
-      </div>
+      </DraggableAILauncher>
+      <span id="ai-launcher-help" className="sr-only">
+        드래그하거나 Alt와 방향키로 위치를 이동할 수 있습니다.
+      </span>
       <DialogContent
-        className={cn(
-          "p-0! gap-0 mt-20 rounded-md max-w-[60ch] will-change-transform duration-300 data-ending-style:translate-0 data-starting-style:translate-0",
-          activeTab === "doc" && !input && "h-min",
-        )}
+        className="p-0! gap-0 mt-4 rounded-md max-w-[60ch] h-[80dvh] max-h-[90dvh] flex flex-col overflow-hidden"
+        showCloseButton
         layout="top"
       >
         <ChatDialogHeader />
-        {activeTab === "chat" && <ChatStreaming />}
-        {activeTab === "doc" && <AskDoc />}
+        <ChatStreaming />
       </DialogContent>
     </Dialog>
   );

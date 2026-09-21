@@ -1,0 +1,36 @@
+.orbit {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 15%,
+    var(--color-amber-500) 45%,
+    var(--color-yellow-200) 65%,
+    var(--color-white) 75%,
+    transparent 85%
+  );
+  animation: orbit 1.6s linear infinite;
+  filter: drop-shadow(0 0 5px var(--color-amber-400));
+  pointer-events: none;
+}
+
+.launcher:hover .orbit {
+  filter: drop-shadow(0 0 8px var(--color-amber-400));
+}
+
+.launcher[data-open] .orbit {
+  animation-play-state: paused;
+}
+
+@keyframes orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orbit {
+    animation: none;
+  }
+}

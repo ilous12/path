@@ -1,0 +1,174 @@
+[
+  {
+    "id": "demo-tds-evaluation-2026-09-11",
+    "title": "[데모] TDS · 회선 회복 추세 예측 일치",
+    "type": "혜택 변경",
+    "groupName": "예측 검증 데모",
+    "workspace": "tds",
+    "description": "가입 전환 혜택과 채널 노출 개선으로 09/12부터 회선 증가를 예상하는 시나리오. 실제 역할의 합성 실적과 유사하지만 일별 값은 다르게 설정했습니다. 사후 구성한 설명용 예측이며 실제 사전 예측 성능이나 정책 인과효과를 입증하지 않습니다.",
+    "start": "2026-09-11",
+    "days": 11,
+    "applyDays": 11,
+    "pricePct": 0,
+    "demandPct": 0,
+    "variableCostPct": 0,
+    "cancellationPct": 0,
+    "dailyCost": 10000,
+    "oneTimeCost": 0,
+    "status": "draft",
+    "createdAt": "2026-09-21T00:00:00Z",
+    "history": [
+      {
+        "at": "2026-09-21T00:00:00Z",
+        "action": "성공·미달 비교를 위한 사후 구성 데모"
+      }
+    ],
+    "demoCustomerForecast": [
+      94,
+      172,
+      236,
+      286,
+      329,
+      361,
+      391,
+      402,
+      398,
+      405,
+      397
+    ],
+    "demoEvaluationDate": "2026-09-17"
+  },
+  {
+    "id": "demo-tds-evaluation-2026-09-08",
+    "title": "[데모] TDS · 가입 증가 예측 미달",
+    "type": "혜택 변경",
+    "groupName": "예측 검증 데모",
+    "workspace": "tds",
+    "description": "09/08부터 가입 혜택으로 회선 증가를 예상했으나, 09/10까지 합성 관측 실적에서는 증가가 나타나지 않는 실패 사례. 이후 회복 구간은 이 실험의 평가에 포함하지 않습니다. 사후 구성한 설명용 시나리오이며 정책 인과효과가 아닙니다.",
+    "start": "2026-09-08",
+    "days": 3,
+    "applyDays": 3,
+    "pricePct": 0,
+    "demandPct": 0,
+    "variableCostPct": 0,
+    "cancellationPct": 0,
+    "dailyCost": 10000,
+    "oneTimeCost": 0,
+    "status": "draft",
+    "createdAt": "2026-09-21T00:00:00Z",
+    "history": [
+      {
+        "at": "2026-09-21T00:00:00Z",
+        "action": "성공·미달 비교를 위한 사후 구성 데모"
+      }
+    ],
+    "demoCustomerForecast": [
+      110,
+      130,
+      145
+    ],
+    "demoEvaluationDate": "2026-09-10"
+  },
+  {
+    "id": "demo-tds-evaluation-2026-09-11",
+    "title": "[데모] TDS · 초기 상승 후 유사 수준 유지",
+    "type": "혜택 변경",
+    "groupName": "예측 검증 데모",
+    "workspace": "tds",
+    "description": "09/01부터 초기 회선 증가 후 300회선 안팎에서 웨이브를 보이며 유사 수준을 유지하는 예측. 이후 실제 역할의 합성 관측에서는 증가가 이어지지 않는 비교 사례입니다. 사후 구성 데모이며 정책 인과효과가 아닙니다.",
+    "start": "2026-09-01",
+    "days": 7,
+    "applyDays": 7,
+    "pricePct": 0,
+    "demandPct": 0,
+    "variableCostPct": 0,
+    "cancellationPct": 0,
+    "dailyCost": 10000,
+    "oneTimeCost": 0,
+    "status": "draft",
+    "createdAt": "2026-09-21T00:00:00Z",
+    "history": [
+      {
+        "at": "2026-09-21T00:00:00Z",
+        "action": "성공·미달 비교를 위한 사후 구성 데모"
+      }
+    ],
+    "demoCustomerForecast": [
+      275,
+      290,
+      302,
+      297,
+      304,
+      298,
+      301
+    ],
+    "demoEvaluationDate": "2026-09-07"
+  },
+  {
+    "id": "demo-tds-evaluation-2026-09-08",
+    "title": "[데모] TDS · 회선 증가 추세 추종 성공",
+    "type": "혜택 변경",
+    "groupName": "예측 검증 데모",
+    "workspace": "tds",
+    "description": "09/08 실험은 회복 구간의 큰 증가를 예측합니다. 09/12부터 관측 증가 추세를 따라 상승하고, 이후 작은 웨이브를 유지하며 관측 회선수보다 조금 낮게 예측했습니다. 사후 구성한 성공 비교 데모이며 실제 사전 예측 성능이나 정책 인과효과가 아닙니다.",
+    "start": "2026-09-08",
+    "days": 14,
+    "applyDays": 14,
+    "pricePct": 0,
+    "demandPct": 0,
+    "variableCostPct": 0,
+    "cancellationPct": 0,
+    "dailyCost": 10000,
+    "oneTimeCost": 0,
+    "status": "draft",
+    "createdAt": "2026-09-21T00:00:00Z",
+    "history": [
+      {
+        "at": "2026-09-21T00:00:00Z",
+        "action": "성공·미달 비교를 위한 사후 구성 데모"
+      }
+    ],
+    "demoCustomerForecast": [
+      79,
+      78,
+      80,
+      88,
+      172,
+      237,
+      287,
+      326,
+      361,
+      389,
+      395,
+      390,
+      397,
+      393
+    ],
+    "demoEvaluationDate": "2026-09-21"
+  },
+  {
+    "id": "seed-telecom-experiment-01",
+    "title": "[가상 실험] AIR · 20GB 상품 가격 5% 인하",
+    "type": "가격 조정",
+    "groupName": "가격 경쟁력",
+    "workspace": "air",
+    "description": "동일 망·QoS·할인기간의 경쟁 요금제와 비교. 증분 순익이 음수이면 중단.\n실제 시행 이력 또는 AI 검증 결과가 아닙니다. 수요·해지·비용 수치는 수동 가정이고, 차트 기준 실적은 공통 합성 데이터입니다.",
+    "start": "2026-09-14",
+    "applyDays": 14,
+    "days": 30,
+    "pricePct": -5,
+    "demandPct": 8,
+    "variableCostPct": 1,
+    "cancellationPct": -2,
+    "dailyCost": 10000,
+    "oneTimeCost": 30000,
+    "status": "draft",
+    "createdAt": "2026-09-21T00:00:00Z",
+    "history": [
+      {
+        "at": "2026-09-21T00:00:00Z",
+        "action": "통신시장 사례를 참고한 가상 실험 초안 등록"
+      }
+    ]
+  }
+]

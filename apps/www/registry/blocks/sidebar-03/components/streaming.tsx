@@ -1,224 +1,162 @@
 "use client";
 
-import { Bot, Loader2, Send, User } from "lucide-react";
-import { useState } from "react";
-import { useAIChat } from "@/registry/blocks/sidebar-03/components/ai-chat";
-import { MovingBorderButton } from "@/registry/blocks/sidebar-03/components/moving-border-button";
-import { cn } from "@/registry/lib/utils";
-import { Button } from "@/registry/ui/button";
-import { Input } from "@/registry/ui/input";
-import { ScrollArea } from "@/registry/ui/scroll-area";
+import { Bot, Send, User } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useRef } from "react";
+import {
+  buildPerformance,
+  presetRange,
+} from "@/components/market-performance/data";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
-const RESPONSE_INTRO = `Lumi UI gives you accessible, customizable React components that you own completely. Built on Base UI for robust behavior and styled with Tailwind CSS for maximum flexibility.
+import { useAIChat } from "./ai-chat";
 
-It offers two paths to production:
-1. **Composite Components**: Pre-assembled, production-ready components for common patterns. Perfect for prototyping and building standard UIs fast.
-2. **Primitive Components**: Raw, unstyled building blocks that give you full access to logic without fighting the library.
-
-This ensures you have both velocity when you need it and control when you want it.`;
-
-const RESPONSE_PHILOSOPHY = `Lumi UI is built on a "Dual Layer Architecture" to refuse the false dichotomy between speed and control.
-
-**Composites = Velocity**
-Pre-assembled components that combine structure, styling, and logic. You accept our opinions about structure in exchange for speed. Best for MVPs and 80% of use cases.
-
-**Primitives = Control**
-Thin wrappers around Base UI that provide state and accessibility but enforce zero visual layout. You write more code but get complete control over DOM structure.
-
-We also optimize for **AI-Assisted Development** with flat semantic exports and clear patterns that LLMs can easily understand and generate.`;
-
-const RESPONSE_ARCHITECTURE = `Our architecture focuses on **Flat Semantic Exports** and **Immutable Logic Blocks**.
-
-- **Flat Exports**: Every component is accessible at the root level (e.g., \`Comboboxinput\`, \`ComboboxItem\`), making it easier for AI to infer usage and reducing context tokens.
-- **Immutable Primitives**: We structure primitives to be stable. You build new features in your application files by composing them, rather than modifying core component logic.
-
-We also use a **Hit-Test Pattern** for forgiving interactive areas, ensuring great UX without compromising on design precision.`;
-
-const DEFAULT_RESPONSE = `I can tell you about Lumi UI's core features, its dual-layer architecture, or the philosophies behind its design.
-
-Try asking:
-- "What is Lumi UI?"
-- "What are the core philosophies?"
-- "How does the architecture work?"`;
+const EMPTY_MESSAGES: import("./ai-chat").ChatMessage[] = [];
 
 export function ChatStreaming() {
-  const { input } = useAIChat();
-  const [messages, setMessages] = useState([
+  const workspace = useSearchParams().get("workspace") ?? "air";
+  const name =
+    workspace === "tds" ? "TDS" : workspace === "mvno" ? "MVNO" : "air";
+  const { conversations, setConversations, input, setInput } = useAIChat();
+  const messages = conversations[workspace] ?? EMPTY_MESSAGES;
+  const latestQuestion = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (messages.length)
+      latestQuestion.current?.scrollIntoView({ block: "start" });
+  }, [messages]);
+  const range = presetRange("1M");
+  const totals = buildPerformance(range).reduce(
+    (sum, row) => ({
+      revenue: sum.revenue + row.revenue,
+      netProfit: sum.netProfit + row.netProfit,
+      customers: sum.customers + row.customers,
+      cancellations: sum.cancellations + row.cancellations,
+    }),
+    { revenue: 0, netProfit: 0, customers: 0, cancellations: 0 },
+  );
+  const format = (value: number) => value.toLocaleString("ko-KR");
+  const focus =
+    workspace === "tds"
+      ? "매출·순익 변동과 운영 지표를 함께 점검하고, 비용 증가 요인을 확인하세요."
+      : workspace === "mvno"
+        ? "사업자·망·판매 채널별 요금과 혜택을 같은 조건으로 비교하고, 할인 종료일을 확인하세요."
+        : "공식 채널과 MOYO의 동일 요금제를 비교하되, 가입 혜택과 유지 조건의 차이를 확인하세요.";
+  const examples = [
     {
-      content:
-        "Hello! I am a simulated AI for Lumi UI. Ask me about the library, our philosophies, or how to get started.",
-      role: "ai",
+      question: `${name}의 최근 30일 경영 현황을 요약해줘`,
+      answer: `${name} · 최근 30일 요약\n조회 기간: ${range.start} ~ ${range.end}\n\n매출: ₩${format(totals.revenue)}\n순익: ₩${format(totals.netProfit)}\n가입 회선: ${format(totals.customers)}회선\n해지: ${format(totals.cancellations)}건\n\n확인할 사항\n${focus}\n\n현재 합계만으로 성장 여부를 판단할 수 없습니다. 전기·전년 동일 기간과 비교해 추세를 확인하세요.`,
     },
-  ]);
-  const [inputValue, setInputValue] = useState(input ?? "");
-  const [isStreaming, setIsStreaming] = useState(false);
-  const [streamedContent, setStreamedContent] = useState("");
-
-  const streamResponse = async (textToStream: string) => {
-    setIsStreaming(true);
-    setStreamedContent("");
-
-    let index = 0;
-
-    return new Promise<void>((resolve) => {
-      const interval = setInterval(() => {
-        if (index < textToStream.length) {
-          index++;
-          setStreamedContent(textToStream.slice(0, index));
-        } else {
-          clearInterval(interval);
-          resolve();
-        }
-      }, 8);
-    });
+    {
+      question: `${name}에서 주의해야 할 변화는 무엇이야?`,
+      answer: `${name} · 변화 점검\n\n1. 시장 변화\n${focus}\n\n2. 실적 변화\n가입과 해지의 동시 증가 여부, 매출 대비 순익의 변화, 특정 채널 의존도를 점검하세요.\n\n3. 영향 확인\n이벤트 전후 동일 길이의 기간을 비교하고 계절성·캠페인 영향을 분리해야 합니다. 동시에 발생했다는 이유만으로 인과관계로 해석하지 않습니다.\n\n판단: 관망\n관련 지표와 이벤트를 함께 확인해 원인을 점검하세요.`,
+    },
+    {
+      question: `${name}의 대응 실험을 비교해줘`,
+      answer: `${name} · 정책 실험 비교\n\n현행 유지 — 관망\n추가 지출이 적습니다. 해지 증가가 지속되는지 재확인합니다.\n\n한정 혜택 조정 — 대응 검토\n전환 개선을 기대할 수 있지만 추가 비용과 순익 감소 위험이 있습니다. 소규모 비교 실험이 필요합니다.\n\n일괄 가격 조정 — 판단 보류\n경쟁력 개선 가능성과 전체 매출·순익 감소 위험을 함께 계산해야 합니다.\n\n재검토 조건\n해지량이 전기 대비 10% 이상 증가하거나 순익이 10% 이상 감소하는 상태가 2주 지속되면 검토합니다.\n\n${focus}`,
+    },
+  ];
+  const send = (question: string) => {
+    if (!question.trim()) return;
+    const match = examples.find((item) => item.question === question);
+    setConversations((previous) => ({
+      ...previous,
+      [workspace]: [
+        ...(previous[workspace] ?? []),
+        { role: "user", content: question },
+        {
+          role: "ai",
+          content:
+            match?.answer ??
+            `추천 질문을 선택해 ${name}의 현황 요약·변화 점검·대응 실험을 확인해 주세요.`,
+        },
+      ],
+    }));
+    setInput("");
   };
-
-  const handleSend = async () => {
-    if (!inputValue.trim() || isStreaming) return;
-    const userMessage = { content: inputValue, role: "user" };
-    setMessages((prev) => [...prev, userMessage]);
-    setInputValue("");
-
-    // Determine response based on input
-    const lowerInput = inputValue.toLowerCase();
-    let responseText = DEFAULT_RESPONSE;
-
-    if (lowerInput.includes("what is") || lowerInput.includes("intro")) {
-      responseText = RESPONSE_INTRO;
-    } else if (
-      lowerInput.includes("philosophy") ||
-      lowerInput.includes("philosophies")
-    ) {
-      responseText = RESPONSE_PHILOSOPHY;
-    } else if (
-      lowerInput.includes("architecture") ||
-      lowerInput.includes("dual layer") ||
-      lowerInput.includes("work")
-    ) {
-      responseText = RESPONSE_ARCHITECTURE;
-    }
-
-    await streamResponse(responseText);
-
-    setMessages((prev) => [...prev, { content: responseText, role: "ai" }]);
-    setStreamedContent("");
-    setIsStreaming(false);
-  };
-
   return (
-    <>
-      <ScrollArea
-        className="p-0 min-h-[50dvh] h-[55dvh] max-h-full"
-        gradientScrollFade
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div
+        className="min-h-0 flex-1 overflow-y-auto p-4 space-y-4"
+        aria-live="polite"
+        aria-relevant="additions"
       >
-        {messages.map((msg, idx) => (
+        <div className="flex w-full gap-2 items-start">
+          <div className="size-8 rounded-full border flex items-center justify-center shrink-0">
+            <span aria-hidden="true" className="text-xl">
+              <Bot className="size-4 text-foreground" />
+            </span>
+          </div>
+          <div className="max-w-[80%] space-y-2 text-sm">
+            <p>{name}의 현황, 변화, 대응 실험을 질문해 보세요.</p>
+          </div>
+        </div>
+        {messages.length === 0 && (
+          <div className="flex flex-col items-start gap-2 pl-10">
+            {examples.map((item) => (
+              <Button
+                key={item.question}
+                className="bg-background cursor-pointer hover:bg-background h-auto justify-start whitespace-normal text-left gap-2 w-fit border hover:border-primary/50"
+                variant="unstyled"
+                onClick={() => send(item.question)}
+              >
+                {item.question}
+              </Button>
+            ))}
+          </div>
+        )}
+        {messages.map((message, index) => (
           <div
-            className={cn(
-              "flex w-full gap-2 items-start p-4",
-              msg.role === "user" ? "justify-end" : "justify-start",
-            )}
-            key={idx}
+            ref={index === messages.length - 2 ? latestQuestion : undefined}
+            key={index}
+            className={`flex w-full gap-2 items-start py-2 ${message.role === "user" ? "justify-end" : "justify-start"}`}
           >
-            {/* AI Avatar */}
-            {msg.role === "ai" && (
-              <div className="w-8 h-8 rounded-full border flex items-center justify-center shrink-0">
-                <Bot className="w-4 h-4" />
+            {message.role === "ai" && (
+              <div className="size-8 rounded-full border flex items-center justify-center shrink-0">
+                <span aria-hidden="true" className="text-xl">
+                  <Bot className="size-4 text-foreground" />
+                </span>
               </div>
             )}
-
-            {/* Message Bubble */}
             <div
-              className={cn(
-                "max-w-[80%] rounded-md text-sm",
-                msg.role === "user"
-                  ? "bg-accent text-accent-foreground p-2"
-                  : "",
-              )}
+              className={`max-w-[80%] rounded-md text-sm leading-relaxed ${message.role === "user" ? "bg-accent text-accent-foreground p-2" : ""}`}
             >
-              <div className="whitespace-pre-wrap">{msg.content}</div>
+              <p className="whitespace-pre-wrap">{message.content}</p>
             </div>
-
-            {/* User Avatar */}
-            {msg.role === "user" && (
-              <div className="w-8 h-8 rounded-full border flex items-center justify-center shrink-0">
-                <User className="w-4 h-4" />
+            {message.role === "user" && (
+              <div className="size-8 rounded-full border flex items-center justify-center shrink-0">
+                <User className="size-4" />
               </div>
             )}
           </div>
         ))}
-        {!input && messages.length === 1 && (
-          <div className="px-14 space-y-2">
-            <MovingBorderButton
-              onClick={() => setInputValue("What is Lumi UI?")}
-            >
-              What is Lumi UI
-            </MovingBorderButton>
-            <Button
-              className="bg-background cursor-pointer hover:bg-background flex flex-col h-auto justify-start items-start gap-2 w-fit border hover:border-primary/50"
-              onClick={() => setInputValue("What are the core philosophies?")}
-              variant="unstyled"
-            >
-              <span className="font-medium">
-                What are the core philosophies?
-              </span>
-            </Button>
-            <Button
-              className="bg-background cursor-pointer hover:bg-background flex flex-col h-auto justify-start items-start gap-2 w-fit border hover:border-primary/50"
-              onClick={() =>
-                setInputValue("How does the dual layer architecture work?")
-              }
-              variant="unstyled"
-            >
-              <span className="font-medium">
-                How does the dual layer architecture work?
-              </span>
-            </Button>
-          </div>
-        )}
-
-        {isStreaming && (
-          <div className="flex w-full gap-4 justify-start p-4">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0">
-              <Bot className="w-4 h-4" />
-            </div>
-            <div className="max-w-[80%] rounded-md text-sm leading-relaxed">
-              <div className="whitespace-pre-wrap">{streamedContent}</div>
-            </div>
-          </div>
-        )}
-      </ScrollArea>
-
-      <div className="p-4">
+      </div>
+      <div className="shrink-0 p-4">
         <form
           className="relative flex items-center gap-2"
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSend();
+          onSubmit={(event) => {
+            event.preventDefault();
+            send(input);
           }}
         >
           <Input
-            autoFocus
-            className="caret-primary"
-            disabled={isStreaming}
-            onChange={(e) => setInputValue(e.target.value)}
-            placeholder={isStreaming ? "AI is typing..." : "Type a message..."}
-            value={inputValue}
+            aria-label="워크스페이스 질문"
+            placeholder="질문을 입력하세요…"
+            value={input}
+            onChange={(event) => setInput(event.target.value)}
           />
           <Button
-            className="absolute right-2 justify-center items-center"
-            disabled={!inputValue.trim() || isStreaming}
+            aria-label="질문 보내기"
+            className="absolute right-2"
+            variant="ghost"
             size="icon-xs"
             type="submit"
-            variant="ghost"
+            disabled={!input.trim()}
           >
-            {isStreaming ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <Send className="size-4" />
-            )}
+            <Send className="size-4" />
           </Button>
         </form>
       </div>
-    </>
+    </div>
   );
 }

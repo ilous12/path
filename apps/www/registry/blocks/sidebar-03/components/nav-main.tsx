@@ -1,11 +1,13 @@
 "use client";
 
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { ChevronRight, type LucideIcon } from "lucide-react";
 import {
   Collapsible,
   CollapsiblePanel,
   CollapsibleTrigger,
-} from "@/registry/ui/collapsible";
+} from "@/components/ui/collapsible";
 import {
   SidebarGroup,
   SidebarMenu,
@@ -14,7 +16,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-} from "@/registry/ui/sidebar";
+} from "@/components/ui/sidebar";
 
 export function NavMain({
   items,
@@ -30,43 +32,71 @@ export function NavMain({
     }[];
   }[];
 }) {
+  const params = useSearchParams();
+  const current = params.get("view") ?? "summary";
+  const href = (view: string) => {
+    const next = new URLSearchParams(params.toString());
+    if (view === "summary") next.delete("view");
+    else next.set("view", view);
+    return `/?${next.toString()}`;
+  };
   return (
     <SidebarGroup>
       <SidebarMenu>
         {items.map((item) => (
           <SidebarMenuItem key={item.title}>
-            <Collapsible defaultOpen={item.isActive}>
-              <CollapsibleTrigger
-                className="group/collapsible data-panel-open:bg-sidebar-accent data-panel-open:text-sidebar-accent-foreground"
+            {!item.items?.length ? (
+              <SidebarMenuButton
+                tooltip={item.title}
                 render={
-                  <SidebarMenuButton
-                    tooltip={{
-                      children: item.title,
-                      side: "right",
-                    }}
-                  >
-                    {item.icon && <item.icon />}
-                    <span>{item.title}</span>
-                    <ChevronRight className="ml-auto text-muted-foreground transition-[transform,colors] duration-200 group-data-panel-open/collapsible:rotate-90 group-data-panel-open/collapsible:text-foreground group-hover/collapsible:text-sidebar-foreground" />
-                  </SidebarMenuButton>
+                  <Link
+                    href={href(item.url)}
+                    aria-current={current === item.url ? "page" : undefined}
+                  />
                 }
-              />
-              <CollapsiblePanel>
-                <SidebarMenuSub>
-                  {item.items?.map((subItem) => (
-                    <SidebarMenuSubItem key={subItem.title}>
-                      <SidebarMenuSubButton
-                        render={
-                          <a href={subItem.url}>
-                            <span>{subItem.title}</span>
-                          </a>
-                        }
-                      />
-                    </SidebarMenuSubItem>
-                  ))}
-                </SidebarMenuSub>
-              </CollapsiblePanel>
-            </Collapsible>
+              >
+                {item.icon && <item.icon />}
+                <span>{item.title}</span>
+              </SidebarMenuButton>
+            ) : (
+              <Collapsible defaultOpen={item.isActive}>
+                <CollapsibleTrigger
+                  className="group/collapsible"
+                  render={
+                    <SidebarMenuButton
+                      tooltip={{
+                        children: item.title,
+                        side: "right",
+                      }}
+                    >
+                      {item.icon && <item.icon />}
+                      <span>{item.title}</span>
+                      <ChevronRight className="ml-auto text-muted-foreground transition-[transform,colors] duration-200 group-data-panel-open/collapsible:rotate-90 group-data-panel-open/collapsible:text-foreground group-hover/collapsible:text-sidebar-foreground" />
+                    </SidebarMenuButton>
+                  }
+                />
+                <CollapsiblePanel>
+                  <SidebarMenuSub>
+                    {item.items?.map((subItem) => (
+                      <SidebarMenuSubItem key={subItem.title}>
+                        <SidebarMenuSubButton
+                          render={
+                            <Link
+                              href={href(subItem.url)}
+                              aria-current={
+                                current === subItem.url ? "page" : undefined
+                              }
+                            >
+                              <span>{subItem.title}</span>
+                            </Link>
+                          }
+                        />
+                      </SidebarMenuSubItem>
+                    ))}
+                  </SidebarMenuSub>
+                </CollapsiblePanel>
+              </Collapsible>
+            )}
           </SidebarMenuItem>
         ))}
       </SidebarMenu>

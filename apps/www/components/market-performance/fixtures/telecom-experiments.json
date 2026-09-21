@@ -1,0 +1,426 @@
+[
+  {
+    "id": "seed-telecom-experiment-01",
+    "title": "[가상 실험] AIR · 20GB 상품 가격 5% 인하",
+    "type": "가격 조정",
+    "groupName": "가격 경쟁력",
+    "workspace": "air",
+    "description": "동일 망·QoS·할인기간의 경쟁 요금제와 비교. 증분 순익이 음수이면 중단.\n실제 시행 이력 또는 AI 검증 결과가 아닙니다. 수요·해지·비용 수치는 수동 가정이고, 차트 기준 실적은 공통 합성 데이터입니다.\n회선 예측은 관측 역할의 합성 실적을 따라 약 1~4% 낮게 구성한 사후 구성 시나리오입니다. 09/21 관측 400회선 대비 예측 391회선이며, 이후 값은 관측값이 없는 가상 전망입니다. 실제 사전 예측 성능이나 정책 인과효과를 의미하지 않습니다.",
+    "start": "2026-09-14",
+    "applyDays": 14,
+    "days": 30,
+    "pricePct": -5,
+    "demandPct": 8,
+    "variableCostPct": 1,
+    "cancellationPct": -2,
+    "dailyCost": 10000,
+    "oneTimeCost": 30000,
+    "status": "draft",
+    "createdAt": "2026-09-21T00:00:00Z",
+    "history": [
+      {
+        "at": "2026-09-21T00:00:00Z",
+        "action": "통신시장 사례를 참고한 가상 실험 초안 등록"
+      }
+    ],
+    "demoCustomerForecast": [
+      286,
+      324,
+      358,
+      387,
+      393,
+      388,
+      395,
+      391,
+      394,
+      389,
+      396,
+      392,
+      395,
+      390,
+      394,
+      391,
+      396,
+      392,
+      395,
+      389,
+      393,
+      390,
+      395,
+      391,
+      394,
+      388,
+      392,
+      390,
+      394,
+      391
+    ],
+    "demoEvaluationDate": "2026-09-21"
+  },
+  {
+    "id": "seed-telecom-experiment-02",
+    "title": "[가상 실험] AIR · eSIM 발급 비용 지원",
+    "type": "혜택 변경",
+    "groupName": "셀프개통 개선",
+    "workspace": "air",
+    "description": "자급제 고객의 개통 이탈 감소 가설. 발급 비용과 개통 전환율을 함께 평가.\n실제 시행 이력 또는 AI 검증 결과가 아닙니다. 수요·해지·비용 수치는 수동 가정이고, 차트 기준 실적은 공통 합성 데이터입니다.",
+    "start": "2026-09-18",
+    "applyDays": 14,
+    "days": 30,
+    "pricePct": 0,
+    "demandPct": 5,
+    "variableCostPct": 2,
+    "cancellationPct": -1,
+    "dailyCost": 7000,
+    "oneTimeCost": 50000,
+    "status": "draft",
+    "createdAt": "2026-09-21T00:00:00Z",
+    "history": [
+      {
+        "at": "2026-09-21T00:00:00Z",
+        "action": "통신시장 사례를 참고한 가상 실험 초안 등록"
+      }
+    ]
+  },
+  {
+    "id": "seed-telecom-experiment-03",
+    "title": "[가상 실험] AIR · 보안 안내와 상담 연결 강화",
+    "type": "운영 개선",
+    "groupName": "신뢰 회복",
+    "workspace": "air",
+    "description": "AIR 출시 이전 시점을 사용하는 가상 백테스트이며 당시 AIR의 실제 운영을 뜻하지 않습니다. SKT 침해사고 후 고객 보호 안내 강화 시나리오. 보안 조치는 모든 고객에게 동일하게 제공하며 안내 방식만 비교.\n실제 시행 이력 또는 AI 검증 결과가 아닙니다. 수요·해지·비용 수치는 수동 가정이고, 차트 기준 실적은 공통 합성 데이터입니다.",
+    "start": "2025-04-28",
+    "applyDays": 21,
+    "days": 45,
+    "pricePct": 0,
+    "demandPct": 2,
+    "variableCostPct": 3,
+    "cancellationPct": -8,
+    "dailyCost": 15000,
+    "oneTimeCost": 100000,
+    "status": "draft",
+    "createdAt": "2026-09-21T00:00:00Z",
+    "history": [
+      {
+        "at": "2026-09-21T00:00:00Z",
+        "action": "통신시장 사례를 참고한 가상 실험 초안 등록"
+      }
+    ]
+  },
+  {
+    "id": "seed-telecom-experiment-04",
+    "title": "[가상 실험] AIR · 가입 포인트 대신 30일 유지 보상",
+    "type": "혜택 변경",
+    "groupName": "가입·유지 혜택",
+    "workspace": "air",
+    "description": "공시된 AIR 포인트 혜택을 참고한 가상 대안. 비용 지급 시점·해지율·고객 이해도를 비교.\n실제 시행 이력 또는 AI 검증 결과가 아닙니다. 수요·해지·비용 수치는 수동 가정이고, 차트 기준 실적은 공통 합성 데이터입니다.",
+    "start": "2026-09-07",
+    "applyDays": 30,
+    "days": 60,
+    "pricePct": 0,
+    "demandPct": 3,
+    "variableCostPct": 1,
+    "cancellationPct": -6,
+    "dailyCost": 12000,
+    "oneTimeCost": 40000,
+    "status": "draft",
+    "createdAt": "2026-09-21T00:00:00Z",
+    "history": [
+      {
+        "at": "2026-09-21T00:00:00Z",
+        "action": "통신시장 사례를 참고한 가상 실험 초안 등록"
+      }
+    ]
+  },
+  {
+    "id": "seed-telecom-experiment-05",
+    "title": "[가상 실험] TDS · 단말 예약 고객 SIM 요금제 교차 안내",
+    "type": "채널·마케팅 배분",
+    "groupName": "온라인 개통",
+    "workspace": "tds",
+    "description": "T다이렉트샵의 단말 수요를 가정. 중복 광고비와 기존 채널 잠식률을 확인.\n실제 시행 이력 또는 AI 검증 결과가 아닙니다. 수요·해지·비용 수치는 수동 가정이고, 차트 기준 실적은 공통 합성 데이터입니다.",
+    "start": "2026-09-11",
+    "applyDays": 21,
+    "days": 45,
+    "pricePct": 0,
+    "demandPct": 7,
+    "variableCostPct": 1,
+    "cancellationPct": 0,
+    "dailyCost": 10000,
+    "oneTimeCost": 60000,
+    "status": "draft",
+    "createdAt": "2026-09-21T00:00:00Z",
+    "history": [
+      {
+        "at": "2026-09-21T00:00:00Z",
+        "action": "통신시장 사례를 참고한 가상 실험 초안 등록"
+      }
+    ]
+  },
+  {
+    "id": "seed-telecom-experiment-06",
+    "title": "[가상 실험] TDS · 셀프개통 4단계 안내",
+    "type": "운영 개선",
+    "groupName": "온라인 개통",
+    "workspace": "tds",
+    "description": "본인확인 절차는 유지하고 설명·입력 화면만 단순화. 완료율과 상담 문의량을 측정.\n실제 시행 이력 또는 AI 검증 결과가 아닙니다. 수요·해지·비용 수치는 수동 가정이고, 차트 기준 실적은 공통 합성 데이터입니다.",
+    "start": "2026-09-16",
+    "applyDays": 14,
+    "days": 30,
+    "pricePct": 0,
+    "demandPct": 6,
+    "variableCostPct": -2,
+    "cancellationPct": 0,
+    "dailyCost": 5000,
+    "oneTimeCost": 120000,
+    "status": "draft",
+    "createdAt": "2026-09-21T00:00:00Z",
+    "history": [
+      {
+        "at": "2026-09-21T00:00:00Z",
+        "action": "통신시장 사례를 참고한 가상 실험 초안 등록"
+      }
+    ]
+  },
+  {
+    "id": "seed-telecom-experiment-07",
+    "title": "[가상 실험] MVNO · 할인 종료 30일 전 요금 안내",
+    "type": "운영 개선",
+    "groupName": "알뜰폰 유지",
+    "workspace": "mvno",
+    "description": "프로모션 종료 후 가격을 미리 안내하고 대체 상품을 제시. 유지율과 민원을 함께 확인.\n실제 시행 이력 또는 AI 검증 결과가 아닙니다. 수요·해지·비용 수치는 수동 가정이고, 차트 기준 실적은 공통 합성 데이터입니다.",
+    "start": "2026-09-10",
+    "applyDays": 30,
+    "days": 60,
+    "pricePct": 0,
+    "demandPct": 1,
+    "variableCostPct": 1,
+    "cancellationPct": -7,
+    "dailyCost": 5000,
+    "oneTimeCost": 30000,
+    "status": "draft",
+    "createdAt": "2026-09-21T00:00:00Z",
+    "history": [
+      {
+        "at": "2026-09-21T00:00:00Z",
+        "action": "통신시장 사례를 참고한 가상 실험 초안 등록"
+      }
+    ]
+  },
+  {
+    "id": "seed-telecom-experiment-08",
+    "title": "[가상 실험] MVNO · 20GB 장기 고정가 상품",
+    "type": "가격 조정",
+    "groupName": "알뜰폰 가격",
+    "workspace": "mvno",
+    "description": "도매원가 상승에도 최소 기여이익을 유지하는지 검토. 수요 탄력성은 검증 전 가정.\n실제 시행 이력 또는 AI 검증 결과가 아닙니다. 수요·해지·비용 수치는 수동 가정이고, 차트 기준 실적은 공통 합성 데이터입니다.",
+    "start": "2026-09-17",
+    "applyDays": 30,
+    "days": 60,
+    "pricePct": -8,
+    "demandPct": 12,
+    "variableCostPct": 3,
+    "cancellationPct": -3,
+    "dailyCost": 8000,
+    "oneTimeCost": 50000,
+    "status": "draft",
+    "createdAt": "2026-09-21T00:00:00Z",
+    "history": [
+      {
+        "at": "2026-09-21T00:00:00Z",
+        "action": "통신시장 사례를 참고한 가상 실험 초안 등록"
+      }
+    ]
+  },
+  {
+    "id": "seed-telecom-experiment-09",
+    "title": "[가상 실험] MVNO · 피싱 안심보험 선택 혜택",
+    "type": "혜택 변경",
+    "groupName": "신뢰 회복",
+    "workspace": "mvno",
+    "description": "실제 보험 결합 상품 사례를 참고. 가입조건·보장 제외를 명확히 안내하고 비용 상한 설정.\n실제 시행 이력 또는 AI 검증 결과가 아닙니다. 수요·해지·비용 수치는 수동 가정이고, 차트 기준 실적은 공통 합성 데이터입니다.",
+    "start": "2025-12-18",
+    "applyDays": 30,
+    "days": 60,
+    "pricePct": 0,
+    "demandPct": 4,
+    "variableCostPct": 4,
+    "cancellationPct": -4,
+    "dailyCost": 10000,
+    "oneTimeCost": 30000,
+    "status": "draft",
+    "createdAt": "2026-09-21T00:00:00Z",
+    "history": [
+      {
+        "at": "2026-09-21T00:00:00Z",
+        "action": "통신시장 사례를 참고한 가상 실험 초안 등록"
+      }
+    ]
+  },
+  {
+    "id": "seed-telecom-experiment-10",
+    "title": "[가상 실험] SKT 관점 · 해지 고객 복귀 혜택 비교",
+    "type": "혜택 변경",
+    "groupName": "MNO 시장 대응",
+    "workspace": "air",
+    "description": "SKT 고객 복귀 프로그램에서 착안한 가상 실험. 기존 고객 형평성과 복귀 후 유지율을 평가.\n실제 시행 이력 또는 AI 검증 결과가 아닙니다. 수요·해지·비용 수치는 수동 가정이고, 차트 기준 실적은 공통 합성 데이터입니다.",
+    "start": "2025-07-15",
+    "applyDays": 30,
+    "days": 60,
+    "pricePct": -3,
+    "demandPct": 6,
+    "variableCostPct": 2,
+    "cancellationPct": -5,
+    "dailyCost": 20000,
+    "oneTimeCost": 150000,
+    "status": "draft",
+    "createdAt": "2026-09-21T00:00:00Z",
+    "history": [
+      {
+        "at": "2026-09-21T00:00:00Z",
+        "action": "통신시장 사례를 참고한 가상 실험 초안 등록"
+      }
+    ]
+  },
+  {
+    "id": "seed-telecom-experiment-11",
+    "title": "[가상 실험] MNO 관점 · 통합요금제 데이터 안심 옵션",
+    "type": "상품 구성",
+    "groupName": "MNO 시장 대응",
+    "workspace": "air",
+    "description": "5G·LTE 통합요금제 사례를 참고. 고가 상품 하향 전환과 저가 상품 신규 수요를 분리.\n실제 시행 이력 또는 AI 검증 결과가 아닙니다. 수요·해지·비용 수치는 수동 가정이고, 차트 기준 실적은 공통 합성 데이터입니다.",
+    "start": "2026-07-02",
+    "applyDays": 30,
+    "days": 60,
+    "pricePct": 0,
+    "demandPct": 4,
+    "variableCostPct": 3,
+    "cancellationPct": -4,
+    "dailyCost": 15000,
+    "oneTimeCost": 80000,
+    "status": "draft",
+    "createdAt": "2026-09-21T00:00:00Z",
+    "history": [
+      {
+        "at": "2026-09-21T00:00:00Z",
+        "action": "통신시장 사례를 참고한 가상 실험 초안 등록"
+      }
+    ]
+  },
+  {
+    "id": "seed-telecom-experiment-12",
+    "title": "[가상 실험] 시장 대응 · 경쟁 로밍 할인에 단기 쿠폰",
+    "type": "혜택 변경",
+    "groupName": "MNO 시장 대응",
+    "workspace": "air",
+    "description": "경쟁사의 로밍 혜택 연장을 관측한 뒤 쿠폰 제공 여부를 비교. 할인 전후 순익과 대체 수요를 확인.\n실제 시행 이력 또는 AI 검증 결과가 아닙니다. 수요·해지·비용 수치는 수동 가정이고, 차트 기준 실적은 공통 합성 데이터입니다.",
+    "start": "2026-09-19",
+    "applyDays": 14,
+    "days": 30,
+    "pricePct": -4,
+    "demandPct": 7,
+    "variableCostPct": 2,
+    "cancellationPct": 0,
+    "dailyCost": 9000,
+    "oneTimeCost": 20000,
+    "status": "draft",
+    "createdAt": "2026-09-21T00:00:00Z",
+    "history": [
+      {
+        "at": "2026-09-21T00:00:00Z",
+        "action": "통신시장 사례를 참고한 가상 실험 초안 등록"
+      }
+    ]
+  },
+  {
+    "id": "demo-tds-evaluation-2026-09-11",
+    "title": "[가상] TDS · 초기 상승 후 유사 수준 유지",
+    "type": "혜택 변경",
+    "groupName": "예측 비교 시나리오",
+    "workspace": "tds",
+    "description": "09/07부터 초반 회선 상승 후 110~116회선 수준에서 작은 웨이브를 유지하는 예측입니다. 예측 종료일은 09/27이며 조회 기간 안에서만 표시합니다. 사후 구성 시나리오이며 정책 인과효과가 아닙니다.",
+    "start": "2026-09-07",
+    "days": 21,
+    "applyDays": 21,
+    "pricePct": 0,
+    "demandPct": 0,
+    "variableCostPct": 0,
+    "cancellationPct": 0,
+    "dailyCost": 10000,
+    "oneTimeCost": 0,
+    "status": "draft",
+    "createdAt": "2026-09-21T00:00:00Z",
+    "history": [
+      {
+        "at": "2026-09-21T00:00:00Z",
+        "action": "성공·미달 비교를 위한 사후 구성 시나리오"
+      }
+    ],
+    "demoCustomerForecast": [
+      102,
+      108,
+      114,
+      112,
+      115,
+      111,
+      114,
+      113,
+      116,
+      112,
+      115,
+      113,
+      114,
+      112,
+      115,
+      111,
+      114,
+      113,
+      115,
+      112,
+      114
+    ],
+    "demoEvaluationDate": "2026-09-21"
+  },
+  {
+    "id": "demo-tds-evaluation-2026-09-08",
+    "title": "[가상] TDS · 회선 증가 추세 추종 성공",
+    "type": "혜택 변경",
+    "groupName": "예측 비교 시나리오",
+    "workspace": "tds",
+    "description": "09/14부터 회선 증가 추세를 따라 크게 상승한 뒤 작은 웨이브를 유지합니다. 09/21까지 관측 회선수보다 조금 낮으며, 09/27까지 예측합니다. 끝점 %는 시작 전일 회선수 대비 해당 표시일의 예측 증감률입니다. 사후 구성 시나리오이며 실제 예측 성능이나 정책 인과효과가 아닙니다.",
+    "start": "2026-09-14",
+    "days": 14,
+    "applyDays": 14,
+    "pricePct": 0,
+    "demandPct": 0,
+    "variableCostPct": 0,
+    "cancellationPct": 0,
+    "dailyCost": 10000,
+    "oneTimeCost": 0,
+    "status": "draft",
+    "createdAt": "2026-09-21T00:00:00Z",
+    "history": [
+      {
+        "at": "2026-09-21T00:00:00Z",
+        "action": "성공·미달 비교를 위한 사후 구성 시나리오"
+      }
+    ],
+    "demoCustomerForecast": [
+      287,
+      326,
+      361,
+      389,
+      395,
+      390,
+      397,
+      393,
+      396,
+      392,
+      398,
+      394,
+      397,
+      395
+    ],
+    "demoEvaluationDate": "2026-09-21"
+  }
+]

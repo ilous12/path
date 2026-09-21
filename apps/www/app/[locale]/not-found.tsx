@@ -1,42 +1,19 @@
 import Link from "next/link";
-import { Logo } from "@/components/logo";
-
-function NotFound() {
+export default function NotFound() {
   return (
-    <main className="h-screen">
-      <div className="container mx-auto">
-        <div className="max-w-7xl mx-auto h-screen flex justify-center items-center">
-          <div className="space-y-4 xl:space-y-10">
-            <Logo className="size-12" />
-            <div>
-              <h1 className="text-4xl xl:text-6xl font-bold">
-                Opps, Page not found
-              </h1>
-              <p className="text-muted-foreground text-lg mt-6">
-                Sorry, we couldn't find the page you're looking for. Here are
-                some helpful links instead:
-              </p>
-            </div>
-
-            <div className="flex gap-4">
-              <Link
-                className="bg-accent/90 transition-colors hover:bg-accent inline-block py-2 px-4 rounded-md"
-                href="/docs/installation"
-              >
-                Get Started
-              </Link>
-              <Link
-                className="border-border border transition-colors inline-block py-1.5 px-4 rounded-md"
-                href="/docs/components"
-              >
-                Browser components
-              </Link>
-            </div>
-          </div>
-        </div>
+    <main className="flex min-h-screen items-center justify-center p-6">
+      <div className="space-y-4 text-center">
+        <h1 className="text-2xl font-semibold">페이지를 찾을 수 없습니다.</h1>
+        <p className="text-muted-foreground">
+          주소를 확인하거나 대시보드로 이동해 주세요.
+        </p>
+        <Link
+          href="/"
+          className="inline-block rounded-lg bg-primary px-4 py-2 text-primary-foreground"
+        >
+          대시보드로 이동
+        </Link>
       </div>
     </main>
   );
 }
-
-export default NotFound;

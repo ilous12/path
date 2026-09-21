@@ -1,28 +1,11 @@
-import {
-  Geist_Mono as FontMono,
-  Geist as FontSans,
-  Inter,
-} from "next/font/google";
-import { cn } from "@/lib/utils";
+import localFont from "next/font/local";
 
-const fontSans = FontSans({
-  subsets: ["latin"],
-  variable: "--font-sans",
+const pretendard = localFont({
+  src: "./fonts/PretendardVariable.woff2",
+  variable: "--font-pretendard",
+  display: "swap",
+  weight: "45 920",
+  fallback: ["Arial", "sans-serif"],
 });
 
-const fontMono = FontMono({
-  subsets: ["latin"],
-  variable: "--font-mono",
-  weight: ["400"],
-});
-
-const fontInter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-});
-
-export const fontVariables = cn(
-  fontSans.variable,
-  fontMono.variable,
-  fontInter.variable,
-);
+export const fontVariables = pretendard.variable;

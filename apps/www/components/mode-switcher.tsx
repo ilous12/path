@@ -4,12 +4,12 @@ import { useMounted } from "@lumi-ui/ui/hooks/use-mounted";
 import { cn } from "@lumi-ui/ui/lib/utils";
 import { AnimatePresence, motion } from "motion/react";
 import { useTheme } from "next-themes";
-import { Button } from "@/registry/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "../registry/ui/tooltip";
+} from "@/components/ui/tooltip";
 
 export function ModeSwitcher({
   className,
@@ -72,7 +72,7 @@ export function ModeSwitcher({
                   width="20"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <title>moon icon</title>
+                  <title>달 아이콘</title>
                   <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z" />
                 </motion.svg>
               ) : (
@@ -93,19 +93,19 @@ export function ModeSwitcher({
                   width="20"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <title>sun icon</title>
+                  <title>해 아이콘</title>
                   <circle cx="12" cy="12" r="5" />
                   <path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
                 </motion.svg>
               )}
             </AnimatePresence>
 
-            <span className="sr-only">Toggle theme</span>
+            <span className="sr-only">화면 모드 전환</span>
           </Button>
         }
       />
       <TooltipContent sideOffset={tooltipSideOffset}>
-        Toggle mode
+        화면 모드 전환
       </TooltipContent>
     </Tooltip>
   );

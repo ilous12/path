@@ -1,0 +1,40 @@
+// Run: node scripts/check-market-data.cjs
+const assert = require('node:assert/strict');
+const path = require('node:path');
+const fs = require('node:fs');
+const Module = require('node:module');
+const root = path.resolve(__dirname, '../apps/www');
+const ts = require(require.resolve('typescript', { paths: [root] }));
+const resolve = Module._resolveFilename;
+Module._resolveFilename = function (name, parent, ...rest) {
+  return resolve.call(this, name.startsWith('@/') ? path.join(root, name.slice(2)) : name, parent, ...rest);
+};
+require.extensions['.ts'] = (module, filename) => module._compile(ts.transpileModule(fs.readFileSync(filename, 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, esModuleInterop: true, target: ts.ScriptTarget.ES2022 } }).outputText, filename);
+const load = name => require(path.join(root, 'components/market-performance', name));
+const {extractPolicyRequirements,EXPERIMENT_SUGGESTIONS}=load('policy-requirements.ts');
+assert.equal(EXPERIMENT_SUGGESTIONS.length,5);
+assert.equal(extractPolicyRequirements(EXPERIMENT_SUGGESTIONS[0].prompt).pricePct,-5);
+assert.match(extractPolicyRequirements(EXPERIMENT_SUGGESTIONS[1].prompt).benefits,/10GB/);
+assert.match(extractPolicyRequirements(EXPERIMENT_SUGGESTIONS[2].prompt).points,/5,000원/);
+assert.match(extractPolicyRequirements(EXPERIMENT_SUGGESTIONS[3].prompt).freeOffers,/eSIM 발급비 무료/);
+const mix=extractPolicyRequirements(EXPERIMENT_SUGGESTIONS[4].prompt);
+assert.equal(mix.pricePct,-3);assert.match(mix.benefits,/5GB/);assert.match(mix.points,/3,000원/);assert.match(mix.freeOffers,/유심 배송 무료/);
+assert.equal(extractPolicyRequirements('전환율 10% 증가를 검토').pricePct,null);
+assert.equal(extractPolicyRequirements('월 요금 5% 인하 또는 가격 3% 인상').pricePct,null);
+assert.equal(extractPolicyRequirements('월 요금을 2.5% 인상').pricePct,2.5);
+console.log('PASS: five policy scenarios, decimal price direction, point comma preservation, free offers, absent and ambiguous price changes.');
+
+const {registrationScenario,reviewSnapshot,summarizeRequirements}=load('registration-scenarios.ts');
+const base={start:'2026-09-14',applyDays:7,days:14,pricePct:-5,demandPct:8,cancellationPct:-2,variableCostPct:1,dailyCost:1000,oneTimeCost:5000,requirements:mix,targetChannels:['APP']};
+const before=JSON.stringify(base);
+assert.equal(registrationScenario(base,0).pricePct,0);
+assert.equal(registrationScenario(base,0).dailyCost,0);
+assert.equal(registrationScenario(base,1).applyDays,4);
+assert.equal(registrationScenario(base,2).applyDays,7);
+assert.equal(JSON.stringify(base),before);
+const saved=reviewSnapshot(base,1,summarizeRequirements(mix));
+assert.equal(saved.applyDays,registrationScenario(base,1).applyDays);
+assert.equal(saved.variableCostPct,1);
+assert.deepEqual(saved.targetChannels,['APP']);
+assert.match(saved.summary,/3,000원/);
+console.log('PASS: review candidates preserve inputs, selected forecast duration and saved assumptions match.');

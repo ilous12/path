@@ -1,12 +1,17 @@
 "use client";
 
-import { AIChatDialog } from "@/registry/blocks/sidebar-03/components/ai-chat-dialog";
 import type React from "react";
 import { createContext, useCallback, useContext, useState } from "react";
+import { AIChatDialog } from "@/registry/blocks/sidebar-03/components/ai-chat-dialog";
+
+export type ChatMessage = { role: "user" | "ai"; content: string };
+type Conversations = Record<string, ChatMessage[]>;
 
 type TabType = "chat" | "doc";
 
 interface AIChatContextType {
+  conversations: Conversations;
+  setConversations: React.Dispatch<React.SetStateAction<Conversations>>;
   activeTab: TabType;
   input: string;
   isDialogOpen: boolean;
@@ -20,6 +25,7 @@ interface AIChatContextType {
 const AIChatContext = createContext<AIChatContextType | undefined>(undefined);
 
 const AIChatProvider = ({ children }: { children: React.ReactNode }) => {
+  const [conversations, setConversations] = useState<Conversations>({});
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>("doc");
   const [input, setInput] = useState("");
@@ -35,6 +41,8 @@ const AIChatProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <AIChatContext.Provider
       value={{
+        conversations,
+        setConversations,
         activeTab,
         input,
         isDialogOpen,

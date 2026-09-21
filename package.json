@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "next": "^16.1.1"
+    "next": "16.3.5"
   },
   "devDependencies": {
     "@biomejs/biome": "latest",
@@ -10,18 +10,20 @@
     "husky": "^9.1.7",
     "turbo": "^2.8.12"
   },
-  "name": "lumi-ui",
-  "packageManager": "bun@1.3.5",
+  "name": "mars",
+  "packageManager": "pnpm@10.33.4",
   "private": true,
   "scripts": {
     "build": "turbo build",
     "changeset": "changeset",
-    "dev": "turbo dev",
+    "dev": "pnpm --filter www dev --hostname localhost --port 3100",
     "format": "biome format --write .",
     "lint": "turbo run lint --",
     "prepare": "husky",
     "release": "changeset publish",
-    "version-packages": "changeset version"
+    "version-packages": "changeset version",
+    "typecheck": "pnpm --filter www exec next typegen && pnpm --filter www exec tsc --noEmit",
+    "start": "pnpm --filter www start --hostname localhost --port 3100"
   },
   "workspaces": [
     "apps/*",

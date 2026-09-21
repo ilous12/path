@@ -1,10 +1,8 @@
-import { createMDX } from "fumadocs-mdx/next";
 import createNextIntlPlugin from "next-intl/plugin";
-
-const withMDX = createMDX({});
 
 /** @type {import('next').NextConfig} */
 const config = {
+  cacheComponents: true,
   experimental: {
     turbopackFileSystemCacheForDev: true,
   },
@@ -24,23 +22,27 @@ const config = {
       },
     ],
   },
-  reactCompiler: true,
-  reactStrictMode: true,
-  async rewrites() {
+  async redirects() {
     return [
+      { source: "/playground", destination: "/", permanent: true },
+      { source: "/playground/:path+", destination: "/:path+", permanent: true },
       {
-        destination: "/llms/:locale/:path*",
-        source: "/:locale/docs/:path*.md",
+        source: "/:locale(en|cn)/playground",
+        destination: "/:locale",
+        permanent: true,
       },
       {
-        destination: "/llms/:path*",
-        source: "/docs/:path*.md",
+        source: "/:locale(en|cn)/playground/:path+",
+        destination: "/:locale/:path+",
+        permanent: true,
       },
     ];
   },
+  reactCompiler: true,
+  reactStrictMode: true,
   transpilePackages: ["@lumi-ui/ui"],
 };
 
 const withNextIntl = createNextIntlPlugin("./lib/i18n/request.ts");
 
-export default withNextIntl(withMDX(config));
+export default withNextIntl(config);

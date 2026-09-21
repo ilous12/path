@@ -1,364 +1,246 @@
 "use client";
+import { getEventType } from "@/components/market-performance/data";
 
+import { EventProvenance } from "@/components/market-performance/event-provenance";
+
+import { EyeOff, Bell, RotateCcw } from "lucide-react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
-  ArchiveIcon,
-  BellIcon,
-  CalendarIcon,
-  MessageCircleDashed,
-  MessageCircleIcon,
-  PlusIcon,
-  Settings,
-  TypeIcon,
-  UserIcon,
-} from "lucide-react";
-import React from "react";
+  EVENT_TYPES,
+  eventOwnership,
+  presetRange,
+} from "@/components/market-performance/data";
+import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Button } from "@/registry/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/registry/ui/dropdown-menu";
-import { Input } from "@/registry/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/registry/ui/popover";
-import { ScrollArea } from "@/registry/ui/scroll-area";
-import { Sheet, SheetContent, SheetTrigger } from "@/registry/ui/sheet";
-import {
-  TabIndicator,
-  Tabs,
-  TabsList,
-  TabsPanel,
-  TabsTab,
-} from "@/registry/ui/tabs";
-import { DashboardOnboardingDialog } from "./onboarding-dialog";
 
-const NotificationContext = React.createContext<
-  | {
-      open: boolean;
-      setOpen: (open: boolean) => void;
-      onClose: () => void;
-      onBoardingOpen: boolean;
-      setOnBoardingOpen: (open: boolean) => void;
+import { useEventCatalog } from "@/components/market-performance/event-catalog";
+import { useEventVisibility } from "@/components/market-performance/event-visibility";
+
+export function Notifications() {
+  const { events: catalog } = useEventCatalog();
+  const events = [...catalog].sort(
+    (a, b) => b.startAt.localeCompare(a.startAt) || a.id.localeCompare(b.id),
+  );
+  const mobile = useIsMobile();
+  const params = useSearchParams();
+  const workspace = params.get("workspace") ?? "air";
+  const [open, setOpen] = useState(false);
+  const [filter, setFilter] = useState("all");
+  const [read, setRead] = useState<Set<string>>(() => new Set());
+  const { hiddenIds, hideEvents, restoreEvent } = useEventVisibility();
+  const archived = new Set(hiddenIds);
+  const router = useRouter();
+  const [restored, setRestored] = useState(false);
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(
+        sessionStorage.getItem("mars-event-notifications") ?? "{}",
+      );
+      const valid = (values: unknown) =>
+        new Set<string>(
+          Array.isArray(values)
+            ? values.filter(
+                (id): id is string =>
+                  typeof id === "string" &&
+                  events.some((event) => event.id === id),
+              )
+            : [],
+        );
+      setRead(valid(saved.read));
+    } catch {
+      /* Storage is optional for this demo. */
     }
-  | undefined
->(undefined);
-
-const useNotification = () => {
-  const context = React.useContext(NotificationContext);
-  if (!context) {
-    throw new Error(
-      "useNotification must be used within a NotificationContext.Provider",
-    );
-  }
-  return context;
-};
-
-export const Notifications = () => {
-  const [open, setOpen] = React.useState(false);
-  const [onBoardingOpen, setOnBoardingOpen] = React.useState(false);
-  const handleClose = () => setOpen(false);
-
-  return (
+    setRestored(true);
+  }, []);
+  useEffect(() => {
+    if (!restored) return;
+    try {
+      sessionStorage.setItem(
+        "mars-event-notifications",
+        JSON.stringify({ read: [...read] }),
+      );
+    } catch {
+      /* Keep in-memory state when storage is unavailable. */
+    }
+  }, [read, restored]);
+  const unread = events.filter(
+    (event) => !read.has(event.id) && !archived.has(event.id),
+  ).length;
+  const visible = events.filter((event) =>
+    filter === "archived"
+      ? archived.has(event.id)
+      : !archived.has(event.id) && (filter !== "unread" || !read.has(event.id)),
+  );
+  const trigger = (
+    <Button
+      className="relative"
+      aria-label={`이벤트 알림, 읽지 않음 ${unread}건`}
+      size="icon-sm"
+      variant="outline"
+    >
+      <Bell />
+      {unread > 0 && (
+        <span
+          aria-hidden="true"
+          className="absolute -right-2 -top-2 rounded-full border border-background bg-primary px-1 min-w-5 text-[9px] font-bold text-primary-foreground shadow-sm"
+        >
+          {unread}
+        </span>
+      )}
+    </Button>
+  );
+  const body = (
     <>
-      <NotificationContext.Provider
-        value={{
-          onBoardingOpen,
-          onClose: handleClose,
-          open,
-          setOnBoardingOpen,
-          setOpen,
-        }}
-      >
-        <NotificationContent />
-      </NotificationContext.Provider>
-
-      <DashboardOnboardingDialog
-        open={onBoardingOpen}
-        setOpen={setOnBoardingOpen}
-      />
+      <div className="border-b px-4 py-3 space-y-2 shrink-0">
+        <div className="flex items-center justify-between pr-5">
+          <h2 className="text-sm font-semibold">시장·air 이벤트 알림</h2>
+          <Button
+            size="sm"
+            variant="ghost"
+            disabled={!unread}
+            onClick={() => setRead(new Set(events.map((event) => event.id)))}
+          >
+            모두 읽음
+          </Button>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          전체 이벤트 {events.length}건 · 최신순
+        </p>
+        <div className="flex gap-1" aria-label="알림 분류">
+          {[
+            ["all", "전체"],
+            ["unread", "읽지 않음"],
+            ["archived", "숨기기"],
+          ].map(([value, label]) => (
+            <Button
+              key={value}
+              size="sm"
+              variant={filter === value ? "secondary" : "ghost"}
+              aria-pressed={filter === value}
+              onClick={() => setFilter(value)}
+            >
+              {label}{" "}
+              {value === "all"
+                ? events.length - archived.size
+                : value === "unread"
+                  ? unread
+                  : archived.size}
+            </Button>
+          ))}
+        </div>
+      </div>
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        {visible.length ? (
+          <ol>
+            {visible.map((event) => {
+              const ownership = eventOwnership([event], workspace);
+              return (
+                <li
+                  key={event.id}
+                  className="flex gap-1 border-b last:border-0 hover:bg-accent/50"
+                >
+                  <Link
+                    className="flex min-w-0 flex-1 gap-3 p-4 focus-visible:outline-2 focus-visible:outline-ring"
+                    href={`/analysis?workspace=${encodeURIComponent(workspace)}&start=${presetRange("1M").start}&end=${presetRange("1M").end}`}
+                    onClick={() => {
+                      setRead((previous) => new Set([...previous, event.id]));
+                      setOpen(false);
+                    }}
+                  >
+                    <span
+                      className="mt-0.5 grid size-7 shrink-0 place-items-center rounded-md text-sm font-bold text-white"
+                      style={{ backgroundColor: ownership.color }}
+                    >
+                      E
+                    </span>
+                    <div className="min-w-0 space-y-1.5">
+                      <p
+                        className={`text-sm leading-snug ${read.has(event.id) ? "font-medium text-muted-foreground" : "font-semibold"}`}
+                      >
+                        {event.title}
+                        {!read.has(event.id) && (
+                          <span
+                            className="ml-1 text-primary"
+                            aria-label="읽지 않음"
+                          >
+                            ●
+                          </span>
+                        )}
+                      </p>
+                      <EventProvenance event={event} />
+                      <p className="text-xs text-primary">
+                        {event.types
+                          .map((type) => getEventType(type).label)
+                          .join(" · ")}
+                      </p>
+                      <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">
+                        {event.summary}
+                      </p>
+                    </div>
+                  </Link>
+                  <Button
+                    className="mr-2 mt-3 shrink-0"
+                    size="icon-sm"
+                    variant="ghost"
+                    aria-label={`${event.title} ${archived.has(event.id) ? "다시 표시" : "숨기기"}`}
+                    onClick={() => {
+                      if (archived.has(event.id)) restoreEvent(event.id);
+                      else hideEvents([event.id]);
+                      router.refresh();
+                    }}
+                  >
+                    {archived.has(event.id) ? <RotateCcw /> : <EyeOff />}
+                  </Button>
+                </li>
+              );
+            })}
+          </ol>
+        ) : (
+          <p className="p-10 text-center text-sm text-muted-foreground">
+            {filter === "archived"
+              ? "숨긴 이벤트가 없습니다."
+              : filter === "unread"
+                ? "읽지 않은 이벤트가 없습니다."
+                : "표시할 이벤트가 없습니다."}
+          </p>
+        )}
+      </div>
     </>
   );
-};
-
-const NotificationContent = () => {
-  const isMobile = useIsMobile();
-
-  if (isMobile) {
-    return <NotificationSheet />;
-  }
-
-  return <NotificationPopover />;
-};
-
-const NotificationSheet = () => {
-  const { open, setOpen } = useNotification();
-  return (
-    <Sheet onOpenChange={setOpen} open={open}>
-      <SheetTrigger
-        className="relative"
-        render={
-          <Button
-            aria-label="Notifications, you have unread messages"
-            size="icon-sm"
-            variant="outline"
-          >
-            <span>
-              <BellIcon />
-            </span>
-            <span className="absolute -top-1 right-0 size-2.5 bg-green-600 rounded-full" />
-            <span className="sr-only">You have unread messages</span>
-          </Button>
-        }
-      />
+  return mobile ? (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger render={trigger} />
       <SheetContent
-        className="flex flex-col p-0 bg-background duration-300 h-[50dvh] max-h-[50dvh] overflow-hidden"
         side="bottom"
+        className="flex h-[75dvh] max-h-[75dvh] flex-col overflow-hidden bg-background p-0"
       >
-        <UnderLineTabs />
+        <SheetTitle className="sr-only">이벤트 알림</SheetTitle>
+        {body}
       </SheetContent>
     </Sheet>
-  );
-};
-
-function NotificationPopover() {
-  const { open, setOpen } = useNotification();
-  return (
-    <Popover onOpenChange={setOpen} open={open}>
-      <PopoverTrigger
-        render={
-          <Button
-            aria-label="Notifications, you have unread messages"
-            size="icon-sm"
-            variant="outline"
-          >
-            <span>
-              <BellIcon />
-            </span>
-
-            <span className="absolute -top-1 -right-1 pointer-events-none">
-              <span className="relative flex size-2">
-                <span className="absolute inline-flex size-full animate-ping rounded-full bg-green-600 opacity-75"></span>
-                <span className="relative inline-flex size-2 rounded-full bg-green-600"></span>
-              </span>
-            </span>
-            <span className="sr-only">You have unread messages</span>
-          </Button>
-        }
-      />
+  ) : (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger render={trigger} />
       <PopoverContent
-        align="center"
-        className="flex flex-col p-0 w-96 duration-300 h-[50dvh] max-h-[50dvh] overflow-hidden"
+        align="end"
         matchAnchorWidth={false}
-        side="bottom"
+        className="flex h-[65dvh] max-h-[680px] w-[420px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden p-0"
       >
-        <UnderLineTabs />
+        {body}
       </PopoverContent>
     </Popover>
   );
 }
-
-const UnderLineTabs = () => {
-  const { onClose, setOnBoardingOpen } = useNotification();
-  return (
-    <Tabs className="h-full" defaultValue="all">
-      <div className="flex justify-between h-12 items-center border-b">
-        <TabsList className="gap-6 h-full">
-          <TabsTab
-            className="w-16 cursor-pointer hover:text-foreground"
-            value="all"
-          >
-            All
-          </TabsTab>
-          <TabsTab
-            className="w-16 cursor-pointer hover:text-foreground"
-            value="unread"
-          >
-            Unread
-          </TabsTab>
-          <TabsTab
-            className="w-16 cursor-pointer hover:text-foreground"
-            value="archived"
-          >
-            Archived
-          </TabsTab>
-          <TabIndicator className="bg-foreground -bottom-0.5 left-px h-0.5 translate-x-(--active-tab-left) translate-y-0" />
-        </TabsList>
-        <Button className="mr-2" size="icon-sm" variant="ghost">
-          <Settings />
-        </Button>
-      </div>
-
-      <TabsPanel
-        className="h-full flex flex-col min-h-0"
-        keepMounted
-        value="all"
-      >
-        <ScrollArea
-          className="flex flex-col flex-1 min-h-0 h-full"
-          gradientScrollFade
-          noScrollBar
-        >
-          <ol className="list-none group w-full">
-            <li className="group/link border-b border-muted hover:bg-accent transition-colors">
-              <button
-                className="outline-none flex justify-between items-center gap-4 p-4 cursor-pointer"
-                onClick={() => {
-                  setOnBoardingOpen(true);
-                  onClose();
-                }}
-                type="button"
-              >
-                <span>
-                  <MessageCircleDashed className="size-4" />
-                </span>
-
-                <div className="flex flex-col justify-start gap-0.5 flex-1 text-left text-primary">
-                  <span className="text-sm">Welcome to Lumi UI</span>
-                  <span className="text-xs text-muted-foreground">
-                    just now
-                  </span>
-                </div>
-              </button>
-            </li>
-            {Array.from({ length: 30 }).map((_, index) => (
-              <li
-                className="group/link border-b border-muted last:border-0 hover:bg-accent transition-colors"
-                key={index}
-              >
-                <a
-                  className="outline-none flex justify-between items-center gap-4 p-4"
-                  href="#"
-                  onClick={onClose}
-                >
-                  <span>
-                    <MessageCircleDashed className="size-4" />
-                  </span>
-
-                  <div className="flex flex-col justify-start gap-0.5 flex-1">
-                    <span className="text-sm">
-                      New notification {index + 1}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {index + 1} mins ago
-                    </span>
-                  </div>
-
-                  <div className="opacity-0 group-hover/link:opacity-100 transition-opacity w-8">
-                    <Button
-                      className="cursor-pointer rounded-full text-muted-foreground hover:text-foreground"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                      }}
-                      size="icon-sm"
-                      title="Archive"
-                      variant="ghost"
-                    >
-                      <ArchiveIcon />
-                    </Button>
-                  </div>
-                </a>
-              </li>
-            ))}
-          </ol>
-        </ScrollArea>
-        <div className="border-t border-input flex-none">
-          <Button
-            className="w-full rounded-none cursor-pointer hover:bg-accent shadow-none"
-            onClick={onClose}
-            variant="unstyled"
-          >
-            View All
-          </Button>
-        </div>
-      </TabsPanel>
-      <TabsPanel
-        className="h-full flex flex-col min-h-0"
-        keepMounted
-        value="unread"
-      >
-        <ScrollArea className="flex-1 min-h-0" gradientScrollFade noScrollBar>
-          <ol className="list-none group">
-            {Array.from({ length: 20 }).map((_, index) => (
-              <li
-                className="group/link border-b border-muted last:border-0 hover:bg-muted transition-colors"
-                key={index}
-              >
-                <a
-                  className="outline-none flex justify-between items-center gap-4 p-4"
-                  href="#"
-                  onClick={onClose}
-                >
-                  <span>
-                    <MessageCircleIcon className="size-4" />
-                  </span>
-                  <div className="flex flex-col justify-start gap-0.5 flex-1">
-                    <span className="text-sm">
-                      Unread notification {index + 1}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {index + 1} mins ago
-                    </span>
-                  </div>
-                  <div className="w-8 opacity-0" />
-                </a>
-              </li>
-            ))}
-          </ol>
-        </ScrollArea>
-      </TabsPanel>
-      <TabsPanel className="flex flex-col h-full" keepMounted value="archived">
-        <ScrollArea
-          className="flex-1 min-h-0 flex flex-col relative"
-          gradientScrollFade
-          noScrollBar
-        >
-          <div className="flex gap-2 py-2 px-4 items-center">
-            <Input placeholder="Search" variant="transparent" />
-            <FilterDropdown />
-          </div>
-          <div className="flex justify-center items-center absolute inset-x-0 top-[calc(50%-3rem)]">
-            <span className="text-muted-foreground flex flex-col items-center gap-2">
-              <span className="bg-muted rounded-full p-3">
-                <ArchiveIcon className="size-5" />
-              </span>
-              No archived notifications
-            </span>
-          </div>
-        </ScrollArea>
-      </TabsPanel>
-    </Tabs>
-  );
-};
-
-const FilterDropdown = () => {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        render={<Button aria-label="Filter notifications" variant="outline" />}
-      >
-        <PlusIcon />
-        Filter
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="end"
-        className="w-36"
-        matchAnchorWidth={false}
-      >
-        <DropdownMenuItem>
-          <UserIcon /> Author
-          <span className="sr-only">Filter by author</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <CalendarIcon /> Date
-          <span className="sr-only">Filter by date</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <TypeIcon /> Type
-          <span className="sr-only">Filter by type</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-};

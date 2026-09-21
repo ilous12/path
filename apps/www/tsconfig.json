@@ -3,7 +3,6 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./*"],
-      "fumadocs-mdx:collections/*": [".source/*"],
       "@lumi-ui/ui/*": ["../../packages/ui/src/*"]
     }
   },
@@ -15,7 +14,6 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "next.config.mjs",
-    ".next/dev/types/**/*.ts",
-    "components/app-sidebar-collapsible-sections"
+    ".next/dev/types/**/*.ts"
   ]
 }

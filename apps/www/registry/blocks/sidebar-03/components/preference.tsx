@@ -8,16 +8,16 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/registry/ui/card";
-import { Label } from "@/registry/ui/label";
-import { ScrollArea } from "@/registry/ui/scroll-area";
+} from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
   SelectItemContent,
   SelectTriggerGroup,
-} from "@/registry/ui/select";
-import { Switch } from "@/registry/ui/switch";
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 
 type PreferenceSelect = {
   id: string;
@@ -36,63 +36,57 @@ type PreferenceSwitch = {
 
 const initialSelects: PreferenceSelect[] = [
   {
-    description: "Choose which page opens when you launch the dashboard.",
+    description: "대시보드를 열 때 표시할 첫 화면을 선택합니다.",
     id: "homeView",
-    label: "Default home view",
+    label: "기본 시작 화면",
     options: [
-      { label: "Executive overview", value: "overview" },
-      { label: "Financial performance", value: "financials" },
-      { label: "Billing operations", value: "billing" },
-      { label: "Customer health", value: "customers" },
-      { label: "Alerts & anomalies", value: "alerts" },
+      { label: "경영 현황", value: "overview" },
+      { label: "재무 실적", value: "financials" },
+      { label: "결제 운영", value: "billing" },
+      { label: "고객 상태", value: "customers" },
+      { label: "알림 및 이상 징후", value: "alerts" },
     ],
     value: "overview",
   },
   {
-    description: "Applied to charts and tables by default.",
+    description: "차트와 표에 기본으로 적용합니다.",
     id: "dateRange",
-    label: "Default date range",
+    label: "기본 조회 기간",
     options: [
-      { label: "Last 7 days", value: "7d" },
-      { label: "Last 30 days", value: "30d" },
-      { label: "Last 90 days", value: "90d" },
-      { label: "Month to date", value: "mtd" },
-      { label: "Quarter to date", value: "qtd" },
+      { label: "최근 7일", value: "7d" },
+      { label: "최근 30일", value: "30d" },
+      { label: "최근 90일", value: "90d" },
+      { label: "이번 달 누적", value: "mtd" },
+      { label: "이번 분기 누적", value: "qtd" },
     ],
     value: "30d",
   },
   {
-    description: "Used for financial formatting across the dashboard.",
+    description: "대시보드 금액은 원화로 표시합니다.",
     id: "currency",
-    label: "Currency",
-    options: [
-      { label: "USD — US Dollar", value: "usd" },
-      { label: "EUR — Euro", value: "eur" },
-      { label: "GBP — British Pound", value: "gbp" },
-      { label: "SGD — Singapore Dollar", value: "sgd" },
-      { label: "JPY — Japanese Yen", value: "jpy" },
-    ],
-    value: "usd",
+    label: "통화",
+    options: [{ label: "₩ 대한민국 원", value: "krw" }],
+    value: "krw",
   },
   {
-    description: "How large numbers are abbreviated in KPIs.",
+    description: "핵심 지표의 큰 숫자 표시 형식입니다.",
     id: "numberFormat",
-    label: "Number format",
+    label: "숫자 형식",
     options: [
-      { label: "Compact (128.4k)", value: "compact" },
-      { label: "Standard (128,430)", value: "standard" },
-      { label: "Accounting (128,430.00)", value: "accounting" },
+      { label: "축약 (12.8만)", value: "compact" },
+      { label: "일반 (128,430)", value: "standard" },
+      { label: "회계 (128,430.00)", value: "accounting" },
     ],
     value: "compact",
   },
   {
-    description: "Controls spacing for tables and cards.",
+    description: "표와 카드의 간격을 설정합니다.",
     id: "density",
-    label: "Data density",
+    label: "정보 밀도",
     options: [
-      { label: "Comfortable", value: "comfortable" },
-      { label: "Compact", value: "compact" },
-      { label: "Dense", value: "dense" },
+      { label: "여유롭게", value: "comfortable" },
+      { label: "간결하게", value: "compact" },
+      { label: "촘촘하게", value: "dense" },
     ],
     value: "comfortable",
   },
@@ -100,33 +94,33 @@ const initialSelects: PreferenceSelect[] = [
 
 const initialSwitches: PreferenceSwitch[] = [
   {
-    description: "Minimize animations across the dashboard UI.",
+    description: "대시보드의 애니메이션을 최소화합니다.",
     id: "reducedMotion",
-    label: "Reduce motion",
+    label: "애니메이션 줄이기",
     value: false,
   },
   {
-    description: "Display mini-trends inside KPI cards.",
+    description: "핵심 지표 카드에 작은 추이 차트를 표시합니다.",
     id: "showKpiSparks",
-    label: "Show KPI sparklines",
+    label: "핵심 지표 추이 표시",
     value: true,
   },
   {
-    description: "Refresh key metrics automatically when data changes.",
+    description: "데이터가 바뀌면 핵심 지표를 자동 갱신합니다.",
     id: "liveUpdates",
-    label: "Live updates",
+    label: "실시간 갱신",
     value: true,
   },
   {
-    description: "Surface unusual spikes, drops, and outliers in charts.",
+    description: "차트의 급등·급락과 이상값을 강조합니다.",
     id: "anomalyDetection",
-    label: "Anomaly highlights",
+    label: "이상 징후 강조",
     value: true,
   },
   {
-    description: "Strings like :) will be converted to 🙂 in notes.",
+    description: "메모의 :) 같은 문자를 🙂 이모지로 변환합니다.",
     id: "convertEmoticons",
-    label: "Convert text emoticons",
+    label: "문자 이모티콘 변환",
     value: false,
   },
 ];
@@ -188,8 +182,8 @@ export function PreferencesDialogContent() {
       <div className="space-y-4">
         <Card className="bg-card">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">General</CardTitle>
-            <CardDescription>Default behavior and formatting.</CardDescription>
+            <CardTitle className="text-base">일반</CardTitle>
+            <CardDescription>기본 동작과 표시 형식입니다.</CardDescription>
           </CardHeader>
           <CardContent className="divide-y divide-border">
             <PreferenceRow
@@ -285,9 +279,9 @@ export function PreferencesDialogContent() {
 
         <Card className="bg-card">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">Interface & theme</CardTitle>
+            <CardTitle className="text-base">화면 및 테마</CardTitle>
             <CardDescription>
-              Visual density and interaction preferences.
+              화면 밀도와 조작 방식을 설정합니다.
             </CardDescription>
           </CardHeader>
           <CardContent className="divide-y divide-border">
@@ -355,10 +349,8 @@ export function PreferencesDialogContent() {
 
         <Card className="bg-card">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">Intelligence</CardTitle>
-            <CardDescription>
-              Signal quality and automation settings.
-            </CardDescription>
+            <CardTitle className="text-base">분석 설정</CardTitle>
+            <CardDescription>이상 징후와 자동화 설정입니다.</CardDescription>
           </CardHeader>
           <CardContent className="divide-y divide-border">
             <PreferenceRow

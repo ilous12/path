@@ -5,6 +5,31 @@
 @import "./code.css";
 @import "./lumi.css";
 
+/* One service-wide family, including legacy mono/inter utilities and portals. */
+@theme inline {
+  --font-sans: var(--font-pretendard), Arial, sans-serif;
+  --font-mono: var(--font-pretendard), Arial, sans-serif;
+  --font-serif: var(--font-pretendard), Arial, sans-serif;
+  /* Reduce text by 1px while retaining spacing and control sizes. */
+  --text-xs: calc(.75rem - 1px);
+  --text-sm: calc(.875rem - 1px);
+  --text-base: calc(1rem - 1px);
+  --text-lg: calc(1.125rem - 1px);
+  --text-xl: calc(1.25rem - 1px);
+  --text-2xl: calc(1.5rem - 1px);
+  --text-3xl: calc(1.875rem - 1px);
+  --text-4xl: calc(2.25rem - 1px);
+  --text-5xl: calc(3rem - 1px);
+  --text-6xl: calc(3.75rem - 1px);
+  --text-7xl: calc(4.5rem - 1px);
+  --text-8xl: calc(6rem - 1px);
+  --text-9xl: calc(8rem - 1px);
+}
+
+body {
+  --font-inter: var(--font-pretendard), Arial, sans-serif;
+}
+
 @custom-variant dark (&:where([data-theme$="-dark"], [data-theme$="-dark"] *));
 
 @layer base {
@@ -12,6 +37,7 @@
     @apply border-border outline-ring/50;
   }
   body {
+    font-size: var(--text-base);
     @apply bg-background text-foreground;
   }
 }

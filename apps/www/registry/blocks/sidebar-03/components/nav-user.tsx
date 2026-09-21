@@ -1,19 +1,16 @@
 "use client";
 
 import {
-  BookIcon,
   ChevronsUpDown,
   LogOut,
   PenIcon,
-  PlugIcon,
   Settings,
   SmileIcon,
   UserIcon,
   XIcon,
 } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
-import { TimelineDemo } from "@/components/examples/ui/timeline/timeline-demo";
+import { ProductChangelog } from "./product-changelog";
 import {
   AlertDialog,
   AlertDialogClose,
@@ -22,8 +19,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/registry/ui/alert-dialog";
-import { Button } from "@/registry/ui/button";
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -33,28 +30,24 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
-} from "@/registry/ui/dialog";
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLinkItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/registry/ui/dropdown-menu";
-import { Input } from "@/registry/ui/input";
-import { Label } from "@/registry/ui/label";
-import { ScrollArea } from "@/registry/ui/scroll-area";
+} from "@/components/ui/dropdown-menu";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/registry/ui/sidebar";
-import { Textarea } from "@/registry/ui/textarea";
-import { toast } from "@/registry/ui/toast";
+} from "@/components/ui/sidebar";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/components/ui/toast";
 import { PreferencesDialogContent } from "./preference";
 
 export function NavUser({
@@ -66,7 +59,6 @@ export function NavUser({
   };
 }) {
   const { isCollapsed } = useSidebar();
-  const [open, setOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [changelogOpen, setChangelogOpen] = useState(false);
   const [preferenceOpen, setPreferenceOpen] = useState(false);
@@ -119,32 +111,18 @@ export function NavUser({
                   className="justify-between py-2"
                   onClick={() => setFeedbackOpen(true)}
                 >
-                  Feedback
+                  의견 보내기
                   <SmileIcon />
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="justify-between py-2"
-                  onClick={() => setOpen(true)}
-                >
-                  Connect Integrations
-                  <PlugIcon />
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="justify-between py-2"
                   onClick={() => setChangelogOpen(true)}
                 >
-                  Changelog
+                  변경 이력
                   <PenIcon />
                 </DropdownMenuItem>
-                <DropdownMenuLinkItem
-                  className="justify-between py-2"
-                  render={<Link href="/docs/introduction" />}
-                >
-                  Doc
-                  <BookIcon />
-                </DropdownMenuLinkItem>
                 <DropdownMenuItem className="justify-between py-2">
-                  Log out
+                  로그아웃
                   <LogOut />
                 </DropdownMenuItem>
               </DropdownMenuGroup>
@@ -152,7 +130,6 @@ export function NavUser({
           </DropdownMenu>
         </SidebarMenuItem>
       </SidebarMenu>
-      <IntegrationsDialog onOpenChange={setOpen} open={open} />
       <DialogCloseConfirmation
         onOpenChange={setFeedbackOpen}
         open={feedbackOpen}
@@ -163,81 +140,6 @@ export function NavUser({
         open={preferenceOpen}
       />
     </>
-  );
-}
-
-const integrations = ["GitHub", "Slack", "Linear"];
-
-export function IntegrationsDialog({
-  open,
-  onOpenChange,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}) {
-  return (
-    <Dialog onOpenChange={onOpenChange} open={open}>
-      <DialogContent layout="stacked">
-        <DialogHeader>
-          <DialogTitle>Integrations</DialogTitle>
-          <DialogDescription>
-            Manage your active third-party integrations.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="flex flex-col gap-3 py-2">
-          {integrations.map((app) => (
-            <IntegrationItem appName={app} key={app} />
-          ))}
-        </div>
-
-        <DialogFooter>
-          <DialogClose render={<Button>Done</Button>} />
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function IntegrationItem({ appName }: { appName: string }) {
-  return (
-    <div className="flex items-center justify-between p-3 border rounded-lg bg-card">
-      <div className="flex items-center gap-3">
-        <div className="size-8 rounded bg-primary/10 grid place-items-center">
-          <span className="text-xs font-bold text-primary">{appName[0]}</span>
-        </div>
-        <div className="text-sm font-medium">{appName}</div>
-      </div>
-      <Dialog>
-        <DialogTrigger
-          render={
-            <Button size="sm" variant="outline">
-              Configure
-            </Button>
-          }
-        />
-        <DialogContent layout="stacked">
-          <DialogHeader>
-            <DialogTitle>Configure {appName}</DialogTitle>
-            <DialogDescription>
-              Enter your API key to connect this service.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-2 py-2">
-            <Label htmlFor={`api-key-${appName}`}>API Key</Label>
-            <Input
-              defaultValue="sk_test_123456789"
-              id={`api-key-${appName}`}
-              type="password"
-            />
-          </div>
-          <DialogFooter>
-            <DialogClose render={<Button variant="outline">Back</Button>} />
-            <DialogClose render={<Button>Save Configuration</Button>} />
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
   );
 }
 
@@ -266,7 +168,7 @@ function DialogCloseConfirmation({
       <DialogContent className="sm:max-w-96" layout="stacked" showCloseButton>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <SmileIcon className="size-5" /> Send Feedback
+            <SmileIcon className="size-5" /> 의견 보내기
           </DialogTitle>
         </DialogHeader>
         <form
@@ -279,14 +181,14 @@ function DialogCloseConfirmation({
           <Textarea
             className="min-h-48 resize-none"
             onChange={(event) => setTextareaValue(event.target.value)}
-            placeholder="Please describe the bug or issue you are experiencing..."
+            placeholder="발생한 오류나 문제를 설명해 주세요…"
             required
             value={textareaValue}
           />
           <DialogFooter>
-            <DialogClose render={<Button variant="outline">Cancel</Button>} />
+            <DialogClose render={<Button variant="outline">취소</Button>} />
             <Button disabled={!textareaValue} type="submit">
-              Send Feedback
+              의견 보내기
             </Button>
           </DialogFooter>
         </form>
@@ -294,15 +196,14 @@ function DialogCloseConfirmation({
       <AlertDialog onOpenChange={setConfirmationOpen} open={confirmationOpen}>
         <AlertDialogContent className="sm:max-w-md" layout="stacked">
           <AlertDialogHeader>
-            <AlertDialogTitle>Discard changes?</AlertDialogTitle>
+            <AlertDialogTitle>변경 사항을 취소할까요?</AlertDialogTitle>
             <AlertDialogDescription>
-              You have unsaved changes. Are you sure you want to discard this
-              feedback?
+              저장하지 않은 의견이 있습니다. 작성을 취소할까요?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogClose render={<Button variant="outline" />}>
-              Keep Editing
+              계속 편집
             </AlertDialogClose>
             <Button
               onClick={() => {
@@ -311,7 +212,7 @@ function DialogCloseConfirmation({
               }}
               variant="destructive"
             >
-              Discard
+              취소
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -335,21 +236,21 @@ export function ChangelogDialog({
           render={
             <Button variant="secondary">
               <XIcon />
-              <span className="sr-only">Close</span>
+              <span className="sr-only">닫기</span>
             </Button>
           }
         />
         <DialogHeader className="flex-none">
-          <DialogTitle>Changelog</DialogTitle>
+          <DialogTitle>변경 이력</DialogTitle>
           <DialogDescription>
-            Stay updated with the latest changes.
+            통합 모니터링 도구의 주요 업데이트를 확인합니다.
           </DialogDescription>
         </DialogHeader>
         <ScrollArea className="min-h-0" gradientScrollFade noScrollBar>
-          <TimelineDemo />
+          <ProductChangelog />
         </ScrollArea>
         <DialogFooter>
-          <DialogClose render={<Button>Done</Button>} />
+          <DialogClose render={<Button>완료</Button>} />
         </DialogFooter>
       </DialogElementOutsideContent>
     </Dialog>
@@ -367,22 +268,22 @@ const PreferencesDialog = ({
     <Dialog onOpenChange={onOpenChange} open={open}>
       <DialogContent className="sm:max-w-3xl" showCloseButton>
         <DialogHeader>
-          <DialogTitle>Preferences</DialogTitle>
-          <DialogDescription>Manage your preferences.</DialogDescription>
+          <DialogTitle>환경 설정</DialogTitle>
+          <DialogDescription>사용 환경을 설정합니다.</DialogDescription>
         </DialogHeader>
         <PreferencesDialogContent />
         <DialogFooter>
-          <DialogClose render={<Button variant="ghost">Cancel</Button>} />
+          <DialogClose render={<Button variant="ghost">취소</Button>} />
           <Button
             onClick={() => {
               toast.success({
-                description: "Your preferences have been saved successfully.",
-                title: "Preferences saved",
+                description: "환경 설정을 저장했습니다.",
+                title: "환경 설정 저장 완료",
               });
               onOpenChange(false);
             }}
           >
-            Save
+            저장
           </Button>
         </DialogFooter>
       </DialogContent>

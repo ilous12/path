@@ -4,15 +4,19 @@ import { useMounted } from "@lumi-ui/ui/hooks/use-mounted";
 import { PaletteIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/registry/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/registry/ui/dropdown-menu";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/registry/ui/tooltip";
+} from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 const THEME_OPTIONS = [
   {
@@ -70,6 +74,7 @@ export function ThemeSwitcher({
             <DropdownMenuTrigger
               render={
                 <Button
+                  aria-label="색상 테마 변경"
                   className={cn(
                     "data-popup-open:bg-accent data-popup-open:hover:bg-accent",
                     className,
@@ -77,7 +82,10 @@ export function ThemeSwitcher({
                   size="icon-sm"
                   variant={variant}
                 >
-                  <PaletteIcon className="size-4 transition-transform" />
+                  <PaletteIcon
+                    aria-hidden="true"
+                    className="size-4 transition-transform"
+                  />
                 </Button>
               }
             />
@@ -85,7 +93,7 @@ export function ThemeSwitcher({
         />
 
         <TooltipContent sideOffset={tooltipSideOffset}>
-          Switch theme
+          색상 테마 변경
         </TooltipContent>
       </Tooltip>
       <DropdownMenuContent
@@ -96,6 +104,16 @@ export function ThemeSwitcher({
         <div className="grid grid-cols-3 gap-y-1">
           {THEME_OPTIONS.map(({ id, colorClass }) => (
             <DropdownMenuItem
+              aria-label={
+                {
+                  shadcn: "기본",
+                  celeste: "하늘",
+                  orchid: "보라",
+                  lagoon: "청록",
+                  dune: "주황",
+                  canopy: "초록",
+                }[id]
+              }
               className="extend-touch-target relative py-2"
               disabled={themeSet === id}
               key={id}

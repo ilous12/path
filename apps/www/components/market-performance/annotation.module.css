@@ -1,0 +1,44 @@
+@keyframes eventPop {
+  0%,
+  55%,
+  100% {
+    transform: scale(1);
+  }
+  18% {
+    transform: scale(1.12);
+  }
+  30% {
+    transform: scale(0.97);
+  }
+  42% {
+    transform: scale(1.05);
+  }
+}
+
+.highlightPop {
+  transform-origin: center bottom;
+  animation: eventPop 1.4s ease-in-out infinite;
+}
+
+.highlightPop:hover,
+.highlightPop:focus-visible {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .highlightPop {
+    animation: none;
+  }
+}
+
+.bubble {
+  transform-origin: var(--transform-origin, center bottom);
+  transition: opacity 140ms ease-out, transform 140ms ease-out;
+}
+.bubble[data-starting-style], .bubble[data-ending-style] {
+  opacity: 0;
+  transform: translateY(5px) scale(0.98);
+}
+@media (prefers-reduced-motion: reduce) {
+  .bubble { transition: none; }
+}

@@ -49,3 +49,10 @@ next-env.d.ts
 # generated content
 .source
 
+
+# Existing independent project
+/mars/
+
+# Local recovery snapshots and package-manager temporary files
+/.rollback/
+/_tmp_*
