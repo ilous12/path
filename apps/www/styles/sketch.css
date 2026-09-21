@@ -1,0 +1,93 @@
+/* Opt-in appearance only. Removing data-sketch restores all original styles. */
+html[data-sketch="on"] {
+  --background: #faf8f1;
+  --foreground: #292a2d;
+  --card: #fdfbf5;
+  --card-foreground: #292a2d;
+  --popover: #fdfbf5;
+  --popover-foreground: #292a2d;
+  --primary: #41434a;
+  --primary-foreground: #fffdf7;
+  --secondary: #eae7dc;
+  --secondary-foreground: #292a2d;
+  --muted: #eeece4;
+  --muted-foreground: #686964;
+  --accent: #e8e5d9;
+  --accent-foreground: #292a2d;
+  --border: #aaa89e;
+  --input: #aaa89e;
+  --ring: #77776f;
+  --sidebar: #f0ede3;
+  --sidebar-foreground: #292a2d;
+  --sidebar-accent: #e2ded2;
+  --sidebar-accent-foreground: #292a2d;
+  --sidebar-border: #aaa89e;
+  --chart-1: #35373c;
+  --chart-2: #7d807c;
+  --chart-3: #b19e74;
+  --chart-4: #566678;
+  --chart-5: #9b7b69;
+}
+html[data-sketch="on"][data-theme$="-dark"] {
+  --background: #222320;
+  --foreground: #eeeadf;
+  --card: #282925;
+  --card-foreground: #eeeadf;
+  --popover: #2d2e29;
+  --popover-foreground: #eeeadf;
+  --primary: #e2dcc9;
+  --primary-foreground: #24251f;
+  --secondary: #363730;
+  --secondary-foreground: #eeeadf;
+  --muted: #30312c;
+  --muted-foreground: #bbb7aa;
+  --accent: #3c3d35;
+  --accent-foreground: #eeeadf;
+  --border: #747569;
+  --input: #747569;
+  --ring: #d2cbb8;
+  --sidebar: #282923;
+  --sidebar-foreground: #eeeadf;
+  --sidebar-accent: #3c3d35;
+  --sidebar-accent-foreground: #eeeadf;
+  --sidebar-border: #747569;
+  --chart-1: #e2dcc9;
+  --chart-2: #a8b0a2;
+  --chart-3: #d3bd8f;
+  --chart-4: #9fb4c7;
+  --chart-5: #c5a696;
+}
+html[data-sketch="on"] body {
+  background-image: repeating-linear-gradient(0deg, transparent, transparent 23px, color-mix(in srgb, var(--foreground) 4%, transparent) 24px);
+}
+html[data-sketch="on"] :where([data-slot="card"], [data-slot="popover-content"], [data-slot="popover-popup"], [data-slot="dialog-popup"], [data-slot="dialog-content"], [data-slot="dropdown-menu-content"], section.border, article.border) {
+  border: 1.5px solid var(--foreground);
+  border-radius: 13px 5px 15px 6px / 5px 14px 6px 12px;
+  box-shadow: 2px 3px 0 color-mix(in srgb, var(--foreground) 15%, transparent);
+  background-image: repeating-linear-gradient(135deg, transparent, transparent 9px, color-mix(in srgb, var(--foreground) 2%, transparent) 10px);
+}
+html[data-sketch="on"] :where(button, input, select, textarea, [role="tab"]) {
+  border-radius: 7px 3px 8px 4px / 4px 8px 3px 7px;
+}
+html[data-sketch="on"] :where(button.border, input, select, textarea, [data-slot="toggle-group"]) {
+  border-color: var(--foreground);
+  border-style: dashed;
+}
+html[data-sketch="on"] :where(h1, h2, h3) {
+  text-decoration-line: underline;
+  text-decoration-style: wavy;
+  text-decoration-color: color-mix(in srgb, var(--foreground) 20%, transparent);
+  text-underline-offset: 5px;
+  text-decoration-thickness: 1px;
+}
+html[data-sketch="on"] :where(.recharts-line-curve, .recharts-area-curve) {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(.6px .5px 0 color-mix(in srgb, var(--foreground) 15%, transparent));
+}
+html[data-sketch="on"] .recharts-cartesian-grid line {
+  stroke-dasharray: 2 6;
+}
+html[data-sketch="on"] .recharts-text {
+  fill: var(--muted-foreground);
+}

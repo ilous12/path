@@ -1,6 +1,7 @@
 "use client";
 
 import { ThemeProvider as NextThemesProvider } from "next-themes";
+import { SketchMode } from "./sketch-mode";
 import type * as React from "react";
 
 export function ThemeProvider({
@@ -17,6 +18,7 @@ export function ThemeProvider({
       {...props}
     >
       {children}
+      <SketchMode />
     </NextThemesProvider>
   );
 }
