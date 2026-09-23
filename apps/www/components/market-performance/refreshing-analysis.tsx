@@ -14,7 +14,7 @@ export function RefreshingAnalysis({
   children,
   mode = "analysis",
 }: {
-  mode?: "analysis" | "detail";
+  mode?: "analysis" | "detail" | "page";
   refreshKey: string;
   children: ReactNode;
 }) {
@@ -32,7 +32,7 @@ export function RefreshingAnalysis({
     if (ready === analysisKey) return;
     const timer = setTimeout(
       () => setReady(analysisKey),
-      mode === "detail" ? 450 : 1200,
+      mode === "analysis" ? 1200 : 450,
     );
     return () => clearTimeout(timer);
   }, [analysisKey, ready, mode]);

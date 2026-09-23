@@ -422,5 +422,104 @@
       395
     ],
     "demoEvaluationDate": "2026-09-21"
+  },
+  {
+    "id": "scenario-air-nugget-response-1",
+    "title": "AIR · 1차 가입 포인트 대응",
+    "type": "혜택 변경",
+    "workspace": "air",
+    "groupName": "너겟 반값 프로모션 대응",
+    "eventId": "scenario-air-response-1",
+    "description": "1차: 가입 포인트 3,000원을 추가해 회선 회복을 예상했으나 관측 역할의 합성 실적은 저점에 머물렀습니다. 사용자 정의 가정이며 실제 시행 결과나 검증된 예측 정확도가 아닙니다. 09/02 너겟 한시 할인 → 09/03 AIR 하락 → 09/07 1차 대응 → 09/12 2차 대응 흐름을 비교합니다.",
+    "start": "2026-09-07",
+    "applyDays": 5,
+    "days": 5,
+    "pricePct": 0,
+    "demandPct": 15,
+    "variableCostPct": 3,
+    "cancellationPct": -2,
+    "dailyCost": 10000,
+    "oneTimeCost": 30000,
+    "status": "applied",
+    "createdAt": "2026-09-07T00:00:00+09:00",
+    "history": [
+      {
+        "at": "2026-09-07T00:00:00+09:00",
+        "action": "가정 시나리오의 대응 시행 기록"
+      }
+    ],
+    "demoCustomerForecast": [
+      100,
+      115,
+      130,
+      145,
+      160
+    ],
+    "demoEvaluationDate": "2026-09-11",
+    "analysisContext": {
+      "start": "2026-09-02",
+      "end": "2026-09-11",
+      "workspace": "air",
+      "channels": [],
+      "reason": "너겟 한시 반값 프로모션에 대한 단계별 대응 가정",
+      "eventIds": [
+        "scenario-nugget-half-2026-09-02"
+      ],
+      "pivotDates": [
+        "2026-09-03"
+      ]
+    }
+  },
+  {
+    "id": "scenario-air-nugget-response-2",
+    "title": "AIR · 2차 가격·노출 대응",
+    "type": "가격 조정",
+    "workspace": "air",
+    "groupName": "너겟 반값 프로모션 대응",
+    "eventId": "scenario-air-response-2",
+    "description": "2차: 요금 5% 인하와 채널 노출 강화로 회선 회복을 예상합니다. 관측 역할의 합성 실적보다 예측이 조금 낮은 성공 사례로 구성했습니다. 사용자 정의 가정이며 실제 시행 결과나 검증된 예측 정확도가 아닙니다. 09/02 너겟 한시 할인 → 09/03 AIR 하락 → 09/07 1차 대응 → 09/12 2차 대응 흐름을 비교합니다.",
+    "start": "2026-09-12",
+    "applyDays": 10,
+    "days": 10,
+    "pricePct": -5,
+    "demandPct": 30,
+    "variableCostPct": 3,
+    "cancellationPct": -2,
+    "dailyCost": 10000,
+    "oneTimeCost": 30000,
+    "status": "applied",
+    "createdAt": "2026-09-12T00:00:00+09:00",
+    "history": [
+      {
+        "at": "2026-09-12T00:00:00+09:00",
+        "action": "가정 시나리오의 대응 시행 기록"
+      }
+    ],
+    "demoCustomerForecast": [
+      174,
+      234,
+      286,
+      324,
+      358,
+      387,
+      393,
+      388,
+      395,
+      391
+    ],
+    "demoEvaluationDate": "2026-09-21",
+    "analysisContext": {
+      "start": "2026-09-02",
+      "end": "2026-09-21",
+      "workspace": "air",
+      "channels": [],
+      "reason": "너겟 한시 반값 프로모션에 대한 단계별 대응 가정",
+      "eventIds": [
+        "scenario-nugget-half-2026-09-02"
+      ],
+      "pivotDates": [
+        "2026-09-03"
+      ]
+    }
   }
 ]

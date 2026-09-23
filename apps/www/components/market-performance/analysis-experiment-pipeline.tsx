@@ -1,5 +1,4 @@
 "use client";
-import { DataBasis } from "./data-basis";
 import { PolicySimulator } from "./policy-simulator";
 import { useEffect, useRef, useState } from "react";
 import { Sparkles, LoaderCircle, ArrowRight } from "lucide-react";
@@ -79,16 +78,16 @@ function Pipeline({
   return (
     <section
       className="space-y-4 rounded-xl border bg-card p-5"
-      aria-label="분석에서 실험으로"
+      aria-label="분석에서 정책으로"
     >
       <div className="flex flex-wrap justify-between gap-3">
         <div>
           <p className="mb-1 text-xs font-medium text-primary">
-            기간별 분석 → AI 실험 제안 → 선택 → 실험 반영
+            기간별 분석 → AI 정책 제안 → 선택 → 정책 반영
           </p>
           <h2 className="text-lg font-semibold">
             {workspace.toUpperCase()} · {channels.join(", ") || "전체 채널"}{" "}
-            실험 제안
+            정책 제안
           </h2>
         </div>
         <Button
@@ -103,11 +102,11 @@ function Pipeline({
           ) : (
             <Sparkles className="size-4" />
           )}
-          {phase === "loading" ? "분석 근거 정리 중" : "AI 실험 3건 제안"}
+          {phase === "loading" ? "분석 근거 정리 중" : "AI 정책 3건 제안"}
         </Button>
       </div>
       <p className="text-sm leading-6">{report.reason}</p>
-      <DataBasis label="합성 데이터 · 산출 기준" details="합성 실적에 기반한 규칙 기반 제안입니다. 효과·비용은 검증 전 가정이며 정책 인과효과가 아닙니다." />
+      
       {phase === "ready" && (
         <div className="space-y-4">
           <PolicySimulator
@@ -133,7 +132,7 @@ function Pipeline({
           />
           <div className="flex justify-end">
             <Button variant="outline" onClick={() => configure(selected)}>
-              실험 {selected + 1} · 요건 확인 및 등록
+              정책 {selected + 1} · 요건 확인 및 등록
               <ArrowRight className="size-4" />
             </Button>
           </div>
@@ -163,7 +162,7 @@ function Pipeline({
                   onClose={() => setSeed(null)}
                   onSaved={() =>
                     setNotice(
-                      "선택한 분석 기간과 채널을 포함해 실험을 등록했습니다.",
+                      "선택한 분석 기간과 채널을 포함해 정책을 등록했습니다.",
                     )
                   }
                 />

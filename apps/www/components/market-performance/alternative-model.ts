@@ -1,3 +1,5 @@
+import { metricBenefits, validateSalesMetrics } from "./sales-metric-values";
+import { projectPolicyGroup } from "./policy-group-projection";
 import { projectSeries, type ForecastMethod } from "./forecast";
 import { scopedPerformance } from "./channel-data";
 import type { PolicyRequirements, PolicyReviewSnapshot } from "./policy-requirements";
@@ -17,6 +19,11 @@ export const ALTERNATIVE_TYPES = [
   "신규·비정형",
 ];
 export type PolicyAlternative = {
+  composition?: import("./policy-group-model").PolicyComposition;
+  policyRevisionId?: string;
+  policyProjection?: { method: ForecastMethod; channels: string[]; rows: import("./policy-group-model").GroupProjectionRow[] };
+  subPolicyCount?: number;
+  salesTerms?: import("./air-sales-terms").AirSalesTerms;
   forecastMethod?: ForecastMethod;
   isNew?: boolean;
   requirements?: PolicyRequirements;
@@ -72,6 +79,15 @@ export function validateAlternative(
     a.start > dayShift(MAX_DATE, 90)
   )
     return "적용일은 기준 데이터 시작일 이후부터 마지막 관측일 + 90일 이내여야 합니다.";
+  if (a.salesTerms) {
+    const t = a.salesTerms;
+    const metricError=validateSalesMetrics(t);if(metricError)return metricError;
+    if (!t.offerId || !t.channel || !t.planName || !t.pointCondition || !t.specialCondition ||
+      ![t.baselinePrice,t.monthlyPrice,t.points,t.specialPoints,t.pointMonths,t.eligibilityPct].every(Number.isFinite) ||
+      t.baselinePrice <= 0 || t.monthlyPrice < 0 || t.points < 0 || t.specialPoints < 0 ||
+      !Number.isInteger(t.pointMonths) || t.pointMonths < 1 || t.pointMonths > 24 || t.eligibilityPct < 0 || t.eligibilityPct > 100)
+      return "요금제 판매조건과 포인트 지급기간을 확인하세요.";
+  }
   const limits: [keyof PolicyAlternative, number, number][] = [
     ["days", 1, 90],
     ["pricePct", -100, 100],
@@ -102,7 +118,11 @@ export function validateAlternative(
   if (a.demoEvaluationDate !== undefined && (!/^\d{4}-\d{2}-\d{2}$/.test(a.demoEvaluationDate) || !Number.isFinite(Date.parse(a.demoEvaluationDate)) || new Date(a.demoEvaluationDate).toISOString().slice(0,10) !== a.demoEvaluationDate || a.demoEvaluationDate < a.start || a.demoEvaluationDate > dayShift(a.start,a.days!-1))) return "시나리오 평가일이 예측 기간을 벗어났습니다.";
   return null;
 }
-export function projectAlternative(a: PolicyAlternative) {
+export function projectAlternative(a: PolicyAlternative): import("./policy-group-model").GroupProjectionRow[] {
+  if (a.composition) {
+    if(a.policyProjection && JSON.stringify([...(a.targetChannels??[])].sort())===JSON.stringify([...a.policyProjection.channels].sort()) && (a.forecastMethod??a.composition.revision.method)===a.policyProjection.method) return a.policyProjection.rows.map(row=>a.composition!.baselineOnly?{...row,customers:row.customers-row.customersDelta,cancellations:row.cancellations-row.cancellationsDelta,revenue:row.baseRevenue,netProfit:row.baseProfit,customersDelta:0,cancellationsDelta:0,revenueDelta:0,netProfitDelta:0,rewardProvision:0,remainingRewards:0}:{...row});
+    return projectPolicyGroup(a);
+  }
   const error = validateAlternative(a);
   if (error) throw new Error(error);
   const end = a.start > MAX_DATE ? MAX_DATE : dayShift(a.start, -1);
@@ -141,10 +161,15 @@ export function projectAlternative(a: PolicyAlternative) {
     const revenue = Math.round(
       dailyRevenue * (applying ? 1 + a.pricePct / 100 : 1) * demand,
     );
+    // Reserve the maximum reward obligation for eligible new subscriptions.
+    // This is an accrual assumption, not an actual point-payment cash schedule.
+    const rewardProvision = applying && a.salesTerms
+      ? customers * a.salesTerms.eligibilityPct / 100 * (a.salesTerms.points * a.salesTerms.pointMonths + a.salesTerms.specialPoints)
+      : 0;
     const expenses = Math.round(
       dailyCosts * demand * (applying ? 1 + a.variableCostPct / 100 : 1) +
         (applying ? a.dailyCost : 0) +
-        (i === 0 ? a.oneTimeCost : 0),
+        (i === 0 ? a.oneTimeCost : 0) + rewardProvision + (applying&&a.salesTerms?customers*a.salesTerms.eligibilityPct/100*metricBenefits(a.salesTerms).reduce((sum,b)=>sum+(b.monthlyCost??0)*b.months,0):0),
     );
     return {
       key: dayShift(a.start, i),

@@ -1,5 +1,9 @@
 "use client";
-import { RegisteredExperiments } from "@/components/market-performance/alternative-manager";
+import { AnalysisRangeControl } from "@/components/market-performance/analysis-range-control";
+import { useHistoryViewState } from "@/components/market-performance/history-view-state";
+import { WorkspaceHeader } from "@/components/market-performance/workspace-header";
+import { PageEntry } from "@/components/market-performance/page-entry";
+import { RecordMenu } from "@/components/market-performance/record-menu";
 import { RegistrationWizard } from "@/components/market-performance/registration-wizard";
 import { getEventType } from "@/components/market-performance/data";
 
@@ -37,32 +41,48 @@ import {
 
 export function EventManagement({
   compact = false,
+  promotionsOnly = false,
+  registrationKind = "event",
   defaultStart,
   channel,
   analysisRange,
 }: {
   compact?: boolean;
+  promotionsOnly?: boolean;
+  registrationKind?: "event" | "experiment";
   defaultStart?: string;
   channel?: string;
-  analysisRange?: {start:string;end:string};
+  analysisRange?: { start: string; end: string };
 }) {
   const { events } = useEventCatalog();
   const { hiddenIds, hideEvents, restoreEvent } = useEventVisibility();
-  const workspace = useSearchParams().get("workspace") ?? "air";
-  const [range, setRange] = useState(presetRange("1M"));
-  const [draftRange, setDraftRange] = useState(range);
-  const [keyword, setKeyword] = useState("");
-  const [draftKeyword, setDraftKeyword] = useState("");
-  const [evidenceFilter, setEvidenceFilter] = useState("all");
-  const [filter, setFilter] = useState("visible");
-  const [page, setPage] = useState(0);
+  const params = useSearchParams();
+  const workspace = params.get("workspace") ?? "air";
+  const [range, setRange] = useHistoryViewState("events:range", () => { const requested = { start: params.get("start") ?? "", end: params.get("end") ?? "" }; return validateRange(requested) ? presetRange("1M") : requested; });
+  const [draftRange, setDraftRange] = useHistoryViewState("events:draftRange", range);
+  const [keyword, setKeyword] = useHistoryViewState("events:keyword", "");
+  const [draftKeyword, setDraftKeyword] = useHistoryViewState("events:draftKeyword", "");
+  const [typeFilter, setTypeFilter] = useHistoryViewState("events:typeFilter", params.get("type") ?? "all");
+  const availableTypes = [
+    ...new Set([
+      ...Object.keys(EVENT_TYPES),
+      ...events.flatMap((event) => event.types),
+    ]),
+  ];
+  const [evidenceFilter, setEvidenceFilter] = useHistoryViewState("events:evidenceFilter", "all");
+  const [filter, setFilter] = useHistoryViewState("events:filter", "visible");
+  const [page, setPage] = useHistoryViewState("events:page", 0);
   const [adding, setAdding] = useState(false);
-  const [initialKind, setInitialKind] = useState<"event" | "experiment">("event");
+  const [initialKind, setInitialKind] = useState<"event" | "experiment">(
+    "event",
+  );
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const filtered = events
     .filter(
       (event) =>
+        (!promotionsOnly || event.types.includes("campaign")) &&
+        (typeFilter === "all" || event.types.includes(typeFilter)) &&
         (evidenceFilter === "all" || event.evidenceKind === evidenceFilter) &&
         event.startAt.slice(0, 10) <= range.end &&
         (event.endAt ?? event.startAt).slice(0, 10) >= range.start &&
@@ -75,58 +95,100 @@ export function EventManagement({
     .sort((a, b) => b.startAt.localeCompare(a.startAt));
   const pages = Math.max(1, Math.ceil(filtered.length / 10));
   const current = Math.min(page, pages - 1);
+  const Header = compact ? "div" : WorkspaceHeader;
   return (
     <Dialog
       open={adding}
       onOpenChange={(open) => {
-        if (open) setInitialKind("event");
+        if (open) setInitialKind(registrationKind);
         setAdding(open);
       }}
     >
       <div className={compact ? "" : "mx-auto w-full max-w-[1600px] space-y-6"}>
-        <div className="flex items-center justify-between gap-4">
+        <Header>
           <div hidden={compact}>
-            <p className="mb-2 text-xs font-semibold tracking-widest text-primary">MARKET EVIDENCE</p><h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">이벤트·실험 관리</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">
+              {promotionsOnly ? "프로모션/행사 검색" : "업계 동향 검색"}
+            </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              시장 변화의 근거를 기록하고, 검증할 정책 실험을 관리하세요.
+              시장 변화의 핵심 내용과 출처를 확인하세요.
             </p>
           </div>
           <DialogTrigger
             render={
               <Button
                 size="icon-sm"
-                variant={compact ? "ghost" : "default"}
-                aria-label="이벤트·실험 추가"
-                title="이벤트·실험 추가"
+                variant="ghost"
+                aria-label={
+                  registrationKind === "experiment"
+                    ? "캠페인 추가"
+                    : "업계 동향 추가"
+                }
+                title={registrationKind === "experiment" ? "캠페인 추가" : "업계 동향 추가"}
               />
             }
           >
             <Plus className="size-4" />
           </DialogTrigger>
-        </div>
+        </Header>
         <DialogPortal>
           <DialogBackdrop className="z-50 bg-black/35 backdrop-blur-md" />
           <DialogViewport className="z-50 flex items-center justify-center p-3 sm:p-6">
             <DialogPopup className="relative flex h-[min(760px,92dvh)] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border bg-background text-foreground shadow-2xl animate-fade-zoom">
-              {adding && <RegistrationWizard seed={{title:"",prompt:"",channels:channel?[channel]:[],analysisContext:{...(analysisRange ?? range),workspace,channels:channel?[channel]:[],reason:"타임라인 조회 조건"}}} initialKind={initialKind} workspace={workspace} defaultStart={defaultStart ?? range.end} onClose={()=>setAdding(false)} onSaved={(start,end)=>{
-                const nextRange={start:start<range.start?start:range.start,end:end>range.end?end:range.end};
-                setRange(nextRange);setDraftRange(nextRange);setKeyword("");setDraftKeyword("");setFilter("visible");setEvidenceFilter("all");setPage(0);
-                setNotice("등록했습니다. 타임라인과 이벤트·실험 목록에 반영됩니다.");
-              }} />}
+              {adding && (
+                <RegistrationWizard
+                  seed={{
+                    title: "",
+                    prompt: "",
+                    channels: channel ? [channel] : [],
+                    analysisContext: {
+                      ...(analysisRange ?? range),
+                      workspace,
+                      channels: channel ? [channel] : [],
+                      reason: "타임라인 조회 조건",
+                    },
+                  }}
+                  initialKind={initialKind}
+                  workspace={workspace}
+                  defaultStart={defaultStart ?? range.end}
+                  onClose={() => setAdding(false)}
+                  onSaved={(start, end) => {
+                    const nextRange = {
+                      start: start < range.start ? start : range.start,
+                      end: end > range.end ? end : range.end,
+                    };
+                    setRange(nextRange);
+                    setDraftRange(nextRange);
+                    setKeyword("");
+                    setDraftKeyword("");
+                    setFilter("visible");
+                    setEvidenceFilter("all");
+                    setTypeFilter("all");
+                    setPage(0);
+                    setNotice(
+                      "등록했습니다. 타임라인과 이벤트·정책 목록에 반영됩니다.",
+                    );
+                  }}
+                />
+              )}
             </DialogPopup>
           </DialogViewport>
         </DialogPortal>
         {!compact && (
-          <Card>
+          <PageEntry><Card>
             <CardHeader>
               <CardTitle>기간별 이벤트</CardTitle>
               <CardDescription>
-                데이터 기준일 2026-09-21 · 최근 2년 실제 보도 200건 + 가상 시나리오 100건. 실제 보도는 발표일 기준이며 계획도 포함됩니다. 실적 차트는 합성값입니다.<br/>
+                데이터 기준일 2026-09-21 · 최근 2년 실제 보도 200건 + 가상
+                시나리오 100건. 실제 보도는 발표일 기준이며 계획도 포함됩니다.
+                실적 차트는 합성값입니다.
+                <br />
                 숨긴 이벤트는 차트와 영향 분석에서 제외됩니다. 다시 표시하면
                 복원됩니다.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              <AnalysisRangeControl range={range} onChange={r=>{setRange(r);setDraftRange(r);setError("");setPage(0);}} />
               <form
                 className="flex flex-wrap items-end gap-3 rounded-xl bg-muted/30 p-4"
                 onSubmit={(e) => {
@@ -139,32 +201,6 @@ export function EventManagement({
                   setPage(0);
                 }}
               >
-                <label className="space-y-1 text-xs text-muted-foreground">
-                  시작일
-                  <Input
-                    type="date"
-                    required
-                    min={MIN_DATE}
-                    max={MAX_DATE}
-                    value={draftRange.start}
-                    onChange={(e) =>
-                      setDraftRange({ ...draftRange, start: e.target.value })
-                    }
-                  />
-                </label>
-                <label className="space-y-1 text-xs text-muted-foreground">
-                  종료일
-                  <Input
-                    type="date"
-                    required
-                    min={MIN_DATE}
-                    max={MAX_DATE}
-                    value={draftRange.end}
-                    onChange={(e) =>
-                      setDraftRange({ ...draftRange, end: e.target.value })
-                    }
-                  />
-                </label>
                 <label className="min-w-48 flex-1 space-y-1 text-xs text-muted-foreground">
                   이벤트 검색
                   <Input
@@ -173,7 +209,7 @@ export function EventManagement({
                     placeholder="제목·출처·주체·채널 검색"
                   />
                 </label>
-                <Button type="submit">
+                <Button type="submit" size="sm" variant="secondary">
                   <Search className="size-4" />
                   검색
                 </Button>
@@ -184,23 +220,40 @@ export function EventManagement({
                 </p>
               )}
               <div className="flex flex-wrap gap-2">
-                {["1W", "1M", "1Y", "2Y"].map((preset) => (
-                  <Button
-                    key={preset}
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      const r = presetRange(preset);
-                      setRange(r);
-                      setDraftRange(r);
-                      setError("");
+                <label className="flex items-center gap-2 text-xs">
+                  이벤트 유형
+                  <select
+                    aria-label="이벤트 유형 필터"
+                    className="h-9 rounded-md border bg-background px-2 text-sm"
+                    value={typeFilter}
+                    onChange={(e) => {
+                      setTypeFilter(e.target.value);
                       setPage(0);
                     }}
                   >
-                    {{ "1W": "1주", "1M": "1개월", "1Y": "1년", "2Y": "최근 2년" }[preset]}
-                  </Button>
-                ))}
-                <label className="flex items-center gap-2 text-sm">데이터 구분<select className="rounded-md border bg-background px-3 py-2" value={evidenceFilter} onChange={e=>{setEvidenceFilter(e.target.value);setPage(0);}}><option value="all">전체</option><option value="reported">실제 보도</option><option value="demo">가상 시나리오</option></select></label>
+                    <option value="all">모든 유형</option>
+                    {availableTypes.map((type) => (
+                      <option key={type} value={type}>
+                        {getEventType(type).label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  데이터 구분
+                  <select
+                    className="rounded-md border bg-background px-3 py-2"
+                    value={evidenceFilter}
+                    onChange={(e) => {
+                      setEvidenceFilter(e.target.value);
+                      setPage(0);
+                    }}
+                  >
+                    <option value="all">전체</option>
+                    <option value="reported">실제 보도</option>
+                    <option value="demo">가상 시나리오</option>
+                  </select>
+                </label>
                 <div className="ml-auto flex gap-1">
                   {[
                     ["visible", "표시 중"],
@@ -225,92 +278,63 @@ export function EventManagement({
               <p role="status" className="text-sm text-primary">
                 {notice}
               </p>
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[640px] text-sm">
-                  <thead className="border-b text-left text-xs text-muted-foreground">
-                    <tr>
-                      <th className="py-3">기간</th>
-                      <th>주체·채널</th>
-                      <th>이벤트</th>
-                      <th className="text-right">관리</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filtered
-                      .slice(current * 10, current * 10 + 10)
-                      .map((event) => (
-                        <tr key={event.id} className="border-b last:border-0">
-                          <td className="py-4 pr-4 whitespace-nowrap tabular-nums">
-                            {event.startAt.slice(0, 10)}
-                            {event.endAt && (
-                              <p className="text-xs text-muted-foreground">
-                                ~ {event.endAt.slice(0, 10)}
-                              </p>
-                            )}
-                          </td>
-                          <td className="pr-4">
-                            <p className="font-medium">{event.operator}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {event.channel}
-                            </p>
-                          </td>
-                          <td className="py-3 pr-4">
-                            <p className="text-sm font-semibold leading-6">{event.title}</p>
-                            <EventProvenance event={event} compact />
-                            <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">
-                              {event.summary}
-                            </p>
-                            <div className="mt-2 flex flex-wrap gap-1">
-                              {event.types.map((type) => (
-                                <Badge key={type} variant="outline">
-                                  {getEventType(type).label}
-                                </Badge>
-                              ))}
-                              {hiddenIds.includes(event.id) && (
-                                <Badge variant="secondary">숨김</Badge>
-                              )}
-                            </div>
-                          </td>
-                          <td className="text-right">
-                            {event.operator.toLowerCase() === "air" && (
-                              <Button size="sm" variant="outline" onClick={()=>{setInitialKind("experiment");setAdding(true);}}>실험</Button>
-                            )}
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              aria-label={`${event.title} ${hiddenIds.includes(event.id) ? "다시 표시" : "숨기기"}`}
-                              onClick={() => {
-                                if (hiddenIds.includes(event.id)) {
-                                  restoreEvent(event.id);
-                                  setNotice("이벤트를 다시 표시했습니다.");
-                                } else {
-                                  hideEvents([event.id]);
-                                  setNotice(
-                                    "이벤트를 숨기고 영향 분석에서 제외했습니다.",
-                                  );
-                                }
-                              }}
-                            >
-                              {hiddenIds.includes(event.id) ? (
-                                <RotateCcw className="size-4" />
-                              ) : (
-                                <EyeOff className="size-4" />
-                              )}
-                              {hiddenIds.includes(event.id)
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {filtered
+                  .slice(current * 10, current * 10 + 10)
+                  .map((event) => (
+                    <article
+                      key={event.id}
+                      className="flex flex-col rounded-xl border bg-background p-4"
+                    >
+                      <div className="mb-3 flex flex-wrap items-center gap-1">
+                        {event.types.map((type) => (
+                          <Badge key={type} variant="outline">
+                            {getEventType(type).label}
+                          </Badge>
+                        ))}
+                      </div>
+                      <h2 className="line-clamp-2 text-sm font-semibold leading-relaxed">
+                        {event.title}
+                      </h2>
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        {event.operator} · {event.channel}
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {event.startAt.slice(0, 10)}
+                        {event.endAt ? ` ~ ${event.endAt.slice(0, 10)}` : ""}
+                      </p>
+                      <p className="my-3 line-clamp-3 text-xs leading-relaxed text-muted-foreground">
+                        {event.summary}
+                      </p>
+                      <EventProvenance event={event} compact />
+                      <div className="mt-auto flex justify-end pt-3">
+                        <RecordMenu
+                          label={event.title}
+                          actions={[
+                            {
+                              label: "상세보기",
+                              href: `/analysis?${new URLSearchParams({ workspace, start: range.start, end: range.end, events: event.id })}`,
+                            },
+                            {
+                              label: hiddenIds.includes(event.id)
                                 ? "다시 표시"
-                                : "숨기기"}
-                            </Button>
-                          </td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
-                {!filtered.length && (
-                  <p className="py-12 text-center text-sm text-muted-foreground">
-                    검색 조건에 해당하는 이벤트가 없습니다.
-                  </p>
-                )}
+                                : "숨기기",
+                              onClick: () =>
+                                hiddenIds.includes(event.id)
+                                  ? restoreEvent(event.id)
+                                  : hideEvents([event.id]),
+                            },
+                          ]}
+                        />
+                      </div>
+                    </article>
+                  ))}
               </div>
+              {!filtered.length && (
+                <p className="py-10 text-center text-sm text-muted-foreground">
+                  조건에 맞는 이벤트가 없습니다.
+                </p>
+              )}
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">
                   {filtered.length}건 · {current + 1} / {pages} 페이지
@@ -318,7 +342,7 @@ export function EventManagement({
                 <div className="flex gap-2">
                   <Button
                     size="sm"
-                    variant="outline"
+                    variant="ghost"
                     disabled={!current}
                     onClick={() => setPage(current - 1)}
                   >
@@ -326,7 +350,7 @@ export function EventManagement({
                   </Button>
                   <Button
                     size="sm"
-                    variant="outline"
+                    variant="ghost"
                     disabled={current === pages - 1}
                     onClick={() => setPage(current + 1)}
                   >
@@ -335,9 +359,8 @@ export function EventManagement({
                 </div>
               </div>
             </CardContent>
-          </Card>
+          </Card></PageEntry>
         )}
-        {!compact&&<RegisteredExperiments start={range.start} end={range.end} keyword={keyword}/>}
       </div>
     </Dialog>
   );

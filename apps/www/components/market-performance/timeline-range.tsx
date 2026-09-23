@@ -9,7 +9,8 @@ import {
   type ReactNode,
   type SetStateAction,
 } from "react";
-import { presetRange, type Range } from "./data";
+import { useSearchParams } from "next/navigation";
+import { presetRange, validateRange, MAX_DATE, type Range } from "./data";
 
 import type { RangeMode } from "./analysis-range-control";
 
@@ -32,6 +33,8 @@ export function TimelineRangeProvider({ children }: { children: ReactNode }) {
 }
 
 export function useTimelineRange(workspace: string) {
+  const params = useSearchParams();
+  const requested = { start: params.get("start") ?? "", end: params.get("end") ?? "" };
   const context = useContext(TimelineRangeContext);
   if (!context) throw new Error("TimelineRangeProvider is required");
   const { ranges, setRanges } = context;
@@ -56,6 +59,6 @@ export function useTimelineRange(workspace: string) {
     },
     [workspace, setRanges],
   );
-  const selection = ranges[workspace] ?? initialSelection;
+  const selection = ranges[workspace] ?? (validateRange(requested,new Date(Date.parse(MAX_DATE)+180*86400000).toISOString().slice(0,10)) ? initialSelection : {range: requested, mode: "custom" as const});
   return [selection.range, setRange, selection.mode, selectRange] as const;
 }

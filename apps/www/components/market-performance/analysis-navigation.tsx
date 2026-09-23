@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, type ComponentProps } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, type ComponentProps } from "react";
 
 import { analysisEntryStore } from "./analysis-entry";
 
@@ -49,39 +49,30 @@ export function AnalysisNavigationTracker() {
     document.addEventListener("click", onLink, true);
     return () => document.removeEventListener("click", onLink, true);
   }, []);
-  const pathname = usePathname();
-  const query = useSearchParams().toString();
-  const previous = useRef<{ pathname: string; url: string } | null>(null);
-  const activeReturn = useRef<ReturnEntry | null>(null);
   useEffect(() => {
-    const current = { pathname, url: `${pathname}${query ? `?${query}` : ""}` };
-    const stored = window.history.state?.[RETURN_KEY] as
-      | ReturnEntry
-      | undefined;
-    const prior = previous.current;
-    let entry = stored?.pathname === pathname ? stored : null;
-    if (!entry && prior?.pathname === pathname) entry = activeReturn.current;
-    if (!entry && prior && prior.pathname !== pathname) {
-      const expectedParent = pathname.endsWith("/analysis/market")
-        ? pathname.replace(/\/market$/, "")
-        : pathname.endsWith("/analysis")
-          ? pathname.replace(/analysis$/, "")
-          : pathname.includes("/events/")
-            ? prior.pathname
-            : null;
-      if (expectedParent === prior.pathname) {
-        entry = { pathname, from: prior.url };
-      }
-    }
-    activeReturn.current = entry;
-    previous.current = current;
-    if (stored !== entry) {
-      window.history.replaceState(
-        { ...window.history.state, [RETURN_KEY]: entry },
-        "",
-      );
-    }
-  }, [pathname, query]);
+    // Observe actual history writes, including router.push and same-path queries.
+    // Keep Next's original history implementation and its state fields intact.
+    const originalPush = window.history.pushState;
+    const originalReplace = window.history.replaceState;
+    const push: History["pushState"] = function (this: History, state, unused, url) {
+      const from = window.location.pathname + window.location.search;
+      const destination = new URL(url?.toString() ?? window.location.href, window.location.href);
+      const entry = destination.origin === window.location.origin
+        ? { pathname: destination.pathname, from }
+        : null;
+      originalPush.call(this, { ...state, marsViewState: {}, [RETURN_KEY]: entry }, unused, url);
+    };
+    const replace: History["replaceState"] = function (this: History, state, unused, url) {
+      const entry = window.history.state?.[RETURN_KEY] ?? null;
+      originalReplace.call(this, { ...state, marsViewState: state?.marsViewState ?? window.history.state?.marsViewState, [RETURN_KEY]: entry }, unused, url);
+    };
+    window.history.pushState = push;
+    window.history.replaceState = replace;
+    return () => {
+      if (window.history.pushState === push) window.history.pushState = originalPush;
+      if (window.history.replaceState === replace) window.history.replaceState = originalReplace;
+    };
+  }, []);
   return null;
 }
 

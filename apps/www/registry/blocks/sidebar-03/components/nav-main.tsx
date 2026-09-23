@@ -29,20 +29,22 @@ export function NavMain({
     items?: {
       title: string;
       url: string;
+      items?: { title: string; url: string }[];
     }[];
   }[];
 }) {
   const params = useSearchParams();
   const current = params.get("view") ?? "summary";
   const href = (view: string) => {
-    const next = new URLSearchParams(params.toString());
+    const next = new URLSearchParams();
+    next.set("workspace", params.get("workspace") ?? "air");
     if (view === "summary") next.delete("view");
     else next.set("view", view);
     return `/?${next.toString()}`;
   };
   return (
     <SidebarGroup>
-      <SidebarMenu>
+      <SidebarMenu className="gap-2">
         {items.map((item) => (
           <SidebarMenuItem key={item.title}>
             {!item.items?.length ? (
@@ -76,21 +78,57 @@ export function NavMain({
                   }
                 />
                 <CollapsiblePanel>
-                  <SidebarMenuSub>
+                  <SidebarMenuSub className="my-2 gap-2">
                     {item.items?.map((subItem) => (
                       <SidebarMenuSubItem key={subItem.title}>
-                        <SidebarMenuSubButton
-                          render={
-                            <Link
-                              href={href(subItem.url)}
-                              aria-current={
-                                current === subItem.url ? "page" : undefined
-                              }
+                        {subItem.items?.length ? (
+                          <Collapsible defaultOpen>
+                            <CollapsibleTrigger
+                              render={<SidebarMenuSubButton render={<button type="button" />} />}
+                              className="group/plans"
                             >
                               <span>{subItem.title}</span>
-                            </Link>
-                          }
-                        />
+                              <ChevronRight className="ml-auto size-3 transition-transform group-data-panel-open/plans:rotate-90" />
+                            </CollapsibleTrigger>
+                            <CollapsiblePanel>
+                              <SidebarMenuSub className="my-2 gap-2">
+                                {subItem.items.map((child) => (
+                                  <SidebarMenuSubItem key={child.url}>
+                                    <SidebarMenuSubButton
+                                      render={
+                                        <Link
+                                          href={href(child.url)}
+                                          aria-current={
+                                            current === child.url
+                                              ? "page"
+                                              : undefined
+                                          }
+                                        >
+                                          <span>{child.title}</span>
+                                        </Link>
+                                      }
+                                    />
+                                  </SidebarMenuSubItem>
+                                ))}
+                              </SidebarMenuSub>
+                            </CollapsiblePanel>
+                          </Collapsible>
+                        ) : (
+                          <>
+                            <SidebarMenuSubButton
+                              render={
+                                <Link
+                                  href={href(subItem.url)}
+                                  aria-current={
+                                    current === subItem.url ? "page" : undefined
+                                  }
+                                >
+                                  <span>{subItem.title}</span>
+                                </Link>
+                              }
+                            />
+                          </>
+                        )}
                       </SidebarMenuSubItem>
                     ))}
                   </SidebarMenuSub>

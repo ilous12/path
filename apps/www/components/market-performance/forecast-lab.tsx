@@ -1,5 +1,5 @@
 "use client";
-import { DataBasis } from "./data-basis";
+import { forecastChartMargins } from "./forecast-chart-period";
 import { useState } from "react";
 import {
   Line,
@@ -207,7 +207,7 @@ function Lab({
         <>
           <ChartContainer config={config} className="h-72 w-full aspect-auto">
             <LineChart
-              data={rows}
+              data={forecastChartMargins(rows, "date", metric, "observed", channels)}
               margin={{ left: 12, right: 24, top: 20, bottom: 8 }}
             >
               <CartesianGrid vertical={false} />
@@ -288,7 +288,7 @@ function Lab({
           </div>
         </>
       )}
-      <DataBasis label="합성 데이터 · 산출 기준" details="합성 실적에 기반한 통계 시뮬레이션입니다. Prophet·SARIMAX·XGBoost는 근사 계산이며 학습된 모델 결과가 아닙니다. 정책 인과효과·신뢰구간을 의미하지 않으며 등록된 예측은 변경하지 않습니다." />
+      
     </section>
   );
 }

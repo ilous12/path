@@ -1,4 +1,5 @@
 "use client";
+import { TimelineMarkerIcon } from "./timeline-marker-icon";
 import { useRouter } from "next/navigation";
 import bubbleStyles from "./annotation.module.css";
 import { AnalysisMenu } from "./analysis-menu";
@@ -45,7 +46,7 @@ const initial = () => ({
 export function AlternativeManager({
   eventId,
   seed,
-  label = "실험 관리",
+  label = "정책 관리",
   defaultStart,
   embedded = false,
   source,
@@ -100,13 +101,13 @@ export function AlternativeManager({
       {" "}
       {embedded ? (
         <p className="text-sm text-muted-foreground">
-          AIR 실험 · 브라우저 로컬 저장 · 실제 정책 변경 없음
+          AIR 정책 · 브라우저 로컬 저장 · 실제 정책 변경 없음
         </p>
       ) : (
         <DialogHeader>
-          <DialogTitle>AIR 실험실</DialogTitle>
+          <DialogTitle>AIR 정책실</DialogTitle>
           <DialogDescription>
-            변경하고 싶은 내용과 기간으로 실험을 만듭니다. 브라우저 로컬 저장 ·
+            변경하고 싶은 내용과 기간으로 정책을 만듭니다. 브라우저 로컬 저장 ·
             실제 정책 변경 없음.
           </DialogDescription>
         </DialogHeader>
@@ -133,16 +134,16 @@ export function AlternativeManager({
                   history: [
                     {
                       at: new Date().toISOString(),
-                      action: parentId ? "가정 복제·수정" : "실험 등록",
+                      action: parentId ? "가정 복제·수정" : "정책 등록",
                     },
                   ],
                 }),
-              "실험을 등록했습니다. 타임라인에서 선택해 적용 구간을 확인하세요.",
+              "정책을 등록했습니다. 타임라인에서 선택해 적용 구간을 확인하세요.",
             );
           }}
         >
           <h3 className="font-semibold">
-            {parentId ? "복제하여 새 버전 등록" : "새 실험 등록"}
+            {parentId ? "복제하여 새 버전 등록" : "새 정책 등록"}
           </h3>
           <label className="grid gap-2 text-sm font-medium">
             무엇을 바꿔볼까요?
@@ -264,7 +265,7 @@ export function AlternativeManager({
           )}
           <Button type="submit" disabled={Boolean(invalid)}>
             <Plus className="size-4" />
-            실험 등록
+            정책 등록
           </Button>
           <Button
             type="submit"
@@ -309,7 +310,7 @@ export function AlternativeEventList({ events }: { events: MarketEvent[] }) {
   return (
     <div className="space-y-3 border-t p-4">
       <h3 className="font-semibold text-sm">
-        AIR 이벤트 하단 · 실험 시뮬레이션
+        AIR 이벤트 하단 · 정책 시뮬레이션
       </h3>
       <p className="text-xs text-muted-foreground">
         초안 → 적용 → 점선 예측 비교. 적용은 실제 정책 실행이 아닙니다.
@@ -321,7 +322,7 @@ export function AlternativeEventList({ events }: { events: MarketEvent[] }) {
               <p className="text-sm">
                 {e.startAt.slice(0, 10)} · {e.title}
               </p>
-              <AlternativeManager eventId={e.id} label="실험 추가·관리" />
+              <AlternativeManager eventId={e.id} label="캠페인 추가·관리" />
             </div>
             <div className="mt-2 flex flex-wrap gap-2">
               {store.alternatives
@@ -343,7 +344,7 @@ export function AlternativeEventList({ events }: { events: MarketEvent[] }) {
       {!own.length && (
         <p className="text-xs text-muted-foreground">
           현재 조회 범위에 AIR 이벤트가 없습니다. 이벤트 페이지에서 AIR 이벤트를
-          선택해 실험을 등록하세요.
+          선택해 정책을 등록하세요.
         </p>
       )}
     </div>
@@ -354,6 +355,8 @@ export function AlternativeLaneMarker({
   count,
   periodLabel,
   onHover,
+  highlight = false,
+  scopeLabel,
   experiments,
   open,
   onOpenChange,
@@ -361,6 +364,8 @@ export function AlternativeLaneMarker({
   viewBox?: { x?: number };
   count: number;
   experiments: PolicyAlternative[];
+  highlight?: boolean;
+  scopeLabel?: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   periodLabel: string;
@@ -402,12 +407,12 @@ export function AlternativeLaneMarker({
         onBlur={() => onHover(false)}
         onClick={() => {markSeen(); router.push(detailsHref);}}
         type="button"
-        aria-label={`실험 ${count} 예측 미리보기 · ${periodLabel}`}
-        className="relative flex size-[21px] items-center justify-center rounded-md bg-yellow-300 text-[10px] font-bold text-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+        aria-label={`${scopeLabel ? scopeLabel + " · " : ""}정책 ${count} 예측 미리보기 · ${periodLabel}`}
+        className={`relative flex size-[21px] items-center justify-center rounded-md bg-yellow-300 text-[10px] font-bold text-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ${highlight ? "ring-2 ring-amber-400 ring-offset-2 ring-offset-background shadow-[0_0_12px_#fbbf24]" : ""}`}
       >
-        <FlaskConical aria-hidden="true" className="size-3" />
-        {unseenIds && <span aria-label="새 실험" className="absolute -left-2 -top-2 flex size-3.5 items-center justify-center rounded-full bg-primary text-[8px] font-bold text-primary-foreground">N</span>}
-        {count>=2&&<span aria-hidden="true" className="absolute -right-1.5 -top-1.5 flex min-w-4 h-4 items-center justify-center rounded-full border border-foreground bg-white px-0.5 text-[10px] font-bold text-black shadow-md shadow-black/40">{count>100?"+":count}</span>}
+        <TimelineMarkerIcon kind="experiment"/>
+        {unseenIds && <span aria-label="새 정책" className="absolute -left-2 -top-2 flex size-3.5 items-center justify-center rounded-full bg-primary text-[8px] font-bold text-primary-foreground">N</span>}
+        {count>1&&<span aria-hidden="true" className="absolute -right-1.5 -top-1.5 flex min-w-4 h-4 items-center justify-center rounded-full border border-foreground bg-white px-0.5 text-[10px] font-bold text-black shadow-md shadow-black/40">{count}</span>}
       </PopoverTrigger>
       <PopoverPortal>
       <PopoverPositioner side="top" align="start" sideOffset={10} collisionAvoidance={{side:"none",align:"shift",fallbackAxisSide:"none"}} className="z-50">
@@ -418,14 +423,14 @@ export function AlternativeLaneMarker({
         <PopoverArrow className="data-[side=top]:-bottom-2 data-[side=top]:rotate-180" />
         <div className="max-h-(--available-height) overflow-y-auto overscroll-contain rounded-lg">
         <div className="flex items-center justify-between border-b bg-muted/30 px-3.5 py-2.5">
-          <h3 className="text-[10px] font-semibold">실험 정보</h3>
+          <h3 className="text-[10px] font-semibold">{scopeLabel ? `${scopeLabel} · 정책` : "정책 정보"}</h3>
           <span className="text-[10px] tabular-nums text-muted-foreground">{count}개</span>
         </div>
         <div className="divide-y">
           {experiments.map(a => <article key={a.id} className="space-y-2.5 border-b px-3.5 py-3 last:border-0">
             <div className="flex items-start justify-between gap-2">
               <h4 className="min-w-0 break-words pt-1 text-[10px] font-semibold leading-[1.5]">{a.title}</h4>
-              <div className="shrink-0"><AnalysisMenu onOpenChange={next=>{setMenuOpen(next);onOpenChange(next);onHover(next);}} label={`${a.title} 실험 상세 메뉴`} href={`/analysis?experiment=${encodeURIComponent(a.id)}&workspace=${encodeURIComponent(a.workspace ?? "air")}`} /></div>
+              <div className="shrink-0"><AnalysisMenu onOpenChange={next=>{setMenuOpen(next);onOpenChange(next);onHover(next);}} label={`${a.title} 정책 상세 메뉴`} href={`/analysis?experiment=${encodeURIComponent(a.id)}&workspace=${encodeURIComponent(a.workspace ?? "air")}`} /></div>
             </div>
             <dl className="grid grid-cols-[2rem_1fr] gap-x-2 gap-y-1 rounded-md bg-muted/40 px-2.5 py-2 text-[10px] leading-[1.5] tabular-nums">
               <dt className="text-muted-foreground">적용</dt><dd>{a.start} ~ {dayShift(a.start,(a.applyDays??a.days)-1)}</dd>
@@ -451,13 +456,13 @@ export function RegisteredExperiments({start,end,keyword=''}:{start:string;end:s
  function run(fn:()=>void,message:string){try{fn();setNotice(message);}catch(error){setNotice(error instanceof Error?error.message:'변경하지 못했습니다.');}}
  return <>        <section id="registered-experiments" className="scroll-mt-6 space-y-4 rounded-xl border bg-card p-5 sm:p-6">
           <h2 className="font-semibold">
-            등록된 실험 · {rows.length}개
+            등록된 정책 · {rows.length}개
           </h2>
           <p className="text-xs text-muted-foreground">
-            같은 그룹명을 지정하면 실험들을 하나로 묶어 관리합니다. 그룹명은 직접 입력하거나 기존 그룹에서 선택하세요. 효과는 합산하지 않습니다.
+            같은 그룹명을 지정하면 정책들을 하나로 묶어 관리합니다. 그룹명은 직접 입력하거나 기존 그룹에서 선택하세요. 효과는 합산하지 않습니다.
           </p>
           <datalist id="experiment-group-names">{groupNames.map(name=><option key={name} value={name}/>)}</datalist>
-          {groups.map(groupName=><details key={groupName} open className="space-y-4 rounded-xl border p-4"><summary className="cursor-pointer font-semibold">{groupName||"미분류 실험"} <Badge variant="secondary">{rows.filter(a=>(a.groupName??"")===groupName).length}개</Badge></summary><div className="grid items-start gap-4 2xl:grid-cols-2">
+          {groups.map(groupName=><details key={groupName} open className="space-y-4 rounded-xl border p-4"><summary className="cursor-pointer font-semibold">{groupName||"미분류 정책"} {rows.filter(a=>(a.groupName??"")===groupName).length > 1 && <Badge variant="secondary">{rows.filter(a=>(a.groupName??"")===groupName).length}개</Badge>}</summary><div className="grid items-start gap-4 2xl:grid-cols-2">
           {rows.filter(a=>(a.groupName??"")===groupName).map((a) => {
             const p = projectAlternative(a);
             return (
@@ -475,7 +480,7 @@ export function RegisteredExperiments({start,end,keyword=''}:{start:string;end:s
                   </Badge>
                 </div>
                 <h4 className="font-semibold">{a.title}</h4>
-                <label className="block space-y-1 text-sm"><span>실험 그룹</span><Input key={`${a.id}-${a.groupName??""}`} aria-label={`${a.title} 실험 그룹`} list="experiment-group-names" defaultValue={a.groupName??""} maxLength={80} placeholder="그룹명 입력 또는 선택 · 비우면 그룹 해제" onBlur={e=>{if(e.currentTarget.value.trim()!==(a.groupName??""))run(()=>store.setGroup(a.id,e.currentTarget.value),"실험 그룹을 저장했습니다.");}} onKeyDown={e=>{if(e.key==="Enter")e.currentTarget.blur();}}/></label>
+                <AnalysisMenu href={`/analysis?workspace=${a.workspace??"air"}&policy=${encodeURIComponent(a.id)}`} label="캠페인 구성" />
                 <p className="whitespace-pre-wrap text-sm text-muted-foreground">
                   {a.description}
                 </p>
@@ -504,14 +509,14 @@ export function RegisteredExperiments({start,end,keyword=''}:{start:string;end:s
                             a.status === "applied" ? "paused" : "applied",
                           ),
                         a.status === "applied"
-                          ? "실험 적용 상태를 해제했습니다."
-                          : "실험을 적용 상태로 변경했습니다. 타임라인은 강조만 표시합니다.",
+                          ? "정책 적용 상태를 해제했습니다."
+                          : "정책을 적용 상태로 변경했습니다. 타임라인은 강조만 표시합니다.",
                       )
                     }
                   >
                     {a.status === "applied" ? "적용 해제" : "적용 · 시뮬레이션"}
                   </Button>
-                  <AlternativeManager source={a} label="복제·수정"/>
+                  
                 </div>
                 <details className="text-xs text-muted-foreground">
                   <summary className="cursor-pointer">관리 이력</summary>
@@ -526,7 +531,7 @@ export function RegisteredExperiments({start,end,keyword=''}:{start:string;end:s
           })}</div></details>)}
           {!rows.length && (
             <p className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground">
-              등록된 실험이 없습니다. 직접 작성하거나 요건 분석로 가정을
+              등록된 정책이 없습니다. 직접 작성하거나 요건 분석로 가정을
               구성하세요.
             </p>
           )}

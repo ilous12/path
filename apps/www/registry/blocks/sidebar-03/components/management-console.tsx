@@ -1,4 +1,13 @@
 "use client";
+import { WorkspaceHeader } from "@/components/market-performance/workspace-header";
+import { PageEntry } from "@/components/market-performance/page-entry";
+import { RecordMenu } from "@/components/market-performance/record-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { useState, useEffect, useRef } from "react";
 import { Tags, LoaderCircle } from "lucide-react";
 import {
@@ -31,6 +40,7 @@ import {
 } from "@/components/market-performance/analysis-preferences";
 import { useAnalysisPreferences } from "@/components/market-performance/use-analysis-preferences";
 
+import { SalesMetricSettings } from "@/components/market-performance/sales-metric-settings";
 import { TurningPointPrompt } from "@/components/market-performance/turning-point-prompt";
 import { SourceManager } from "@/components/market-performance/source-manager";
 
@@ -86,12 +96,17 @@ export function ManagementConsole() {
     }, 800);
   };
   const [typePage, setTypePage] = useState(0);
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [typeDetail, setTypeDetail] = useState<string | null>(null);
   const [typeQuery, setTypeQuery] = useState("");
-  const filteredTypes = draft.typeDefinitions.filter((type) =>
-    [type.label, type.description, type.origin === "AI" ? "AI 신규" : ""]
-      .join(" ")
-      .toLocaleLowerCase()
-      .includes(typeQuery.trim().toLocaleLowerCase()),
+  const filteredTypes = draft.typeDefinitions.filter(
+    (type) =>
+      (typeFilter === "all" ||
+        Boolean(draft.types[type.id]) === (typeFilter === "enabled")) &&
+      [type.label, type.description, type.origin === "AI" ? "AI 신규" : ""]
+        .join(" ")
+        .toLocaleLowerCase()
+        .includes(typeQuery.trim().toLocaleLowerCase()),
   );
   const typePages = Math.max(1, Math.ceil(filteredTypes.length / 6));
   const currentTypePage = Math.min(typePage, typePages - 1);
@@ -109,7 +124,7 @@ export function ManagementConsole() {
         if (!busy) requestAction("save");
       }}
     >
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <WorkspaceHeader>
         <div>
           <h1 className="text-xl font-semibold">설정</h1>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -130,7 +145,8 @@ export function ManagementConsole() {
             설정 저장
           </Button>
         </div>
-      </div>
+      </WorkspaceHeader>
+      <PageEntry>
       <div className="grid gap-4 sm:grid-cols-3">
         {[
           [
@@ -167,6 +183,19 @@ export function ManagementConsole() {
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-1 flex-col gap-3">
+              <select
+                aria-label="유형 참조 필터"
+                className="h-9 rounded-md border bg-background px-2 text-sm"
+                value={typeFilter}
+                onChange={(e) => {
+                  setTypeFilter(e.target.value);
+                  setTypePage(0);
+                }}
+              >
+                <option value="all">모든 참조 상태</option>
+                <option value="enabled">참조 중</option>
+                <option value="disabled">참조 제외</option>
+              </select>
               <Input
                 type="search"
                 aria-label="참조 이벤트 유형 검색"
@@ -184,11 +213,11 @@ export function ManagementConsole() {
                 {filteredTypes
                   .slice(currentTypePage * 6, currentTypePage * 6 + 6)
                   .map(({ id, ...type }) => (
-                    <label
+                    <div
                       key={id}
-                      className="flex flex-1 cursor-pointer items-center justify-between gap-4 rounded-lg border p-3"
+                      className="grid min-w-0 grid-cols-[minmax(0,1fr)_36px_32px] items-center gap-4 rounded-lg border p-3"
                     >
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-sm font-medium">
                           {type.label}
                           {type.origin === "AI" && (
@@ -197,7 +226,7 @@ export function ManagementConsole() {
                             </Badge>
                           )}
                         </p>
-                        <p className="mt-1 text-xs text-muted-foreground">
+                        <p className="mt-1 line-clamp-2 break-words text-xs text-muted-foreground">
                           {type.description}
                         </p>
                       </div>
@@ -211,7 +240,27 @@ export function ManagementConsole() {
                           })
                         }
                       />
-                    </label>
+                      <RecordMenu
+                        label={type.label}
+                        actions={[
+                          {
+                            label: "상세보기",
+                            onClick: () => setTypeDetail(id),
+                          },
+                          {
+                            label: draft.types[id] ? "참조 제외" : "참조 사용",
+                            onClick: () =>
+                              setDraft({
+                                ...draft,
+                                types: {
+                                  ...draft.types,
+                                  [id]: !draft.types[id],
+                                },
+                              }),
+                          },
+                        ]}
+                      />
+                    </div>
                   ))}
                 {!filteredTypes.length && (
                   <p className="py-8 text-center text-sm text-muted-foreground">
@@ -333,6 +382,7 @@ export function ManagementConsole() {
           </fieldset>
         </CardContent>
       </Card>
+      <SalesMetricSettings workspace={workspace}/>
       <TurningPointPrompt
         value={draft.turningPointPrompt}
         onChange={(turningPointPrompt) =>
@@ -401,6 +451,26 @@ export function ManagementConsole() {
         설정은 현재 브라우저에 워크스페이스별로 저장됩니다. 원본 이벤트와
         회선·매출 실적은 변경하지 않습니다.
       </p>
+      <Dialog
+        open={typeDetail !== null}
+        onOpenChange={(open) => {
+          if (!open) setTypeDetail(null);
+        }}
+      >
+        <DialogContent className="max-w-md">
+          <DialogTitle>
+            {draft.typeDefinitions.find((t) => t.id === typeDetail)?.label}
+          </DialogTitle>
+          <DialogDescription>
+            {
+              draft.typeDefinitions.find((t) => t.id === typeDetail)
+                ?.description
+            }
+          </DialogDescription>
+          <p className="text-xs text-muted-foreground">유형 ID: {typeDetail}</p>
+        </DialogContent>
+      </Dialog>
+      </PageEntry>
     </form>
   );
 }

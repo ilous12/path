@@ -1,6 +1,7 @@
 "use client";
+import { useSearchParams } from "next/navigation";
 
-import { Database, Settings2, SquareTerminal } from "lucide-react";
+import { Settings2, SquareTerminal, CalendarDays, FlaskConical, Network, Database, Tags } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -9,31 +10,27 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { NavMain } from "@/registry/blocks/sidebar-03/components/nav-main";
-import { NavProjects } from "@/registry/blocks/sidebar-03/components/nav-projects";
 import { NavUser } from "@/registry/blocks/sidebar-03/components/nav-user";
 import { WorkspaceSwitcher } from "@/registry/blocks/sidebar-03/components/workspace-switcher";
 
+const dataMenu = { title: "데이터", url: "data", icon: Database };
+
 const data = {
   navMain: [
-    {
-      icon: SquareTerminal,
-      isActive: true,
-      items: [
-        { title: "타임라인", url: "summary" },
-        { title: "이벤트", url: "events" },
-      ],
-      title: "대시보드",
-      url: "summary",
-    },
-    {
-      icon: Settings2,
-      title: "관리",
-      url: "admin",
-      isActive: true,
-      items: [{ title: "설정", url: "admin" }],
-    },
+    { title: "비지니스", url: "summary", icon: SquareTerminal, isActive: true,
+      items: [{title: "타임라인", url: "summary"}, {title: "실적", url: "kpi"}] },
+    { title: "채널", url: "channels", icon: Network, isActive: true,
+      items: [{title: "스펙트럼", url: "channels"}, {title: "검색", url: "channels-search"}] },
+    { title: "요금제", url: "plans", icon: Tags, isActive: true,
+      items: [{title:"스펙트럼",url:"plans"},{title:"경쟁력",url:"plans-competitiveness"},{title:"검색",url:"plans-search"}] },
+    { title: "업계 동향", url: "events-search", icon: CalendarDays, isActive: true,
+      items: [{title:"검색",url:"events-search"}] },
+    { title: "캠페인", url: "experiments-search", icon: FlaskConical, isActive: true,
+      items: [{title:"검색",url:"experiments-search"}] },
+    dataMenu,
+    { title: "관리", url: "admin", icon: Settings2, isActive: true,
+      items: [{title: "설정", url: "admin"}, {title: "현재 설정", url: "settings-current"}] },
   ],
-  projects: [{ icon: Database, name: "데이터", url: "data" }],
 
   user: {
     avatarUrl: "#",
@@ -44,14 +41,14 @@ const data = {
 };
 
 export function AppSidebar() {
+  const isHome = useSearchParams().get("workspace") === "home";
   return (
     <Sidebar>
       <SidebarHeader>
         <WorkspaceSwitcher />
       </SidebarHeader>
-      <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
+      <SidebarContent className="no-scrollbar">
+        <NavMain items={isHome ? [{title:"타임라인",url:"summary",icon:SquareTerminal},{title:"실적",url:"kpi",icon:CalendarDays},dataMenu] : data.navMain} />
       </SidebarContent>
       <SidebarSeparator className="mx-0" />
       <SidebarFooter>

@@ -1,4 +1,5 @@
 "use client";
+import { forecastChartMargins } from "./forecast-chart-period";
 import { useLayoutEffect, useRef, useState } from "react";
 import {
   CartesianGrid,
@@ -204,7 +205,7 @@ export function PolicySimulator({
       <div
         className="flex h-full flex-col gap-3"
         role="group"
-        aria-label="정책 실험 선택"
+        aria-label="정책 선택"
       >
         {alternatives.slice(0, 3).map((item, index) => (
           <div key={item.title} className="relative flex flex-1">
@@ -219,7 +220,7 @@ export function PolicySimulator({
               className={`w-full flex-1 rounded-xl border p-4 pr-12 text-left transition-colors focus-visible:outline-2 focus-visible:outline-primary ${selected === index ? "border-primary bg-primary/5 ring-1 ring-primary" : "bg-card hover:bg-muted/50"}`}
             >
               <div className="flex justify-between text-xs text-muted-foreground">
-                <span>실험 0{index + 1}</span>
+                <span>정책 0{index + 1}</span>
                 <span>{selected === index ? "선택됨" : item.tag}</span>
               </div>
               <h3 className="mt-2 font-semibold">{item.title}</h3>
@@ -252,7 +253,7 @@ export function PolicySimulator({
                       <Button
                         variant="ghost"
                         size="icon-sm"
-                        aria-label={`실험 ${index + 1} 상세 메뉴`}
+                        aria-label={`정책 ${index + 1} 상세 메뉴`}
                       />
                     }
                   >
@@ -318,7 +319,7 @@ export function PolicySimulator({
               <p className="mt-3 text-xs leading-5 text-muted-foreground">
                 {recommendation.reason}
                 <span className="mt-2 block">
-                  알고리즘 선택은 실험별로 유지됩니다. 실험 간 전망 차이에는
+                  알고리즘 선택은 정책별로 유지됩니다. 정책 간 전망 차이에는
                   모델 차이와 정책 효과 가정이 함께 포함됩니다.
                 </span>
               </p>
@@ -353,7 +354,7 @@ export function PolicySimulator({
               <span className="text-muted-foreground">
                 회색 점선: 현행 유지
               </span>
-              <span className="text-primary">강조 점선: 선택 실험</span>
+              <span className="text-primary">강조 점선: 선택 정책</span>
             </div>
             <ChartContainer
               className="h-72 w-full"
@@ -363,11 +364,11 @@ export function PolicySimulator({
                   label: "현행 유지",
                   color: "var(--muted-foreground)",
                 },
-                predicted: { label: "선택 실험", color: "var(--primary)" },
+                predicted: { label: "선택 정책", color: "var(--primary)" },
               }}
             >
               <LineChart
-                data={data}
+                data={forecastChartMargins(data, "date", metric, "actual", channels)}
                 margin={{ left: 12, right: 16, top: 20, bottom: 4 }}
               >
                 <CartesianGrid vertical={false} strokeDasharray="3 4" />
@@ -404,7 +405,7 @@ export function PolicySimulator({
                             ? "관측 실적"
                             : name === "current"
                               ? "현행 유지"
-                              : "선택 실험"}
+                              : "선택 정책"}
                           : {format(Number(value))}
                         </span>
                       )}
@@ -457,7 +458,7 @@ export function PolicySimulator({
             </div>
             <p className="text-xs leading-6 text-muted-foreground">
               {FORECAST_METHODS[method].label} 방식으로 계산한 기준 예측과 정책
-              적용 전망을 비교합니다. 정책 효과는 선택 실험의 가정이며 인과
+              적용 전망을 비교합니다. 정책 효과는 선택 정책의 가정이며 인과
               효과를 추정한 값은 아닙니다. 현행 유지 선택 시 두 선은 겹칩니다.
               음수 회선·해지는 0으로, 해지는 회선 이하로 제한합니다.
             </p>

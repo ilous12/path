@@ -33,6 +33,7 @@ export function registrationScenario(
   if (index === 0)
     return {
       ...base,
+      salesTerms: undefined,
       pricePct: 0,
       demandPct: 0,
       cancellationPct: 0,

@@ -58,7 +58,7 @@ export function DecisionOverview({
       note: "실제 보도·가상 시나리오·수동 등록 포함",
     },
     {
-      label: "검토할 실험 초안",
+      label: "검토할 정책 초안",
       value: drafts.length,
       note: "선택 기간과 겹치는 초안",
     },
@@ -106,9 +106,9 @@ export function MarketReview({
               선택 기간의 최신 보도입니다. 중요도·영향 순위는 아닙니다.
             </p>
           </div>
-          <Badge variant="secondary" className="shrink-0">
+          {reported.length !== 1 && <Badge variant="secondary" className="shrink-0">
             {reported.length}건
-          </Badge>
+          </Badge>}
         </div>
         <div className="divide-y px-5 sm:px-6">
           {reported.slice(0, 4).map((event) => (

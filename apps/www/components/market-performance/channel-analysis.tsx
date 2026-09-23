@@ -1,11 +1,13 @@
 "use client";
-import { DataBasis } from "./data-basis";
+import { AIChatTrigger } from "@/registry/blocks/sidebar-03/components/ai-chat";
+import { WorkspaceHeader } from "./workspace-header";
 import { ChartMixedAxes } from "@/registry/blocks/sidebar-03/components/chart-mixed-axes";
 import { RefreshingAnalysis } from "./refreshing-analysis";
 import { ForecastLab } from "./forecast-lab";
 import { buildChannels } from "./channel-data";
 import { useState } from "react";
 import Link from "next/link";
+import { AnalysisBackLink } from "./analysis-navigation";
 import { useSearchParams } from "next/navigation";
 import { AnalysisRangeControl, type RangeMode } from "./analysis-range-control";
 import { presetRange, validateRange, type Range } from "./data";
@@ -21,20 +23,31 @@ export function ChannelAnalysis() {
     validateRange(requested) ? presetRange("1M") : requested,
   );
   const [refreshRevision, setRefreshRevision] = useState(0);
-  const [mode, setMode] = useState<RangeMode>("custom");
+  const [mode, setMode] = useState<RangeMode | undefined>(undefined);
   const report = scopeAnalysis(range, [channel]);
   const channelTotals = buildChannels(range);
   const contribution = channelTotals.find((c) => c.name === channel);
   const totalLines = channelTotals.reduce((s, c) => s + c.total, 0);
+  const periodControl = (
+<AnalysisRangeControl
+            range={range}
+            mode={mode}
+            onChange={(r, m) => {
+              setRange(r);
+              setMode(m);
+              setRefreshRevision(value=>value+1);
+            }}
+          />
+  );
   return (
-    <main className="mx-auto max-w-6xl space-y-6 p-5 sm:p-8">
-        <Link
-          href={`/?workspace=${workspace}`}
+    <main className="mars-detail-page space-y-5">
+        <div className="flex items-center justify-between gap-3"><AnalysisBackLink
+          href={`/?workspace=${workspace}&view=channels`}
           className="text-sm text-muted-foreground"
         >
-          ← 가입 흐름과 채널 기여
-        </Link>
-        <header className="flex flex-wrap items-start justify-between gap-4">
+          ← 이전 화면
+        </AnalysisBackLink><AIChatTrigger /></div>
+        <WorkspaceHeader>
           <div>
             
             <h1 className="mt-2 text-2xl font-semibold">
@@ -44,17 +57,8 @@ export function ChannelAnalysis() {
               {range.start} ~ {range.end}
             </p>
           </div>
-          <AnalysisRangeControl
-            range={range}
-            mode={mode}
-            onChange={(r, m) => {
-              setRange(r);
-              setMode(m);
-              setRefreshRevision(value=>value+1);
-            }}
-          />
-          <DataBasis label="합성 데이터" details="채널 실적은 합성 데이터에 따른 배분값입니다. 실제 운영 실적이 아닙니다." />
-        </header>
+          
+        </WorkspaceHeader>
         <RefreshingAnalysis refreshKey={`${workspace}:${channel}:${refreshRevision}`}>
         <section
           aria-label="채널 구조와 효율"
@@ -114,19 +118,18 @@ export function ChannelAnalysis() {
             {channel} · 시장·실적 타임라인
           </h2>
           <p className="text-xs text-muted-foreground">
-            경쟁사·기타 시장 변화와 채널 적용 이벤트를 표시합니다. 실험은 이
+            경쟁사·기타 시장 변화와 채널 적용 이벤트를 표시합니다. 정책은 이
             채널 또는 전체 채널 대상만 표시합니다.
           </p>
           {report.rows.length ? (
             <ChartMixedAxes
               onRangeChange={(next) => {setRange(next);setMode("custom");}}
               channel={channel}
+              periodControl={periodControl}
               range={range}
             />
           ) : (
-            <p className="rounded-xl border p-8 text-center text-muted-foreground">
-              연결된 채널 데이터가 없습니다.
-            </p>
+            <div className="space-y-3 rounded-xl border p-4">{periodControl}<p className="p-4 text-center text-muted-foreground">연결된 채널 데이터가 없습니다.</p></div>
           )}
         </section>
         <ForecastLab

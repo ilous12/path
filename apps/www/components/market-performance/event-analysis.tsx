@@ -1,8 +1,11 @@
 "use client";
+import { AIChatTrigger } from "@/registry/blocks/sidebar-03/components/ai-chat";
+import { WorkspaceHeader } from "./workspace-header";
 import { RefreshingAnalysis } from "./refreshing-analysis";
 import { ForecastLab } from "./forecast-lab";
 
 import Link from "next/link";
+import { AnalysisBackLink } from "./analysis-navigation";
 import { useSearchParams } from "next/navigation";
 import { useEventCatalog } from "./event-catalog";
 import { useAnalysisExclusions } from "./use-analysis-exclusions";
@@ -54,7 +57,7 @@ export function EventAnalysis() {
   if (!anchor)
     return (
       <main className="mx-auto max-w-5xl space-y-4 p-8">
-        <Link href={back}>← 타임라인</Link>
+        <div className="flex items-center justify-between gap-3"><AnalysisBackLink href={back}>← 이전 화면</AnalysisBackLink><AIChatTrigger /></div>
         <h1 className="text-2xl font-semibold">{title}</h1>
         <p>
           선택한 항목을 찾을 수 없거나 숨김 처리되었습니다. 타임라인에서 다시
@@ -109,7 +112,7 @@ export function EventAnalysis() {
           ],
           [
             "다음 판단",
-            "유지·확대·수정·중단 후보를 예산·마진 제약과 비교한 뒤 사용자가 실험을 선택합니다.",
+            "유지·확대·수정·중단 후보를 예산·마진 제약과 비교한 뒤 사용자가 정책을 선택합니다.",
           ],
         ]
       : [
@@ -127,11 +130,11 @@ export function EventAnalysis() {
           ],
         ];
   return (
-    <main className="mx-auto max-w-6xl space-y-6 p-5 sm:p-8">
-      <Link href={back} className="text-sm text-primary">
-        ← 타임라인
-      </Link>
-      <header className="space-y-2">
+    <main className="mars-detail-page space-y-5">
+      <div className="flex items-center justify-between gap-3"><AnalysisBackLink href={back} className="text-sm text-primary">
+        ← 이전 화면
+      </AnalysisBackLink><AIChatTrigger /></div>
+      <WorkspaceHeader><div className="space-y-2">
 
         <h1 className="text-2xl font-semibold">{title}</h1>
         <p className="text-sm text-muted-foreground">
@@ -139,7 +142,7 @@ export function EventAnalysis() {
           {selected.length + points.length}건 · 관측 사실과 검증할 가설을
           구분합니다.
         </p>
-      </header>
+      </div></WorkspaceHeader>
       <RefreshingAnalysis refreshKey={q.toString()}>
       {points.map((p) => (
         <section

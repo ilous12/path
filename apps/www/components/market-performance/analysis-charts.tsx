@@ -1,8 +1,8 @@
 "use client";
+import { withPeriodMargins, chartObservationRange } from "./chart-period";
 import {
-  Bar,
   CartesianGrid,
-  ComposedChart,
+  LineChart,
   Line,
   XAxis,
   YAxis,
@@ -21,7 +21,7 @@ export function AnalysisChart({
   range: Range;
   money?: boolean;
 }) {
-  const data = buildPerformance(range);
+  const data = buildPerformance(chartObservationRange(range), "day");
   const config: Record<string, { label: string; color: string }> = money
     ? {
         revenue: { label: "매출", color: "var(--chart-1)" },
@@ -45,8 +45,8 @@ export function AnalysisChart({
         ))}
       </div>
       <ChartContainer className="h-56 w-full" config={config}>
-        <ComposedChart
-          data={data}
+        <LineChart
+          data={withPeriodMargins(data, "key", range)}
           margin={{ top: 8, left: 0, right: 8, bottom: 4 }}
         >
           <CartesianGrid vertical={false} strokeDasharray="3 4" />
@@ -87,40 +87,8 @@ export function AnalysisChart({
               />
             }
           />
-          {money ? (
-            <>
-              <Line
-                dataKey="revenue"
-                stroke="var(--color-revenue)"
-                strokeWidth={2}
-                dot={false}
-                type="monotone"
-              />
-              <Line
-                dataKey="netProfit"
-                stroke="var(--color-netProfit)"
-                strokeWidth={2}
-                dot={false}
-                type="monotone"
-              />
-            </>
-          ) : (
-            <>
-              <Bar
-                dataKey="customers"
-                fill="var(--color-customers)"
-                radius={[3, 3, 0, 0]}
-                maxBarSize={18}
-              />
-              <Bar
-                dataKey="cancellations"
-                fill="var(--color-cancellations)"
-                radius={[3, 3, 0, 0]}
-                maxBarSize={18}
-              />
-            </>
-          )}
-        </ComposedChart>
+          {Object.keys(config).map(metric=><Line key={metric} dataKey={metric} stroke={`var(--color-${metric})`} strokeWidth={2.5} dot={false} activeDot={{r:4}} type="linear" connectNulls={false} isAnimationActive={false}/>)}
+        </LineChart>
       </ChartContainer>
     </div>
   );

@@ -1,3 +1,4 @@
+import { policyObservations } from "./policy-group-projection";
 import { scopedPerformance } from "./channel-data";
 import { buildPerformance, MIN_DATE, MAX_DATE } from "./data";
 import {
@@ -18,7 +19,7 @@ export function experimentChartData(
   metric: ExperimentChartMetric,
 ) {
   const forecast = projectAlternative(a);
-  const reference = new Map(projectAlternative({...a, demoCustomerForecast: undefined, demoEvaluationDate: undefined, pricePct: 0, demandPct: 0, cancellationPct: 0, variableCostPct: 0, dailyCost: 0, oneTimeCost: 0}).map(row => [row.key, row]));
+  const reference = new Map(projectAlternative({...a, composition: a.composition ? {...a.composition, baselineOnly:true} : undefined, salesTerms: undefined, demoCustomerForecast: undefined, demoEvaluationDate: undefined, pricePct: 0, demandPct: 0, cancellationPct: 0, variableCostPct: 0, dailyCost: 0, oneTimeCost: 0}).map(row => [row.key, row]));
   const forecastEnd = dayShift(a.start, a.days - 1);
   const applyEnd = dayShift(a.start, (a.applyDays ?? a.days) - 1);
   const start =
@@ -27,7 +28,7 @@ export function experimentChartData(
   const actualEnd = end < MAX_DATE ? end : MAX_DATE;
   const actual =
     start <= actualEnd
-      ? scopedPerformance({ start, end: actualEnd }, a.targetChannels)
+      ? a.composition ? policyObservations({start,end:actualEnd},a.composition.workspace,a.targetChannels) : scopedPerformance({ start, end: actualEnd }, a.targetChannels)
       : [];
   const observed = new Map(actual.map((row) => [row.key, row]));
   const projected = new Map(forecast.map((row) => [row.key, row]));

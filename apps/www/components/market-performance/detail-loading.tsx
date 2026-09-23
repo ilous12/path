@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export function DetailLoading({
   mode = "analysis",
 }: {
-  mode?: "analysis" | "detail";
+  mode?: "analysis" | "detail" | "page";
 }) {
   return (
     <div
@@ -20,12 +20,12 @@ export function DetailLoading({
           <p className="font-medium">
             {mode === "analysis"
               ? "선택한 조건으로 분석 중…"
-              : "상세 내용을 불러오는 중…"}
+              : mode === "page" ? "화면을 불러오는 중…" : "상세 내용을 불러오는 중…"}
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
             {mode === "analysis"
               ? "실적과 이벤트를 분석하고 있습니다."
-              : "등록된 요건·기간·가정과 예측 결과를 준비하고 있습니다."}
+              : mode === "page" ? "선택한 메뉴의 정보를 준비하고 있습니다." : "등록된 요건·기간·가정과 예측 결과를 준비하고 있습니다."}
           </p>
         </div>
       </div>

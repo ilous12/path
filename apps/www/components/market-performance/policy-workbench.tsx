@@ -1,5 +1,5 @@
 "use client";
-import { DataBasis } from "./data-basis";
+import { forecastChartMargins } from "./forecast-chart-period";
 
 import { useEffect, useRef, useState } from "react";
 import {
@@ -48,7 +48,7 @@ type Topic = "elasticity" | "marketing" | "evidence";
 const suggestions: { topic: Topic; title: string; question: string }[] = [
   {
     topic: "elasticity",
-    title: "요금 탄력도 실험",
+    title: "요금 탄력도 정책",
     question: "요금을 5% 인하하면 회선과 순익은 어떻게 바뀔까?",
   },
   {
@@ -181,7 +181,7 @@ function AnalysisAnswer({
           }}
         >
           <LineChart
-            data={chart}
+            data={forecastChartMargins(chart, "date", metric)}
             margin={{ left: 12, right: 16, top: 12, bottom: 4 }}
           >
             <CartesianGrid vertical={false} strokeDasharray="3 4" />
@@ -454,7 +454,7 @@ export function PolicyWorkbench({
             <div>
               <h2 className="text-lg font-semibold">어떤 정책을 검토할까요?</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                현재 판단: {decision} · 실험을 선택하여 가정에 따른 기대 효과를
+                현재 판단: {decision} · 정책을 선택하여 가정에 따른 기대 효과를
                 비교합니다.
               </p>
             </div>
@@ -496,7 +496,7 @@ export function PolicyWorkbench({
           </div>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-xs text-muted-foreground">
-              {round + 1}차 제안 <DataBasis details="정책 후보는 사전 구성된 규칙으로 제안됩니다. 실시간 생성형 모델의 분석 결과가 아닙니다." />
+              {round + 1}차 제안 
             </p>
             <Button
               variant="outline"
@@ -559,7 +559,7 @@ export function PolicyWorkbench({
             <p className="text-xs text-muted-foreground">
               {evidenceMode
                 ? `이벤트 ${events.length}건 · ${workspace} ${ownCount}건 · 경쟁사·기타 ${events.length - ownCount}건`
-                : `검토 실험 · ${alternatives[detailIndex ?? selected].title}`}
+                : `검토 정책 · ${alternatives[detailIndex ?? selected].title}`}
             </p>
           </DialogHeader>
           {mode === "detail" ? (
@@ -572,7 +572,7 @@ export function PolicyWorkbench({
                       className={`rounded-xl border p-4 ${selected === index ? "border-primary bg-primary/5" : "bg-muted/20"}`}
                     >
                       <p className="text-xs text-primary">
-                        실험 {index + 1}
+                        정책 {index + 1}
                         {selected === index ? " · 선택됨" : ""}
                       </p>
                       <h3 className="mt-2 font-semibold">{item.title}</h3>
@@ -592,8 +592,8 @@ export function PolicyWorkbench({
                 )}
               </div>
               <p className="mt-4 text-xs text-muted-foreground">
-                적용하면 이 실험을 선택하고 비교 차트에 반영합니다. 실제 정책
-                실행이나 실험 자동 등록은 하지 않습니다.
+                적용하면 이 정책을 선택하고 비교 차트에 반영합니다. 실제 정책
+                실행이나 정책 자동 등록은 하지 않습니다.
               </p>
               <div className="mt-4 flex justify-end gap-2">
                 <Button
@@ -610,7 +610,7 @@ export function PolicyWorkbench({
                     const index = detailIndex ?? selected;
                     setSelected(index);
                     setNotice(
-                      `${alternatives[index].title} 실험을 비교 차트에 적용했습니다.`,
+                      `${alternatives[index].title} 정책을 비교 차트에 적용했습니다.`,
                     );
                     setMode(null);
                     setDetailIndex(null);
@@ -642,7 +642,7 @@ export function PolicyWorkbench({
                   <p className="mt-2 text-sm leading-6 text-muted-foreground">
                     {evidenceMode
                       ? `${range.start} ~ ${range.end} · ${focus}. ${evidenceSummary}`
-                      : `기간·중점 지표·${events.length}건의 이벤트와 선택 실험을 가져왔습니다. 요금 변화, 마케팅 배분, 원인 가설을 차트와 근거로 비교하세요.`}
+                      : `기간·중점 지표·${events.length}건의 이벤트와 선택 정책을 가져왔습니다. 요금 변화, 마케팅 배분, 원인 가설을 차트와 근거로 비교하세요.`}
                   </p>
                   <p className="mt-2 text-xs text-muted-foreground">
                     Phase 2 · 심층 AI 연결 예정. 현재는 입력 가정에 따른 계산과

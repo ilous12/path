@@ -1,5 +1,8 @@
 "use client";
-import { DataBasis } from "./data-basis";
+import { currentSalesSchema } from "./sales-metric-store";
+import { applyMetricDefaults, normalizeSalesTerms } from "./sales-metric-values";
+import { PolicyPeriodEditor } from "./policy-period-editor";
+import { AirSalesTermsEditor, initialAirTerms, airTermsSummary } from "./air-sales-terms";
 import { useAnalysisPreferences } from "./use-analysis-preferences";
 import { RequirementOptions } from "./requirement-options";
 
@@ -24,7 +27,6 @@ import {
   CheckCheck,
   FlaskConical,
   LoaderCircle,
-  Radio,
   Sparkles,
   X,
 } from "lucide-react";
@@ -33,7 +35,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useEventCatalog } from "./event-catalog";
-import { useAlternatives } from "./alternative-store";
+import { usePolicyGroups } from "./policy-group-store";
+import { latestRevision } from "./policy-group-model";
 import { useTimelineRange } from "./timeline-range";
 import {
   RECOVERY_MILESTONES,
@@ -60,7 +63,7 @@ import { isValidCustomEvent } from "./event-validation";
 
 const selectClass =
   "h-10 w-full rounded-lg border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring";
-const steps = ["등록 유형", "기본 정보", "기간·근거", "프롬프트", "완료"];
+const steps = ["등록 방식", "기본 정보", "기간·근거", "프롬프트", "완료"];
 function Field({
   label,
   children,
@@ -92,6 +95,7 @@ export type RegistrationSeed = {
 export function RegistrationWizard({
   workspace,
   defaultStart,
+  parentPolicyId,
   initialKind = "event",
   seed,
   onClose,
@@ -99,12 +103,16 @@ export function RegistrationWizard({
 }: {
   workspace: string;
   defaultStart?: string;
+  parentPolicyId?: string;
   initialKind?: "event" | "experiment";
   seed?: RegistrationSeed;
   onClose: () => void;
   onSaved: (start: string, end: string) => void;
 }) {
   const router = useRouter();
+  const [rawSalesTerms, setSalesTerms] = useState(()=>applyMetricDefaults(initialAirTerms(),currentSalesSchema(workspace)));
+  const salesTerms=normalizeSalesTerms(rawSalesTerms);
+
   const { preferences } = useAnalysisPreferences();
   const query = useSearchParams();
   const hiddenIds = useAnalysisExclusions();
@@ -112,12 +120,17 @@ export function RegistrationWizard({
   const [choosingPriorities, setChoosingPriorities] = useState(false);
   const [generatedContext, setGeneratedContext] = useState<PolicyAlternative["analysisContext"]>();
   const [automatic, setAutomatic] = useState(false);
+  const [inputMode,setInputMode]=useState<"direct"|"prompt">("direct");
   const catalog = useEventCatalog();
-  const store = useAlternatives();
+  const store = usePolicyGroups();
+  const [destination, setDestination] = useState(parentPolicyId ?? "new");
+  const [savedPolicyId, setSavedPolicyId] = useState("");
   const [timeline, setTimeline] = useTimelineRange(workspace);
-  const [step, setStep] = useState(0);
-  const [choosingMethod, setChoosingMethod] = useState(false);
-  const [kind, setKind] = useState<"event" | "experiment">(initialKind);
+  const [step, setStep] = useState(initialKind === "event" ? 1 : 0);
+  const [choosingMethod, setChoosingMethod] = useState(initialKind === "experiment");
+  const kind = initialKind;
+  const airPolicy = workspace === "air" && kind === "experiment";
+  const directPolicy = kind === "experiment" && inputMode === "direct" && !automatic;
   const [phase, setPhase] = useState<
     "edit" | "processing" | "review" | "saving" | "done"
   >("edit");
@@ -140,7 +153,7 @@ export function RegistrationWizard({
     start: `${defaultStart ?? timeline.end}T09:00`,
     end: "",
     applyEnd: dayShift(defaultStart ?? timeline.end, 6),
-    forecastEnd: dayShift(defaultStart ?? timeline.end, 13),
+    forecastEnd: dayShift(defaultStart ?? timeline.end, 29),
     sourceType: "공식 발표",
     sourceName: "",
     sourceUrl: "",
@@ -173,7 +186,7 @@ export function RegistrationWizard({
       "KT",
       "LG U+",
       ...catalog.events.map((e) => e.operator.toUpperCase()),
-      ...store.alternatives.flatMap((a) => (a.operator ? [a.operator] : [])),
+      ...store.policies.map(p => p.workspace.toUpperCase()),
     ]),
   ];
   const operator =
@@ -183,15 +196,16 @@ export function RegistrationWizard({
     Math.round((Date.parse(end) - Date.parse(start)) / 86400000) + 1;
   const [forecastMethod, setForecastMethod] = useState<NonNullable<PolicyAlternative["forecastMethod"]>>("average");
   const candidate = (): PolicyAlternative => ({
+    salesTerms: airPolicy ? salesTerms : undefined,
     forecastMethod,
     id: "",
     title: form.title.trim(),
-    description: form.prompt.trim(),
+    description: directPolicy ? (airPolicy ? airTermsSummary(salesTerms) : summarizeRequirements(requirements ?? {pricePct:form.pricePct,benefits:"",points:"",freeOffers:"",other:form.experimentType})) : form.prompt.trim(),
     type: form.experimentType,
     workspace,
     operator,
-    channel: targetChannels.join(", ") || "전체",
-    targetChannels,
+    channel: airPolicy ? salesTerms.channel : targetChannels.join(", ") || "전체",
+    targetChannels: airPolicy ? [salesTerms.channel] : targetChannels,
     analysisContext: automatic ? generatedContext : seed?.analysisContext,
     start: start <= MIN_DATE ? dayShift(MIN_DATE, 1) : start,
     days: kind === "event" ? 14 : days(form.forecastEnd),
@@ -199,7 +213,7 @@ export function RegistrationWizard({
       kind === "event"
         ? Math.max(1, Math.min(14, form.end ? days(form.end.slice(0, 10)) : 7))
         : days(form.applyEnd),
-    pricePct: form.pricePct,
+    pricePct: airPolicy ? (salesTerms.monthlyPrice / salesTerms.baselinePrice - 1) * 100 * salesTerms.eligibilityPct / 100 : form.pricePct,
     demandPct: form.demandPct,
     cancellationPct: form.cancellationPct,
     variableCostPct: form.variableCostPct,
@@ -208,9 +222,9 @@ export function RegistrationWizard({
     status: "draft",
     createdAt: new Date().toISOString(),
     history: [],
-    prompt: form.prompt.trim(),
+    prompt: directPolicy ? undefined : form.prompt.trim(),
     requirements: requirements
-      ? { ...requirements, pricePct: form.pricePct }
+      ? { ...requirements, pricePct: airPolicy ? (salesTerms.monthlyPrice / salesTerms.baselinePrice - 1) * 100 : form.pricePct, ...(airPolicy ? {points: airTermsSummary(salesTerms)} : {}) }
       : undefined,
   });
   function validate(current: number) {
@@ -221,7 +235,7 @@ export function RegistrationWizard({
       const invalid = validateRange({
         start,
         end: kind === "event" ? form.end.slice(0, 10) || start : start,
-      });
+      },kind === "experiment" ? dayShift(MAX_DATE,90) : MAX_DATE);
       if (invalid) return invalid;
       if (kind === "event") {
         if (form.end && form.end < form.start)
@@ -247,7 +261,7 @@ export function RegistrationWizard({
         return "적용·예측 기간은 시작일부터 1~90일로 지정하세요.";
     }
     if (current === 3) {
-      if (!form.prompt.trim()) return "정리할 프롬프트를 입력하세요.";
+      if (!directPolicy && !form.prompt.trim()) return "정리할 프롬프트를 입력하세요.";
       if (phase === "review")
         return validateAlternative(
           registrationScenario(candidate(), selectedScenario ?? 0),
@@ -263,10 +277,14 @@ export function RegistrationWizard({
     }
     setError("");
     if (step === 0 && kind === "experiment") setChoosingMethod(true);
-    else setStep(step + 1);
+    else if(step===2 && directPolicy){
+      setRequirements(requirements ?? {pricePct:form.pricePct,benefits:"",points:airPolicy?airTermsSummary(salesTerms):"",freeOffers:"",other:form.experimentType});
+      setSelectedScenario(2);setStep(3);setPhase("review");
+    } else setStep(step + 1);
   }
   function autoSuggest() {
     if (submitting.current) return;
+    const invalid=validate(2);if(invalid){setError(invalid);return;}
     const requested = {start:query.get("start")||"",end:query.get("end")||""};
     const basis = seed?.analysisContext ?? (!validateRange(requested) ? requested : timeline);
     const eventIds=(query.get("events")||"").split(",").filter(Boolean);
@@ -274,16 +292,16 @@ export function RegistrationWizard({
     const selectedPivots=(query.has("pivots") ? (query.get("pivots")||"").split(",") : RECOVERY_MILESTONES.map(p=>p.date)).filter(d=>d>=basis.start && d<=basis.end);
     const suggestion = proposePolicy(basis,targetChannels,priorities,selectedEvents,selectedPivots);
     const prompt = suggestion.prompt;
+    if(workspace === "air") setSalesTerms(current=>({...current,monthlyPrice:Math.round(current.baselinePrice*(1+suggestion.pricePct/100)),channel:targetChannels[0] || current.channel}));
     setGeneratedContext({...basis,workspace,channels:[...targetChannels],priorities:[...priorities],eventIds:selectedEvents.map(e=>e.id),pivotDates:selectedPivots,reason:suggestion.reason});
     setChoosingPriorities(false);
     const result = extractPolicyRequirements(prompt);
-    setKind("experiment");
-    setAutomatic(true);
+    setAutomatic(true);setInputMode("prompt");
     setChoosingMethod(false);
     setStep(3);
     setSelectedScenario(null);
     setError("");
-    setForm(current => ({...current, title: `${workspace.toUpperCase()} · ${targetChannels.join("·") || "전체 채널"} · ${suggestion.title}`, prompt, experimentType: priorities[0] === "growth" ? "가격 조정" : "혜택 변경", pricePct: suggestion.pricePct, demandPct:suggestion.demandPct, cancellationPct:suggestion.cancellationPct, variableCostPct:suggestion.variableCostPct, dailyCost:suggestion.dailyCost, applyEnd:dayShift(current.start.slice(0,10),27), forecastEnd:dayShift(current.start.slice(0,10),41)}));
+    setForm(current => ({...current, title: `${workspace.toUpperCase()} · ${targetChannels.join("·") || "전체 채널"} · ${suggestion.title}`, prompt, experimentType: priorities[0] === "growth" ? "가격 조정" : "혜택 변경", pricePct: suggestion.pricePct, demandPct:suggestion.demandPct, cancellationPct:suggestion.cancellationPct, variableCostPct:suggestion.variableCostPct, dailyCost:suggestion.dailyCost}));
     submitting.current = true;
     setPhase("processing");
     setProgress(0);
@@ -296,7 +314,7 @@ export function RegistrationWizard({
   function analyze() {
     if (submitting.current) return;
     const invalid =
-      [1, 2].map(validate).find(Boolean) ||
+      (kind === "experiment" && inputMode === "prompt" ? [2] : [1, 2]).map(validate).find(Boolean) ||
       (!form.prompt.trim() ? "정리할 프롬프트를 입력하세요." : null);
     if (invalid) {
       setError(invalid);
@@ -313,7 +331,8 @@ export function RegistrationWizard({
         const result = extractPolicyRequirements(form.prompt);
         setRequirements(result);
         setSelectedScenario(null);
-        set("pricePct", result.pricePct ?? 0);
+        setForm(current=>({...current,title:current.title.trim()||`${workspace.toUpperCase()} · ${current.prompt.trim().slice(0,60)}`,pricePct:result.pricePct??0}));
+        if(airPolicy && result.pricePct !== null)setSalesTerms(current=>({...current,monthlyPrice:Math.round(current.baselinePrice*(1+result.pricePct!/100))}));
         setPhase("review");
         submitting.current = false;
       }, 3000),
@@ -376,18 +395,19 @@ export function RegistrationWizard({
             catalog.addEvent(event);
             finish = form.end.slice(0, 10) || start;
           } else {
-            store.save({
+            const policyId = store.attach({
               ...registrationScenario(candidate(), selectedScenario),
-              description: `${form.title.trim()} · ${scenario.label}\n${summarizeRequirements(registrationScenario(candidate(), selectedScenario).requirements!)}`,
+              description: `${form.title.trim()} · ${scenario.label}${airPolicy ? "\n" + airTermsSummary(salesTerms) : ""}\n${summarizeRequirements(registrationScenario(candidate(), selectedScenario).requirements!)}`,
               reviewScenario: scenario,
               id: `alt-${crypto.randomUUID()}`,
               history: [
                 {
                   at,
-                  action: "위저드 · 프롬프트와 수동 가정으로 실험 등록",
+                  action: directPolicy ? "직접 입력 판매정책 완료" : "프롬프트·AI 제안 판매정책 완료",
                 },
               ],
-            });
+            }, destination === "new" ? undefined : destination, directPolicy ? "direct" : automatic ? "ai" : "prompt");
+            setSavedPolicyId(policyId);
             const selectedEnd = dayShift(
               scenario.start,
               scenario.applyDays - 1,
@@ -417,18 +437,18 @@ export function RegistrationWizard({
   const headings =
     kind === "event"
       ? [
-          "무엇을 등록할까요?",
+          "이벤트 등록",
           "어떤 시장 변화인가요?",
           "언제, 어디에서 확인했나요?",
           "어떻게 정리할까요?",
           "타임라인에 반영했어요",
         ]
       : [
-          "무엇을 등록할까요?",
+          "판매판매정책 등록",
           "어떤 정책을 검증할까요?",
-          "얼마 동안 실험할까요?",
-          "가정과 요청을 확인하세요",
-          "실험이 준비됐어요",
+          "정책 기간을 지정해주세요",
+          inputMode==="prompt"?"어떤 정책을 검토할까요?":"가정과 요청을 확인하세요",
+          "정책이 준비됐어요",
         ];
   return (
     <>
@@ -441,15 +461,15 @@ export function RegistrationWizard({
             {phase === "processing"
               ? "AI가 요건을 분석하고 있어요"
               : phase === "review"
-                ? "분석한 요건을 확인해주세요"
+                ? kind === "event" ? "이벤트 내용을 확인해주세요" : directPolicy ? "입력한 정책을 확인해주세요" : "이런 정책을 요청하셨나요?"
                 : phase === "saving"
                   ? kind === "experiment"
-                    ? "실험 등록 중"
+                    ? "판매정책 등록 중"
                     : "이벤트 등록 중"
                   : headings[step]}
           </DialogTitle>
           <DialogDescription className="mt-1 text-xs leading-5">
-            이벤트 또는 정책 실험을 등록하세요.
+            {kind === "event" ? "시장 변화와 출처를 기록합니다." : "판매정책을 구성하고 캠페인에 반영합니다."}
           </DialogDescription>
         </div>
         <Button
@@ -464,7 +484,7 @@ export function RegistrationWizard({
       <div className="grid min-h-0 flex-1 md:grid-cols-[190px_1fr]">
         <aside className="border-b bg-muted/25 p-4 md:border-r md:border-b-0 md:p-6">
           <ol className="flex justify-between gap-2 md:flex-col md:gap-5">
-            {steps.map((label, i) => (
+            {steps.map((label, i) => kind === "event" && i === 0 ? null : (
               <li
                 key={label}
                 className={`flex items-center gap-2 text-xs ${i === step ? "font-semibold text-foreground" : "text-muted-foreground"}`}
@@ -473,9 +493,9 @@ export function RegistrationWizard({
                 <span
                   className={`flex size-6 shrink-0 items-center justify-center rounded-full border text-[9px] ${i === step ? "border-primary bg-primary text-primary-foreground" : i < step ? "border-primary/20 bg-primary/10 text-primary" : "border-border"}`}
                 >
-                  {i < step ? <Check className="size-3" /> : i + 1}
+                  {i < step ? <Check className="size-3" /> : kind === "event" ? i : i + 1}
                 </span>
-                <span className="hidden sm:inline">{label}</span>
+                <span className="hidden sm:inline">{directPolicy && label === "프롬프트" ? "정책 검토" : label}</span>
               </li>
             ))}
           </ol>
@@ -538,7 +558,7 @@ export function RegistrationWizard({
               <h3 className="text-xl font-semibold">
                 {kind === "event"
                   ? "새 이벤트를 등록했습니다"
-                  : "새 실험을 등록했습니다"}
+                  : "판매정책을 캠페인 초안에 반영했습니다"}
               </h3>
               <p className="mt-3 max-w-md text-sm leading-6 text-muted-foreground">
                 {form.title}
@@ -546,72 +566,26 @@ export function RegistrationWizard({
                 {start} · {workspace.toUpperCase()}
               </p>
               <p className="mt-5 text-xs text-muted-foreground">
-                조회 기간을 맞췄습니다. 타임라인에서 어노테이션을 확인하세요.
+                {kind === "event" ? "조회 기간을 맞췄습니다. 타임라인에서 어노테이션을 확인하세요." : "캠페인에서 전체 시뮬레이션을 검토하고 등록·실행하세요."}
               </p>
               <Button
                 className="mt-6"
                 onClick={() => {
                   onClose();
-                  router.push(`/?workspace=${encodeURIComponent(workspace)}`);
+                  router.push(kind === "experiment" && savedPolicyId !== "inbox" ? `/analysis?workspace=${encodeURIComponent(workspace)}&policy=${encodeURIComponent(savedPolicyId)}` : `/?workspace=${encodeURIComponent(workspace)}&view=${kind === "experiment" ? "experiments-search" : "summary"}`);
                 }}
               >
-                타임라인에서 보기
+                {kind === "experiment" ? "캠페인에서 검토" : "타임라인에서 보기"}
                 <ArrowRight className="size-4" />
               </Button>
             </div>
           ) : (
             <div className="space-y-6">
-              {step === 0 && !choosingMethod && (
-                <>
-                  <p className="text-sm leading-6 text-muted-foreground">
-                    등록하려는 유형을 선택하세요.
-                  </p>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    {(
-                      [
-                        {
-                          id: "event",
-                          title: "시장 이벤트",
-                          icon: Radio,
-                          desc: "요금제·혜택·시장 변화를 출처와 함께 기록",
-                        },
-                        {
-                          id: "experiment",
-                          title: "정책 실험",
-                          icon: FlaskConical,
-                          desc: "가격·혜택·채널 가정으로 결과를 예측",
-                        },
-                      ] as const
-                    ).map((item) => (
-                      <button
-                        key={item.id}
-                        type="button"
-                        aria-pressed={kind === item.id}
-                        onClick={() => {setKind(item.id); if (item.id === "experiment") setChoosingMethod(true);}}
-                        className={`relative rounded-xl border p-5 text-left transition-colors focus-visible:outline-2 focus-visible:outline-ring ${kind === item.id ? "border-primary bg-primary/5 ring-1 ring-primary" : "bg-card hover:bg-muted/40"}`}
-                      >
-                        <item.icon className="mb-6 size-6 text-primary" />
-                        <h3 className="font-semibold">{item.title}</h3>
-                        <p className="mt-2 text-xs leading-5 text-muted-foreground">
-                          {item.desc}
-                        </p>
-                        {kind === item.id && (
-                          <Check className="absolute top-4 right-4 size-4 text-primary" />
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="rounded-lg bg-muted/40 p-4 text-xs leading-6 text-muted-foreground">
-                    이벤트는 관측한 사실을, 실험은 검증할 가정을 남깁니다. 입력
-                    내용은 이후 상세보기에서 확인할 수 있습니다.
-                  </div>
-                </>
-              )}
               {step === 0 && choosingMethod && !choosingPriorities && (
-                <section className="space-y-5" aria-label="정책 실험 등록 방식">
+                <section className="space-y-5" aria-label="판매판매정책 등록 방식">
                   <div className="space-y-2">
-                    <h3 className="text-xl font-semibold">정책 실험을 어떻게 시작할까요?</h3>
-                    <p className="text-sm text-muted-foreground">제안된 정책을 검토하거나 직접 실험 요건을 선택하세요.</p>
+                    <h3 className="text-xl font-semibold">판매정책을 어떻게 시작할까요?</h3>
+                    <p className="text-sm text-muted-foreground">제안된 정책을 검토하거나 직접 정책 요건을 선택하세요.</p>
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <button type="button" onClick={() => setChoosingPriorities(true)} className="group rounded-xl border bg-card p-5 text-left transition-colors hover:border-primary hover:bg-primary/5 focus-visible:outline-2 focus-visible:outline-ring">
@@ -619,32 +593,34 @@ export function RegistrationWizard({
                       <h4 className="font-semibold">AI 자동 제안</h4>
                       <p className="mt-2 text-xs leading-5 text-muted-foreground">입력 단계를 건너뛰고 중점 지표에 맞춘 정책 후보와 예상 차트를 바로 검토합니다.</p>
                     </button>
-                    <button type="button" onClick={() => {setChoosingMethod(false);setAutomatic(false);setStep(1);}} className="group rounded-xl border bg-card p-5 text-left transition-colors hover:border-primary hover:bg-primary/5 focus-visible:outline-2 focus-visible:outline-ring">
+                    <button type="button" onClick={() => {setChoosingMethod(false);setAutomatic(false);setInputMode("direct");if(workspace === "air"){setTargetChannels([salesTerms.channel]);setForm(current=>({...current,title:current.title || `AIR · ${salesTerms.planName} · ${salesTerms.channel} 판매조건`,prompt:current.prompt || airTermsSummary(salesTerms)}));}setStep(1);}} className="group rounded-xl border bg-card p-5 text-left transition-colors hover:border-primary hover:bg-primary/5 focus-visible:outline-2 focus-visible:outline-ring">
                       <FlaskConical className="mb-5 size-6 text-primary" />
-                      <h4 className="font-semibold">사용자 선택</h4>
-                      <p className="mt-2 text-xs leading-5 text-muted-foreground">실험 유형·채널·기간·정책 요건을 직접 정하고 예상 결과를 비교합니다.</p>
+                      <h4 className="font-semibold">직접 입력</h4>
+                      <p className="mt-2 text-xs leading-5 text-muted-foreground">정책 유형·채널·기간·정책 요건을 직접 정하고 예상 결과를 비교합니다.</p>
                     </button>
+                    <button type="button" onClick={()=>{setChoosingMethod(false);setAutomatic(false);setInputMode("prompt");setStep(3);}} className="rounded-xl border bg-card p-5 text-left transition-colors hover:border-primary hover:bg-primary/5 focus-visible:outline-2 focus-visible:outline-ring"><Sparkles className="mb-5 size-6 text-primary"/><h4 className="font-semibold">프롬프트 입력</h4><p className="mt-2 text-xs leading-5 text-muted-foreground">정책 요청을 작성하면 AI 요건 분석 후 변경 조건과 예상 결과를 검토합니다.</p></button>
                   </div>
                 </section>
               )}
               {step === 0 && choosingPriorities && (
                 <section className="space-y-5">
                   <h3 className="text-xl font-semibold">어떤 지표를 우선할까요?</h3>
-                  <p className="text-sm text-muted-foreground">이번 실험의 우선순위를 선택하세요. 공통 설정은 유지됩니다.</p>
+                  <p className="text-sm text-muted-foreground">이번 정책의 우선순위를 선택하세요. 공통 설정은 유지됩니다.</p>
                   <div className="grid gap-3 sm:grid-cols-3">
                     {priorities.map((focus,index)=><Field key={index} label={`${index+1}순위`}><select className={selectClass} value={focus} onChange={e=>{const next=[...priorities];const other=next.indexOf(e.target.value as Focus);[next[index],next[other]]=[next[other],next[index]];setPriorities(next);}}>{Object.entries(PRIORITY_LABELS).map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></Field>)}
                   </div>
                   <div className="rounded-xl border bg-muted/20 p-4 text-sm space-y-2">
                     <p>기준 기간: {seed?.analysisContext?.start || query.get("start") || timeline.start} ~ {seed?.analysisContext?.end || query.get("end") || timeline.end}</p>
                     <p>대상: {workspace.toUpperCase()} · {targetChannels.join(", ") || "전체 채널"}</p>
-                    <p className="text-xs text-muted-foreground">선택한 이벤트·변곡점이 있으면 해당 항목을, 없으면 조회 기간의 항목을 분석합니다. 단기 7일·장기 28일 적용, 42일 예측을 비교합니다.</p>
+                    <p className="text-xs text-muted-foreground">선택한 이벤트·변곡점이 있으면 해당 항목을, 없으면 조회 기간의 항목을 분석합니다. 다음 단계에서 정책 적용 기간과 예측 종료일을 지정합니다.</p>
                   </div>
-                  <Button type="button" onClick={autoSuggest}><Sparkles className="size-4" />정책 제안 받기</Button>
+
                 </section>
               )}
+              {airPolicy && (step === 1 || phase === "review") && <AirSalesTermsEditor value={salesTerms} onChange={v=>{setSalesTerms(v);setTargetChannels([v.channel]);setForm(current=>({...current,title:`AIR · ${v.planName} · ${v.channel} 판매조건`,prompt:airTermsSummary(v)}));setSelectedScenario(null);}} channels={targetChannels} />}
               {step === 1 && (
                 <>
-                  <Field label={kind === "event" ? "이벤트 유형" : "실험 유형"}>
+                  <Field label={kind === "event" ? "이벤트 유형" : "정책 유형"}>
                     <select
                       className={selectClass}
                       value={
@@ -675,7 +651,7 @@ export function RegistrationWizard({
                       placeholder={
                         kind === "event"
                           ? "예: 경쟁사 데이터 추가 혜택 발표"
-                          : "예: 20GB 요금제 5% 인하 실험"
+                          : "예: 20GB 요금제 5% 인하 정책"
                       }
                     />
                   </Field>
@@ -693,16 +669,14 @@ export function RegistrationWizard({
                       </select>
                     </Field>
                   </div>
-                  <ChannelSelector
+                  {!airPolicy && <ChannelSelector
                     value={targetChannels}
                     onChange={setTargetChannels}
                     extra={[
                       ...catalog.events.flatMap((e) => e.targetChannels ?? []),
-                      ...store.alternatives.flatMap(
-                        (a) => a.targetChannels ?? [],
-                      ),
+                      ...store.policies.flatMap(p => latestRevision(p).items.flatMap(i => i.target.channels)),
                     ]}
-                  />
+                  />}
                   {targetChannels.some(
                     (c) => !CHANNELS.some((known) => known.id === c),
                   ) && (
@@ -723,90 +697,15 @@ export function RegistrationWizard({
                   )}
                 </>
               )}
+              {step===1 && directPolicy && !airPolicy && <RequirementOptions value={requirements??{pricePct:form.pricePct,benefits:"",points:"",freeOffers:"",other:""}} price={form.pricePct} onPrice={v=>set("pricePct",v)} onChange={setRequirements}/>}
               {step === 2 && (
                 <>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <Field
-                      label={kind === "event" ? "발생 일시" : "실험 시작일"}
-                    >
-                      <Input
-                        type={kind === "event" ? "datetime-local" : "date"}
-                        value={kind === "event" ? form.start : start}
-                        min={
-                          kind === "event"
-                            ? `${MIN_DATE}T00:00`
-                            : dayShift(MIN_DATE, 1)
-                        }
-                        max={kind === "event" ? `${MAX_DATE}T23:59` : MAX_DATE}
-                        onInput={(e) => {
-                          const value = e.currentTarget.value;
-                          set(
-                            "start",
-                            kind === "event"
-                              ? value
-                              : value
-                                ? `${value}T09:00`
-                                : "",
-                          );
-                          if (
-                            kind === "experiment" &&
-                            /^\d{4}-\d{2}-\d{2}$/.test(value)
-                          ) {
-                            set("applyEnd", dayShift(value, 6));
-                            set("forecastEnd", dayShift(value, 13));
-                          }
-                        }}
-                      />
-                    </Field>
-                    {kind === "event" ? (
-                      <Field label="종료 일시 · 선택">
-                        <Input
-                          type="datetime-local"
-                          value={form.end}
-                          min={form.start}
-                          max={`${MAX_DATE}T23:59`}
-                          onInput={(e) => set("end", e.currentTarget.value)}
-                        />
-                      </Field>
-                    ) : (
-                      <Field label="적용 종료일">
-                        <Input
-                          type="date"
-                          min={start}
-                          max={
-                            /^\d{4}-\d{2}-\d{2}$/.test(start)
-                              ? dayShift(start, 89)
-                              : undefined
-                          }
-                          value={form.applyEnd}
-                          onInput={(e) =>
-                            set("applyEnd", e.currentTarget.value)
-                          }
-                        />
-                      </Field>
-                    )}
-                  </div>
+                  {kind === "event" && <div className="grid gap-4 sm:grid-cols-2">
+                    <Field label="발생 일시"><Input type="datetime-local" value={form.start} min={`${MIN_DATE}T00:00`} max={`${MAX_DATE}T23:59`} onInput={e=>set("start",e.currentTarget.value)}/></Field>
+                    <Field label="종료 일시 · 선택"><Input type="datetime-local" value={form.end} min={form.start} max={`${MAX_DATE}T23:59`} onInput={e=>set("end",e.currentTarget.value)}/></Field>
+                  </div>}
                   {kind === "experiment" ? (
-                    <>
-                      <Field
-                        label="예측 종료일"
-                        hint="적용 기간과 별도로 지정합니다. 최대 90일, 과거 시점도 실험할 수 있습니다."
-                      >
-                        <Input
-                          type="date"
-                          min={start}
-                          max={
-                            /^\d{4}-\d{2}-\d{2}$/.test(start)
-                              ? dayShift(start, 89)
-                              : undefined
-                          }
-                          value={form.forecastEnd}
-                          onInput={(e) =>
-                            set("forecastEnd", e.currentTarget.value)
-                          }
-                        />
-                      </Field>
-                    </>
+                    <PolicyPeriodEditor value={{start,applyEnd:form.applyEnd,forecastEnd:form.forecastEnd}} channels={airPolicy?[salesTerms.channel]:targetChannels} onChange={v=>{setForm(current=>({...current,start:`${v.start}T09:00`,applyEnd:v.applyEnd,forecastEnd:v.forecastEnd}));setError("");}} />
                   ) : (
                     <>
                       <div className="grid gap-4 sm:grid-cols-2">
@@ -855,16 +754,17 @@ export function RegistrationWizard({
               )}
               {step === 3 && (
                 <>
+                  {kind === "experiment" && phase === "review" && <Field label="완료한 판매정책을 어디에 반영할까요?" hint="기존 등록 정책을 선택하면 새 초안 버전으로 추가됩니다. 실행 중인 버전은 유지됩니다."><select aria-label="판매정책 캠페인 선택" className="h-10 w-full rounded-lg border bg-background px-3 text-sm" value={destination} disabled={Boolean(parentPolicyId)} onChange={e=>setDestination(e.target.value)}><option value="new">새 캠페인 만들기</option><option value="inbox">미배정 판매정책 작업함</option>{store.policies.filter(p=>p.workspace===workspace).map(p=><option key={p.id} value={p.id}>{latestRevision(p).name} · v{latestRevision(p).number}</option>)}</select></Field>}
                   <div className="flex items-center gap-2 text-xs text-primary">
                     <Sparkles className="size-4" />
-                    요건을 확인한 후 등록하세요. <DataBasis details="요건 추출과 자동 제안은 규칙 기반으로 처리됩니다. 성과와 비용은 사용자 가정을 사용합니다." />
+                    요건을 확인한 후 등록하세요. 
                   </div>
                   {phase === "edit" && (
                     <Field
                       label={
                         kind === "event"
                           ? "어떤 변화를 기록할까요?"
-                          : "어떤 정책을 실험할까요?"
+                          : "어떤 정책을 검토할까요?"
                       }
                       hint="프롬프트 원문과 선택한 정보를 함께 저장합니다."
                     >
@@ -918,10 +818,10 @@ export function RegistrationWizard({
                     <div className="space-y-4">
                       <div className="rounded-xl border bg-primary/5 p-4">
                         <p className="mb-2 text-xs font-semibold text-primary">
-                          AI 요건 분석 · 요약
+                          {directPolicy ? "입력한 정책 · 요약" : "AI 요건 분석 · 요약"}
                         </p>
                         <p className="text-sm leading-6">
-                          {summarizeRequirements({
+                          {airPolicy ? airTermsSummary(salesTerms) : summarizeRequirements({
                             ...requirements,
                             pricePct: form.pricePct,
                           })}
@@ -941,13 +841,10 @@ export function RegistrationWizard({
                             <details><summary className="cursor-pointer">반영한 이벤트·변곡점</summary><ul className="mt-2 list-disc space-y-1 pl-4">{catalog.events.filter(e=>generatedContext.eventIds?.includes(e.id)).map(e=><li key={e.id}>{e.startAt.slice(0,10)} · {e.title}</li>)}{generatedContext.pivotDates?.map(date=><li key={date}>{date} · 변곡점</li>)}</ul></details>
                             <Button type="button" size="sm" variant="outline" onClick={()=>{setPhase("edit");setStep(0);setChoosingMethod(true);setChoosingPriorities(true);setSelectedScenario(null);}}>우선순위 다시 선택</Button>
                           </div>}
-                          <div className="grid gap-3 sm:grid-cols-3">
-                            <Field label="적용 시작일"><Input type="date" value={start} onInput={e => {const value=e.currentTarget.value; if(value) {set("start", `${value}T09:00`); set("applyEnd", dayShift(value,27)); set("forecastEnd", dayShift(value,41));}}} /></Field>
-                            <Field label="적용 종료일"><Input type="date" value={form.applyEnd} onInput={e => set("applyEnd",e.currentTarget.value)} /></Field>
-                            <Field label="예측 종료일"><Input type="date" value={form.forecastEnd} onInput={e => set("forecastEnd",e.currentTarget.value)} /></Field>
-                          </div>
+
                         </div>
                       )}
+                      {kind === "experiment" && <PolicyPeriodEditor value={{start,applyEnd:form.applyEnd,forecastEnd:form.forecastEnd}} channels={airPolicy?[salesTerms.channel]:targetChannels} onChange={v=>{setForm(current=>({...current,start:`${v.start}T09:00`,applyEnd:v.applyEnd,forecastEnd:v.forecastEnd}));setError("");}} />}
                       <RegistrationScenarioReview
                         base={candidate()}
                         onMethodChange={kind === "experiment" ? setForecastMethod : undefined}
@@ -960,11 +857,11 @@ export function RegistrationWizard({
                       {kind === "event" && (
                         <p className="text-xs text-muted-foreground">
                           선택한 정책 비교 결과는 이벤트에 검토 기록으로
-                          저장됩니다. 실제 정책 적용이나 별도 실험 자동 등록은
+                          저장됩니다. 실제 정책 적용이나 별도 정책 자동 등록은
                           하지 않습니다.
                         </p>
                       )}
-                      <details className="rounded-xl border p-4">
+                      {!airPolicy && <details className="rounded-xl border p-4">
                         <summary className="cursor-pointer text-sm font-medium">
                           변경 요건 상세 · 수정
                         </summary>
@@ -974,100 +871,16 @@ export function RegistrationWizard({
                           onPrice={(value) => set("pricePct", value)}
                           onChange={setRequirements}
                         />
-                      </details>
-                      <details className="text-xs text-muted-foreground">
+                      </details>}
+                      {!directPolicy && <details className="text-xs text-muted-foreground">
                         <summary className="cursor-pointer">
                           입력 프롬프트 보기
                         </summary>
                         <p className="mt-2 whitespace-pre-wrap leading-5">
                           {form.prompt}
                         </p>
-                      </details>
+                      </details>}
                     </div>
-                  )}
-                  {phase === "review" && (
-                    <details className="rounded-xl border p-4">
-                      <summary className="mb-3 cursor-pointer text-sm font-medium">
-                        시뮬레이션 가정 · 비용 조정
-                      </summary>
-                      <p className="text-xs text-muted-foreground">
-                        수요·해지·비용은 자동으로 추정하지 않습니다. 아래 초기
-                        가정을 선택하세요. 혜택·포인트·무료 제공 비용은 아래
-                        비용 선택지에서 별도로 지정하세요.
-                      </p>
-                      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                        {(
-                          [
-                            {
-                              key: "demandPct",
-                              label: "수요 변화 %",
-                              min: -100,
-                              max: 300,
-                            },
-                            {
-                              key: "cancellationPct",
-                              label: "해지 변화 %",
-                              min: -100,
-                              max: 300,
-                            },
-                            {
-                              key: "variableCostPct",
-                              label: "변동비 변화 %",
-                              min: -100,
-                              max: 300,
-                            },
-                            {
-                              key: "dailyCost",
-                              label: "일 추가 비용 원",
-                              min: 0,
-                              max: 1e9,
-                            },
-                            {
-                              key: "oneTimeCost",
-                              label: "일회성 비용 원",
-                              min: 0,
-                              max: 1e10,
-                            },
-                          ] as const
-                        ).map((f) => (
-                          <Field key={f.key} label={f.label}>
-                            <select
-                              className={selectClass}
-                              value={form[f.key]}
-                              onChange={(e) =>
-                                set(f.key, Number(e.target.value))
-                              }
-                            >
-                              {[
-                                ...new Set([
-                                  ...(f.key === "dailyCost" ||
-                                  f.key === "oneTimeCost"
-                                    ? [
-                                        0, 1000, 5000, 10000, 30000, 50000,
-                                        100000, 300000, 500000, 1000000,
-                                      ]
-                                    : [
-                                        -50, -30, -20, -10, -5, 0, 5, 10, 15,
-                                        20, 30, 50, 100,
-                                      ]),
-                                  form[f.key],
-                                ]),
-                              ]
-                                .sort((a, b) => a - b)
-                                .map((value) => (
-                                  <option key={value} value={value}>
-                                    {value.toLocaleString("ko-KR")}
-                                    {f.key === "dailyCost" ||
-                                    f.key === "oneTimeCost"
-                                      ? "원"
-                                      : "%"}
-                                  </option>
-                                ))}
-                            </select>
-                          </Field>
-                        ))}
-                      </div>
-                    </details>
                   )}
                   <div className="rounded-lg border p-3 text-xs leading-6 text-muted-foreground">
                     <strong className="font-medium text-foreground">
@@ -1083,7 +896,7 @@ export function RegistrationWizard({
                     <br />
                     {phase === "review"
                       ? "확인 후 등록해야 타임라인에 반영됩니다."
-                      : "AI로 요건 분석 후, 변경요인을 검토하고 등록할 수 있습니다."}
+                      : directPolicy ? "입력한 조건과 예상 결과를 검토한 후 등록합니다." : "AI로 요건 분석 후, 변경요인을 검토하고 등록할 수 있습니다."}
                   </div>
                 </>
               )}
@@ -1101,7 +914,7 @@ export function RegistrationWizard({
       </div>
       <footer className="flex shrink-0 items-center justify-between border-t bg-background px-6 py-4 sm:px-8">
         <span className="text-xs text-muted-foreground">
-          {phase === "done" ? "등록 완료" : choosingMethod ? "정책 실험 · 등록 방식 선택" : `${step + 1} / 4 단계`}
+          {phase === "done" ? "등록 완료" : choosingMethod ? "판매정책 · 등록 방식 선택" : `${kind === "event" ? step : step + 1} / ${kind === "event" ? 3 : 4} 단계`}
         </span>
         <div className="flex gap-2">
           {phase === "edit" && (
@@ -1109,9 +922,11 @@ export function RegistrationWizard({
               <Button
                 variant="ghost"
                 onClick={() => {
-                  if (choosingPriorities) setChoosingPriorities(false);
-                  else if (choosingMethod) setChoosingMethod(false);
-                  else if (step === 0) onClose();
+                  if(automatic && step===2){setStep(0);setChoosingMethod(true);setChoosingPriorities(true);}
+                  else if(kind==="experiment" && inputMode==="prompt" && step===3){setStep(0);setChoosingMethod(true);}
+                  else if (choosingPriorities) setChoosingPriorities(false);
+                  else if (choosingMethod) onClose();
+                  else if (step === 0 || (kind === "event" && step === 1)) onClose();
                   else if (step === 1 && kind === "experiment") {setStep(0);setChoosingMethod(true);}
                   else {
                     setStep(step - 1);
@@ -1119,7 +934,7 @@ export function RegistrationWizard({
                   }
                 }}
               >
-                {step === 0 && !choosingMethod ? (
+                {(kind === "event" && step === 1) || (choosingMethod && !choosingPriorities) ? (
                   "취소"
                 ) : (
                   <>
@@ -1128,7 +943,8 @@ export function RegistrationWizard({
                   </>
                 )}
               </Button>
-              {!choosingMethod && (step < 3 ? (
+              {choosingPriorities && <Button onClick={()=>{setChoosingPriorities(false);setChoosingMethod(false);setAutomatic(true);setInputMode("prompt");setStep(2);setError("");}}>다음<ArrowRight className="size-4"/></Button>}
+              {automatic && step===2 && !choosingMethod ? <Button onClick={autoSuggest}><Sparkles className="size-4"/>AI 제안</Button> : !choosingMethod && (step < 3 ? (
                 <Button onClick={next}>
                   다음
                   <ArrowRight className="size-4" />
@@ -1152,13 +968,14 @@ export function RegistrationWizard({
                 variant="ghost"
                 onClick={() => {
                   setPhase("edit");
+                  if(directPolicy)setStep(1);else if(automatic)setStep(2);
                   setError("");
                 }}
               >
                 아니요, 수정할게요
               </Button>
               <Button disabled={selectedScenario === null} onClick={run}>
-                선택안으로 {kind === "experiment" ? "실험" : "이벤트"} 등록
+                {kind === "experiment" ? "판매정책 완료·반영" : "선택안으로 이벤트 등록"}
               </Button>
             </>
           )}

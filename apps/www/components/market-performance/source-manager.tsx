@@ -1,4 +1,5 @@
 "use client";
+import { RecordMenu } from "./record-menu";
 import { getEventType } from "@/components/market-performance/data";
 
 import { useState } from "react";
@@ -35,12 +36,17 @@ export function SourceManager({
   const [editing, setEditing] = useState<ReferenceSource | null>(null);
   const [error, setError] = useState("");
   const [page, setPage] = useState(0);
+  const [sourceFilter, setSourceFilter] = useState("all");
   const [query, setQuery] = useState("");
-  const filteredSources = draft.sourceDefinitions.filter((source) =>
-    [source.name, source.group, source.operator, source.channel, source.url]
-      .join(" ")
-      .toLocaleLowerCase()
-      .includes(query.trim().toLocaleLowerCase()),
+  const filteredSources = draft.sourceDefinitions.filter(
+    (source) =>
+      (sourceFilter === "all" ||
+        Boolean(draft.sources[source.id] ?? true) ===
+          (sourceFilter === "enabled")) &&
+      [source.name, source.group, source.operator, source.channel, source.url]
+        .join(" ")
+        .toLocaleLowerCase()
+        .includes(query.trim().toLocaleLowerCase()),
   );
   const pageCount = Math.max(1, Math.ceil(filteredSources.length / 6));
   const currentPage = Math.min(page, pageCount - 1);
@@ -87,6 +93,19 @@ export function SourceManager({
         </Button>
       </CardHeader>
       <CardContent className="space-y-3">
+        <select
+          aria-label="소스 참조 필터"
+          className="h-9 rounded-md border bg-background px-2 text-sm"
+          value={sourceFilter}
+          onChange={(e) => {
+            setSourceFilter(e.target.value);
+            setPage(0);
+          }}
+        >
+          <option value="all">모든 참조 상태</option>
+          <option value="enabled">참조 중</option>
+          <option value="disabled">참조 제외</option>
+        </select>
         <Input
           type="search"
           aria-label="참조 소스 검색"
@@ -133,42 +152,36 @@ export function SourceManager({
                     })
                   }
                 />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  aria-label={`${source.name} 수정`}
-                  onClick={() =>
-                    open({
-                      ...source,
-                      selectedTypes: [...source.selectedTypes],
-                    })
-                  }
-                >
-                  <Pencil className="size-4" />
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  aria-label={`${source.name} 삭제`}
-                  onClick={() => {
-                    const sources = { ...draft.sources };
-                    delete sources[source.id];
-                    onChange({
-                      ...draft,
-                      sources,
-                      deletedSourceUrls: source.url
-                        ? [...draft.deletedSourceUrls, source.url]
-                        : draft.deletedSourceUrls,
-                      sourceDefinitions: draft.sourceDefinitions.filter(
-                        (s) => s.id !== source.id,
-                      ),
-                    });
-                  }}
-                >
-                  <Trash2 className="size-4" />
-                </Button>
+                <RecordMenu
+                  label={source.name}
+                  actions={[
+                    {
+                      label: "상세보기 · 수정",
+                      onClick: () =>
+                        open({
+                          ...source,
+                          selectedTypes: [...source.selectedTypes],
+                        }),
+                    },
+                    {
+                      label: "삭제",
+                      onClick: () => {
+                        const sources = { ...draft.sources };
+                        delete sources[source.id];
+                        onChange({
+                          ...draft,
+                          sources,
+                          deletedSourceUrls: source.url
+                            ? [...draft.deletedSourceUrls, source.url]
+                            : draft.deletedSourceUrls,
+                          sourceDefinitions: draft.sourceDefinitions.filter(
+                            (s) => s.id !== source.id,
+                          ),
+                        });
+                      },
+                    },
+                  ]}
+                />
               </div>
               <p
                 className="mt-2 truncate text-xs text-muted-foreground"

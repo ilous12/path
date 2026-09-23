@@ -11,10 +11,10 @@
   --font-sans: var(--font-pretendard), Arial, sans-serif;
   --font-mono: var(--font-pretendard), Arial, sans-serif;
   --font-serif: var(--font-pretendard), Arial, sans-serif;
-  /* Reduce text by 1px while retaining spacing and control sizes. */
-  --text-xs: calc(.75rem - 1px);
-  --text-sm: calc(.875rem - 1px);
-  --text-base: calc(1rem - 1px);
+  /* Compact on laptops; readable at FHD without scaling control geometry. */
+  --text-xs: clamp(11px, 0.625vw, 12px);
+  --text-sm: clamp(13px, 0.73vw, 14px);
+  --text-base: clamp(14px, 0.79vw, 15px);
   --text-lg: calc(1.125rem - 1px);
   --text-xl: calc(1.25rem - 1px);
   --text-2xl: calc(1.5rem - 1px);
@@ -69,3 +69,20 @@ body {
 
 
 
+
+/* Shared workspace density. Chart sizing follows viewport height, not width. */
+.mars-page-shell { padding: clamp(16px, 1.25vw, 28px); min-width: 0; }
+.mars-page-shell > * { min-width: 0; }
+.mars-home-chart { height: clamp(260px, 30dvh, 460px); }
+.mars-timeline-chart { height: clamp(440px, 54dvh, 740px); }
+.mars-detail-page { width: 100%; max-width: 1760px; margin-inline: auto; padding: clamp(16px, 1.5vw, 32px); }
+.mars-home-metrics { display: grid; gap: 8px; }
+@media (min-width: 1280px) {
+  .mars-home-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .mars-home-metrics > div { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .mars-home-metrics dd { font-size: clamp(16px, 1.05vw, 20px); }
+}
+@media (max-width: 767px) {
+  .mars-timeline-chart { height: 440px; }
+  .mars-home-chart { height: 280px; }
+}

@@ -1,4 +1,5 @@
 "use client";
+import { withPeriodMargins, chartObservationRange } from "@/components/market-performance/chart-period";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ArrowUpRight, Radio, ArrowRightLeft, EllipsisVertical } from "lucide-react";
@@ -46,8 +47,8 @@ export function ChannelPerformance({
       string,
       { date: string; newLines: number; transfers: number }
     >();
-    for (const row of selected.daily) {
-      const key = bucketKey(row.date, grainFor(range));
+    for (const row of (buildChannels(chartObservationRange(range)).find(c=>c.name===selected.name)?.daily??[])) {
+      const key = row.date;
       const item = grouped.get(key) ?? { date: key, newLines: 0, transfers: 0 };
       item.newLines += row.newLines;
       item.transfers += row.transfers;
@@ -59,7 +60,7 @@ export function ChannelPerformance({
     <section className="space-y-3" aria-label="채널 실적 및 상세">
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div>
-          <p className="mb-1 text-xs font-semibold tracking-wider text-primary">03 · 채널 점검</p><h2 className="text-lg font-semibold">가입 흐름과 채널 기여</h2>
+          <p className="mb-1 text-xs font-semibold tracking-wider text-primary">채널 점검</p><h2 className="text-lg font-semibold">가입 흐름과 채널 기여</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             채널별 가입·매출 기여를 비교하세요.
           </p>
@@ -301,7 +302,7 @@ export function ChannelPerformance({
                 }}
               >
                 <AreaChart
-                  data={trend}
+                  data={withPeriodMargins(trend, "date", range)}
                   margin={{ top: 4, left: 0, right: 0, bottom: 0 }}
                 >
                   <CartesianGrid vertical={false} strokeDasharray="3 4" />

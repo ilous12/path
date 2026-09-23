@@ -1,5 +1,10 @@
 "use client";
+import { AnalysisRangeControl } from "./analysis-range-control";
+import { WorkspaceHeader } from "./workspace-header";
+import { PageEntry } from "./page-entry";
 
+import planCatalog from "./fixtures/plan-catalog.json";
+import { RecordMenu } from "./record-menu";
 import { buildChannelDaily } from "./channel-data";
 import { useMemo, useState } from "react";
 import { Database, Table2, KeyRound, Link2, Search, X } from "lucide-react";
@@ -13,7 +18,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { buildPerformance, MIN_DATE, MAX_DATE, getEventType } from "./data";
+import { buildPerformance, MIN_DATE, MAX_DATE, presetRange, getEventType } from "./data";
 import { useEventCatalog } from "./event-catalog";
 import { useEventVisibility } from "./event-visibility";
 import { useAnalysisPreferences } from "./use-analysis-preferences";
@@ -34,6 +39,40 @@ const col = (
   nullable = false,
 ): Column => ({ name, label, type, key, nullable });
 const schemas = {
+  plan_offers: {
+    label: "채널별 요금제",
+    description:
+      "공식·카카오페이·모요 판매 조건. 월 청구 요금과 혜택 반영 체감가를 구분합니다.",
+    columns: [
+      col("offer_id", "판매 조건 ID", "VARCHAR", "PK"),
+      col("product_id", "상품 ID", "VARCHAR"),
+      col("name", "요금제", "TEXT"),
+      col("operator", "통신사", "VARCHAR"),
+      col("network", "망", "VARCHAR"),
+      col("channel", "채널", "VARCHAR"),
+      col("monthly_gb", "월 데이터 GB", "NUMBER", undefined, true),
+      col("daily_gb", "일 추가 GB", "NUMBER", undefined, true),
+      col("unlimited", "데이터 무제한", "BOOLEAN"),
+      col("qos_kbps", "QoS Kbps", "NUMBER", undefined, true),
+      col("billed", "월 청구 요금", "INTEGER"),
+      col("effective", "혜택 반영 체감가", "INTEGER"),
+      col("months", "체감가 기간", "INTEGER", undefined, true),
+      col("benefits", "혜택", "TEXT"),
+      col("observed_at", "수집 일시 UTC", "TIMESTAMP"),
+      col("source_url", "수집 출처", "TEXT"),
+      col("quality", "확인 항목", "TEXT"),
+    ],
+  },
+  plan_history: {
+    label: "요금제 가격 관측",
+    description:
+      "실제 수집 시점별 체감가. 단일 관측은 변경이나 추세를 의미하지 않습니다.",
+    columns: [
+      col("offer_id", "판매 조건 ID", "VARCHAR", "FK"),
+      col("observed_at", "수집 일시 UTC", "TIMESTAMP", "PK"),
+      col("effective", "체감가", "INTEGER", undefined, true),
+    ],
+  },
   channel_daily_performance: {
     label: "채널별 일별 실적",
     description:
@@ -106,7 +145,13 @@ const schemas = {
 };
 type TableName = keyof typeof schemas;
 const names = Object.keys(schemas) as TableName[];
-const money = new Set(["revenue", "expenses", "net_profit"]);
+const money = new Set([
+  "revenue",
+  "expenses",
+  "net_profit",
+  "billed",
+  "effective",
+]);
 function display(value: Row[string], field: string) {
   if (value === null) return "NULL";
   if (typeof value === "boolean") return value ? "TRUE" : "FALSE";
@@ -120,11 +165,12 @@ export function DataExplorer() {
   const { preferences, workspace } = useAnalysisPreferences();
   const [table, setTable] = useState<TableName>("daily_performance");
   const [mode, setMode] = useState<"rows" | "schema">("rows");
+  const [searchField, setSearchField] = useState("all");
   const [query, setQuery] = useState("");
   const [relationColumn, setRelationColumn] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const [selected, setSelected] = useState<Row | null>(null);
-  const [start, setStart] = useState("2026-08-19");
+  const [start, setStart] = useState(presetRange("1M").start);
   const [end, setEnd] = useState(MAX_DATE);
   const tables = useMemo<Record<TableName, Row[]>>(() => {
     const definitions = new Map(
@@ -135,6 +181,30 @@ export function DataExplorer() {
         if (!definitions.has(id))
           definitions.set(id, { id, ...getEventType(id), origin: "AI" });
     return {
+      plan_offers: planCatalog.offers.map((p) => ({
+        offer_id: p.offerId,
+        product_id: p.productId,
+        name: p.name,
+        operator: p.operator,
+        network: p.network,
+        channel: p.channel,
+        monthly_gb: p.monthlyDataGb,
+        daily_gb: p.dailyDataGb,
+        unlimited: p.unlimitedData,
+        qos_kbps: p.qosKbps,
+        billed: p.monthlyBilledKrw,
+        effective: p.displayedEffectiveKrw,
+        months: p.effectivePeriodMonths,
+        benefits: p.benefits.join(" · "),
+        observed_at: p.observedAt,
+        source_url: p.sourceUrl,
+        quality: p.qualityFlags.join(" · "),
+      })),
+      plan_history: planCatalog.history.map((p) => ({
+        offer_id: p.offerId,
+        observed_at: p.observedAt,
+        effective: p.effectiveKrw,
+      })),
       channel_daily_performance: buildChannelDaily({
         start: MIN_DATE,
         end: MAX_DATE,
@@ -208,10 +278,11 @@ export function DataExplorer() {
       !invalid &&
       (!relationColumn || String(row[relationColumn]) === query) &&
       (!dated || ((!start || date >= start) && (!end || date <= end))) &&
-      Object.values(row).some((v) =>
-        String(v ?? "NULL")
-          .toLowerCase()
-          .includes(query.trim().toLowerCase()),
+      (searchField === "all" ? Object.values(row) : [row[searchField]]).some(
+        (v) =>
+          String(v ?? "NULL")
+            .toLowerCase()
+            .includes(query.trim().toLowerCase()),
       )
     );
   });
@@ -224,6 +295,7 @@ export function DataExplorer() {
   ) => {
     setRelationColumn(column);
     setTable(next);
+    setSearchField("all");
     setQuery(search);
     setPage(0);
     setSelected(null);
@@ -235,15 +307,15 @@ export function DataExplorer() {
   };
   return (
     <div className="space-y-4">
-      <header className="flex flex-wrap items-center justify-between gap-3">
+      <WorkspaceHeader>
         <div>
           <h1 className="text-xl font-semibold">데이터</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             실적과 이벤트의 원본 레코드·컬럼·관계를 탐색합니다.
           </p>
         </div>
-
-      </header>
+      </WorkspaceHeader>
+      <PageEntry>
       <div className="grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
         <Card>
           <CardHeader>
@@ -317,12 +389,33 @@ export function DataExplorer() {
             {mode === "rows" ? (
               <>
                 <div className="flex flex-wrap items-center gap-2">
+                  <select
+                    aria-label="검색 컬럼 필터"
+                    className="h-9 rounded-md border bg-background px-2 text-sm"
+                    value={searchField}
+                    onChange={(e) => {
+                      setSearchField(e.target.value);
+                      setPage(0);
+                    }}
+                  >
+                    <option value="all">모든 컬럼</option>
+                    {schema.columns.map((c) => (
+                      <option key={c.name} value={c.name}>
+                        {c.label}
+                      </option>
+                    ))}
+                  </select>
                   <div className="relative min-w-48 flex-1">
                     <Search className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
+
                     <Input
                       className="pl-9"
                       aria-label="레코드 검색"
-                      placeholder="모든 컬럼에서 검색"
+                      placeholder={
+                        searchField === "all"
+                          ? "모든 컬럼에서 검색"
+                          : `${schema.columns.find((c) => c.name === searchField)?.label ?? "선택 컬럼"}에서 검색`
+                      }
                       value={query}
                       onChange={(e) => {
                         setQuery(e.target.value);
@@ -332,33 +425,7 @@ export function DataExplorer() {
                       }}
                     />
                   </div>
-                  {dated && (
-                    <>
-                      <Input
-                        className="w-auto"
-                        type="date"
-                        aria-label="조회 시작일"
-                        value={start}
-                        onChange={(e) => {
-                          setStart(e.target.value);
-                          setPage(0);
-                          setSelected(null);
-                        }}
-                      />
-                      <span className="text-muted-foreground">~</span>
-                      <Input
-                        className="w-auto"
-                        type="date"
-                        aria-label="조회 종료일"
-                        value={end}
-                        onChange={(e) => {
-                          setEnd(e.target.value);
-                          setPage(0);
-                          setSelected(null);
-                        }}
-                      />
-                    </>
-                  )}
+                  {dated && <AnalysisRangeControl range={{start,end}} onChange={r=>{setStart(r.start);setEnd(r.end);setPage(0);setSelected(null);}} />}
                 </div>
                 {invalid && (
                   <p role="alert" className="text-sm text-destructive">
@@ -387,6 +454,9 @@ export function DataExplorer() {
                             </span>
                           </th>
                         ))}
+                        <th className="sticky right-0 bg-card">
+                          <span className="sr-only">항목 메뉴</span>
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
@@ -415,12 +485,27 @@ export function DataExplorer() {
                                 {display(row[c.name], c.name)}
                               </td>
                             ))}
+                            <td
+                              className="sticky right-0 bg-card px-2"
+                              onClick={(e) => e.stopPropagation()}
+                              onKeyDown={(e) => e.stopPropagation()}
+                            >
+                              <RecordMenu
+                                label="레코드"
+                                actions={[
+                                  {
+                                    label: "상세보기",
+                                    onClick: () => setSelected(row),
+                                  },
+                                ]}
+                              />
+                            </td>
                           </tr>
                         ))}
                       {!rows.length && (
                         <tr>
                           <td
-                            colSpan={schema.columns.length}
+                            colSpan={schema.columns.length + 1}
                             className="h-40 text-center text-muted-foreground"
                           >
                             조회된 레코드가 없습니다.
@@ -512,6 +597,46 @@ export function DataExplorer() {
                   ))}
                 </dl>
                 <div className="mt-4 flex flex-wrap gap-2">
+                  {table === "plan_offers" && (
+                    <div className="flex gap-3">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() =>
+                          navigate(
+                            "plan_history",
+                            String(selected.offer_id),
+                            "offer_id",
+                          )
+                        }
+                      >
+                        가격 관측 이력
+                      </Button>
+                      <a
+                        className="text-sm underline"
+                        href={String(selected.source_url)}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        수집 출처 ↗
+                      </a>
+                    </div>
+                  )}
+                  {table === "plan_history" && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() =>
+                        navigate(
+                          "plan_offers",
+                          String(selected.offer_id),
+                          "offer_id",
+                        )
+                      }
+                    >
+                      판매 조건 보기
+                    </Button>
+                  )}
                   {table === "events" && (
                     <Button
                       variant="outline"
@@ -578,6 +703,7 @@ export function DataExplorer() {
       <p className="text-xs text-muted-foreground">
         금액 단위는 ₩이며, NULL은 미기록 값입니다.
       </p>
+      </PageEntry>
     </div>
   );
 }

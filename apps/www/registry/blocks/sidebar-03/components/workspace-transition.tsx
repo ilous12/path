@@ -39,6 +39,12 @@ export function WorkspaceTransition({ children }: { children: ReactNode }) {
     if (pending && minimumElapsed && workspace === pending.id) setPending(null);
   }, [pending, minimumElapsed, workspace]);
 
+  useEffect(() => {
+    const cancelPending = () => { setPending(null); setMinimumElapsed(false); };
+    window.addEventListener("popstate", cancelPending);
+    return () => window.removeEventListener("popstate", cancelPending);
+  }, []);
+
   const navigate = (href: string, id: string, name: string) => {
     if (pending || workspace === id) return;
     setMinimumElapsed(false);

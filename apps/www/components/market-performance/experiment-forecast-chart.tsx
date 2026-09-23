@@ -1,5 +1,5 @@
 "use client";
-import { DataBasis } from "./data-basis";
+import { forecastChartMargins } from "./forecast-chart-period";
 import { FORECAST_METHODS } from "./forecast";
 import { hasChannelData } from "./channel-data";
 import { useMemo, useState } from "react";
@@ -25,7 +25,7 @@ import {
 const config = {
   observed: { label: "관측", color: "var(--color-cyan-500)" },
   reference: { label: "기준 전망", color: "var(--muted-foreground)" },
-  forecast: { label: "실험 예측", color: "var(--color-amber-500)" },
+  forecast: { label: "정책 예측", color: "var(--color-amber-500)" },
 };
 export function ExperimentForecastChart({
   experiment: source,
@@ -45,15 +45,15 @@ export function ExperimentForecastChart({
     chart.growthPct === null
       ? "산출 불가"
       : `${chart.growthPct > 0 ? "+" : ""}${chart.growthPct.toFixed(1)}%`;
-  if (!hasChannelData(a.targetChannels)) return <section className="rounded-xl border bg-card p-5"><h2 className="font-semibold">실험 예상 차트 · 데이터 연결 대기</h2><p className="mt-2 text-sm text-muted-foreground">{a.targetChannels?.join(", ")} 채널의 기준 실적을 연결하면 예측을 계산할 수 있습니다.</p></section>;
+  if (!hasChannelData(a.targetChannels)) return <section className="rounded-xl border bg-card p-5"><h2 className="font-semibold">정책 예상 차트 · 데이터 연결 대기</h2><p className="mt-2 text-sm text-muted-foreground">{a.targetChannels?.join(", ")} 채널의 기준 실적을 연결하면 예측을 계산할 수 있습니다.</p></section>;
   return (
     <section
-      aria-label="실험 예상 차트"
+      aria-label="정책 예상 차트"
       className="space-y-4 rounded-xl border bg-card p-4 sm:p-5"
     >
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h2 className="text-lg font-semibold">실험 예상 차트</h2>
+          <h2 className="text-lg font-semibold">정책 예상 차트</h2>
           {a.forecastMethod && <p className="mt-1 text-xs font-medium text-primary">{FORECAST_METHODS[a.forecastMethod].label} · 시작 전 최대 28일 학습</p>}
           <p className="mt-1 text-xs leading-5 text-muted-foreground">
             {a.targetChannels?.length?`${a.targetChannels.join(", ")} 채널 기준 · `:"전체 채널 기준 · "}시작 전 7일과 전체 예측 기간을 비교합니다. 관측은 실선, 예측은
@@ -78,10 +78,10 @@ export function ExperimentForecastChart({
           ))}
         </div>
       </div>
-      <div role="group" aria-label="실험 예측 알고리즘" className="flex flex-wrap gap-2">
+      <div role="group" aria-label="정책 예측 알고리즘" className="flex flex-wrap gap-2">
         {(["average", "smoothing", "damped", "trend", "prophet", "sarimax", "xgboost"] as const).map(method => <Button type="button" size="sm" key={method} variant={(a.forecastMethod ?? (a.demoCustomerForecast ? undefined : "average")) === method ? "secondary" : "outline"} aria-pressed={(a.forecastMethod ?? (a.demoCustomerForecast ? undefined : "average")) === method} onClick={() => onMethodChange ? onMethodChange(method) : setComparisonMethod(method)}>{FORECAST_METHODS[method].label}</Button>)}
         {comparisonMethod && !onMethodChange && <Button type="button" size="sm" variant="ghost" onClick={() => setComparisonMethod(undefined)}>등록된 예측 보기</Button>}
-        <p className="w-full text-xs text-muted-foreground">{onMethodChange ? "선택한 알고리즘을 실험과 함께 저장합니다." : comparisonMethod ? "알고리즘 비교 중 · 등록된 예측과 아래 집계값은 유지됩니다." : "등록된 예측 · 알고리즘을 선택해 같은 기간과 정책 가정으로 비교하세요."} 기준 전망은 정책을 변경하지 않은 경우입니다.</p>
+        <p className="w-full text-xs text-muted-foreground">{onMethodChange ? "선택한 알고리즘을 정책과 함께 저장합니다." : comparisonMethod ? "알고리즘 비교 중 · 등록된 예측과 아래 집계값은 유지됩니다." : "등록된 예측 · 알고리즘을 선택해 같은 기간과 정책 가정으로 비교하세요."} 기준 전망은 정책을 변경하지 않은 경우입니다.</p>
 
       </div>
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs">
@@ -92,7 +92,7 @@ export function ExperimentForecastChart({
         </span>
         <span className="flex items-center gap-2">
           <span className="w-5 border-t-2 border-dashed border-amber-500" />
-          실험 예측
+          정책 예측
         </span>
         <span className="text-muted-foreground">
           음영: 적용 {a.start} ~ {chart.applyEnd}
@@ -104,7 +104,7 @@ export function ExperimentForecastChart({
       >
         <LineChart
           accessibilityLayer
-          data={chart.rows}
+          data={forecastChartMargins(chart.rows, "date", metric, "observed", a.targetChannels, undefined, a.composition?.workspace)}
           margin={{ top: 30, right: 80, left: 4, bottom: 6 }}
         >
           <CartesianGrid vertical={false} strokeDasharray="3 4" />
@@ -139,7 +139,7 @@ export function ExperimentForecastChart({
             stroke="var(--muted-foreground)"
             strokeDasharray="3 3"
             label={{
-              value: "실험 시작",
+              value: "정책 시작",
               position: "insideTopLeft",
               fontSize: 10,
               fill: "var(--muted-foreground)",
@@ -207,7 +207,7 @@ export function ExperimentForecastChart({
           <Line dataKey="reference" name="기준 전망" type="linear" stroke="var(--color-reference)" strokeWidth={1.5} strokeDasharray="3 4" dot={false} connectNulls={false} isAnimationActive={false} />
           <Line
             dataKey="forecast"
-            name="실험 예측"
+            name="정책 예측"
             type="linear"
             stroke="var(--color-forecast)"
             strokeWidth={3}
@@ -243,7 +243,7 @@ export function ExperimentForecastChart({
           시작 직전 대비 <strong>{rate}</strong>
         </span>
       </div>
-      <DataBasis label="합성 데이터 · 산출 기준" details={`관측 자료는 ${MAX_DATE}까지의 합성 데이터입니다. ${a.demoCustomerForecast ? "회선 예측은 관측값을 참고해 사후 구성했습니다." : "예측은 입력 가정으로 계산합니다."} Prophet·SARIMAX·XGBoost는 학습 모델이 아닌 근사 계산입니다. 실제 정책 효과나 검증된 예측 정확도를 의미하지 않습니다.`} />
+      
     </section>
   );
 }

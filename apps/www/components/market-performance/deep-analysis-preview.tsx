@@ -56,7 +56,7 @@ export function DeepAnalysisPreview({
           {[
             {
               icon: FlaskConical,
-              title: "요금 탄력도 실험",
+              title: "요금 탄력도 정책",
               question:
                 "일부 요금제를 5% 인하하면 가입·해지·순익이 어떻게 바뀔까?",
               result: "변경 폭별 예측 곡선 · 손익분기점 · 민감도 비교",
@@ -66,13 +66,13 @@ export function DeepAnalysisPreview({
               title: "마케팅 시뮬레이션",
               question:
                 "TOSS와 MOYO의 예산·혜택을 재배분하면 어떤 조합이 유리할까?",
-              result: "실험별 성과 차트 · 비용·수익 비교표 · 제약 조건",
+              result: "정책별 성과 차트 · 비용·수익 비교표 · 제약 조건",
             },
             {
               icon: Search,
               title: "변화 원인과 반례 검토",
               question: "회복이 가격 대응 때문일까, 채널 노출 효과일까?",
-              result: "근거 이벤트 · 실험 가설 · 추가 확인할 데이터",
+              result: "근거 이벤트 · 정책 가설 · 추가 확인할 데이터",
             },
           ].map((item) => (
             <div

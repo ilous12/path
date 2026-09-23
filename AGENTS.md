@@ -2,7 +2,7 @@
 
 - This is a clone of the Lumi UI source. Preserve its MIT license and upstream attribution.
 - App: `apps/www`; Playground: `app/[locale]/(view)/(dashboard)/page.tsx`.
-- Use the installed `lumi` skill when creating or changing UI mockups.
+- Use the installed `mars` skill for MARS UI and policy-workspace changes. Its entrypoint is `~/.codex/skills/mars/SKILL.md`; it covers the local Lumi UI and Base UI layers. Use `lumi` for general Lumi integration guidance when needed.
 - Feature imports use `@/components/ui/*`. Preserve Base UI `render` composition, data-slot attributes, semantic tokens, root isolation, and shared animation utilities.
 - `components/ui/toast.tsx` intentionally re-exports the upstream module to share toast managers with the app Toaster.
 - Use pnpm; do not update bun.lock. pnpm-lock.yaml is the active lockfile.

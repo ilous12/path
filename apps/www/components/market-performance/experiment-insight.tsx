@@ -1,10 +1,15 @@
 "use client";
+import { AIChatTrigger } from "@/registry/blocks/sidebar-03/components/ai-chat";
+import { WorkspaceHeader } from "./workspace-header";
+import { RefreshingAnalysis } from "./refreshing-analysis";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ExperimentForecastChart } from "./experiment-forecast-chart";
 import { RequirementsSummary, ReviewSummary } from "./requirements-summary";
 import { hasChannelData } from "./channel-data";
 import Link from "next/link";
+import { airTermsSummary } from "./air-sales-terms";
+import { AnalysisBackLink } from "./analysis-navigation";
 import { useAlternatives } from "./alternative-store";
 import { dayShift, projectAlternative, evaluateDemoExperiment } from "./alternative-model";
 
@@ -13,7 +18,7 @@ export function ExperimentInsight({id}: {id: string}) {
   const [pagination, setPagination] = useState({ key: "", page: 1 });
   const {alternatives} = useAlternatives();
   const experiment = alternatives.find(item => item.id === id);
-  if (!experiment) return <main className="mx-auto max-w-5xl space-y-4 p-6"><h1 className="text-2xl font-semibold">비지니스 인사이트 · 실험</h1><p>실험을 찾을 수 없습니다. 등록된 실험을 확인하세요.</p><Link href="/?view=events" className="text-primary underline">이벤트·실험 관리</Link></main>;
+  if (!experiment) return <main className="mx-auto max-w-5xl space-y-4 p-6"><h1 className="text-2xl font-semibold">정책 상세</h1><p>정책을 찾을 수 없습니다. 등록된 정책을 확인하세요.</p><Link href="/?view=events" className="text-primary underline">이벤트·정책 관리</Link></main>;
   const a = experiment;
   const rows = hasChannelData(a.targetChannels) ? projectAlternative(a) : [];
   const paginationKey = `${id}:${a.start}:${a.days}:${a.targetChannels?.join(",") ?? ""}`;
@@ -28,10 +33,11 @@ export function ExperimentInsight({id}: {id: string}) {
     {key:"revenue",delta:"revenueDelta",label:"매출",unit:"원"},
     {key:"netProfit",delta:"netProfitDelta",label:"순익",unit:"원"},
   ] as const;
-  return <main className="mx-auto w-full max-w-6xl space-y-6 p-5 sm:p-8">
-    <Link href={`/?workspace=${encodeURIComponent(a.workspace ?? "air")}`} className="text-sm text-muted-foreground hover:text-foreground">← 타임라인</Link>
-    <header className="space-y-2"><p className="text-sm font-medium text-primary">비지니스 인사이트 · 실험 상세</p><h1 className="text-2xl font-semibold">{a.title}</h1><p className="text-sm text-muted-foreground">{(a.workspace ?? "air").toUpperCase()} · {a.type} · {a.groupName || "미분류"}</p></header>
-    <section className="space-y-4 rounded-xl border bg-card p-5"><h2 className="text-lg font-semibold">실험 목적과 기간</h2><p className="whitespace-pre-wrap leading-7">{a.description}</p><div className="flex flex-wrap gap-x-8 gap-y-2 text-sm"><p>적용 {a.start} ~ {dayShift(a.start,(a.applyDays??a.days)-1)}</p><p>예측 {a.start} ~ {dayShift(a.start,a.days-1)}</p></div>{a.prompt && <p className="border-t pt-4 text-sm text-muted-foreground">입력 프롬프트: {a.prompt}</p>}</section>
+  return <main className="mars-detail-page space-y-5">
+    <div className="flex items-center justify-between gap-3"><AnalysisBackLink href={`/?workspace=${encodeURIComponent(a.workspace ?? "air")}`} className="text-sm text-muted-foreground hover:text-foreground">← 이전 화면</AnalysisBackLink><AIChatTrigger /></div>
+<WorkspaceHeader><div className="space-y-2"><p className="text-sm font-medium text-primary">정책 상세</p><h1 className="text-2xl font-semibold">{a.title}</h1><p className="text-sm text-muted-foreground">{(a.workspace ?? "air").toUpperCase()} · {a.type} · {a.groupName || "미분류"}</p></div></WorkspaceHeader><RefreshingAnalysis mode="detail" refreshKey={id}>
+    {a.salesTerms && <section className="rounded-xl border bg-card p-4"><h2 className="font-semibold">요금제 · 채널 판매조건</h2><p className="mt-2 text-sm leading-6">{airTermsSummary(a.salesTerms)}</p></section>}
+    <section className="space-y-4 rounded-xl border bg-card p-5"><h2 className="text-lg font-semibold">정책 목적과 기간</h2><p className="whitespace-pre-wrap leading-7">{a.description}</p><div className="flex flex-wrap gap-x-8 gap-y-2 text-sm"><p>적용 {a.start} ~ {dayShift(a.start,(a.applyDays??a.days)-1)}</p><p>예측 {a.start} ~ {dayShift(a.start,a.days-1)}</p></div>{a.prompt && <p className="border-t pt-4 text-sm text-muted-foreground">입력 프롬프트: {a.prompt}</p>}</section>
     <section className="rounded-xl border bg-card p-4 text-sm"><p>적용 채널 · {a.targetChannels?.length?a.targetChannels.join(", "):"전체 채널"}</p>{a.analysisContext&&<p className="mt-2 text-xs leading-5 text-muted-foreground">분석 근거 · {a.analysisContext.start} ~ {a.analysisContext.end} · {a.analysisContext.channels.join(", ")||"전체 채널"}<br/>{a.analysisContext.reason}</p>}</section>
     <ExperimentForecastChart key={a.id} experiment={a}/>
     {evaluation && <section className="space-y-3 rounded-xl border bg-card p-5"><h2 className="text-lg font-semibold">예측·관측 비교 · 사후 구성 시나리오</h2><p>평가일 {evaluation.date} · 시작 전일 기준 {evaluation.baseline}회선</p><p>예측 {evaluation.forecast}회선 ({evaluation.forecastGrowthPct.toFixed(1)}%) / 관측 {evaluation.actual}회선 ({evaluation.actualGrowthPct.toFixed(1)}%)</p><p className="font-semibold">예측 증가분 대비 관측 달성률: {evaluation.attainment?.toFixed(1) ?? "산출 불가"}%</p><p>{evaluation.matchedOnset ? `증가 전환일 ${evaluation.actualOnset} 일치` : (evaluation.attainment !== null && evaluation.attainment >= 100 ? "관측 증가분이 예측 증가분 이상입니다. 전환일 일치는 별도 기준으로 평가합니다." : "관측 증가분이 예측에 미달했습니다.")}</p><p className="text-sm text-muted-foreground">달성률 = (평가일 관측 − 시작 전일 관측) ÷ (평가일 예측 − 시작 전일 관측) × 100. 전환일은 전일 대비 20% 초과 상승이 처음 나타난 날입니다. 음수 달성률은 실제 감소를 뜻합니다. 합성 데이터에 맞춰 사후 구성한 예시이며 실제 예측 정확도나 정책 인과효과가 아닙니다.</p></section>}
@@ -50,11 +56,11 @@ export function ExperimentInsight({id}: {id: string}) {
         </div>
       </nav>
     </section>
-  </main>;
+  </RefreshingAnalysis></main>;
 }
 
 export function ExperimentInsightGroup({ids}: {ids:string[]}) {
   const {alternatives}=useAlternatives();
   const items=alternatives.filter(a=>ids.includes(a.id));
-  return <main className="mx-auto max-w-5xl space-y-5 p-6"><Link href={`/?workspace=${encodeURIComponent(items[0]?.workspace ?? "air")}`} className="text-sm text-muted-foreground">← 타임라인</Link><h1 className="text-2xl font-semibold">비지니스 인사이트 · 실험 {items.length}건</h1><p className="text-sm text-muted-foreground">같은 시점의 실험입니다. 상세 분석할 실험을 선택하세요.</p><div className="space-y-3">{items.map(a=><Link key={a.id} href={`/analysis?experiment=${encodeURIComponent(a.id)}`} className="block space-y-2 rounded-xl border bg-card p-5 hover:bg-accent"><h2 className="font-semibold">{a.title} →</h2><p className="text-sm text-muted-foreground">{a.start} · {a.type}</p><p className="line-clamp-2 text-sm">{a.description}</p></Link>)}</div></main>;
+  return <main className="mx-auto max-w-5xl space-y-5 p-6"><div className="flex items-center justify-between gap-3"><AnalysisBackLink href={`/?workspace=${encodeURIComponent(items[0]?.workspace ?? "air")}`} className="text-sm text-muted-foreground">← 이전 화면</AnalysisBackLink><AIChatTrigger /></div><WorkspaceHeader><div><h1 className="text-2xl font-semibold">정책 상세 {items.length}건</h1><p className="mt-2 text-sm text-muted-foreground">같은 시점의 정책입니다. 상세 분석할 정책을 선택하세요.</p></div></WorkspaceHeader><RefreshingAnalysis mode="detail" refreshKey={ids.join(",")}><div className="space-y-3">{items.map(a=><Link key={a.id} href={`/analysis?experiment=${encodeURIComponent(a.id)}`} className="block space-y-2 rounded-xl border bg-card p-5 hover:bg-accent"><h2 className="font-semibold">{a.title} →</h2><p className="text-sm text-muted-foreground">{a.start} · {a.type}</p><p className="line-clamp-2 text-sm">{a.description}</p></Link>)}</div></RefreshingAnalysis></main>;
 }

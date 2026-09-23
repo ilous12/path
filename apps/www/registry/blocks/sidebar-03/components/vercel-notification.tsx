@@ -92,7 +92,7 @@ export function Notifications() {
       variant="outline"
     >
       <Bell />
-      {unread > 0 && (
+      {unread > 1 && (
         <span
           aria-hidden="true"
           className="absolute -right-2 -top-2 rounded-full border border-background bg-primary px-1 min-w-5 text-[9px] font-bold text-primary-foreground shadow-sm"

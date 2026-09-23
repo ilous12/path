@@ -1,5 +1,6 @@
 import type { PolicyRequirements, PolicyReviewSnapshot } from "./policy-requirements";
 import reportedEvents from "./fixtures/telecom-news.json";
+import nuggetScenarioEvents from "./fixtures/nugget-response-events.json";
 import demoEvents from "./fixtures/telecom-demo.json";
 
 export const EVENT_TYPES: Record<
@@ -119,15 +120,15 @@ export type MarketEvent = {
   next: string;
 };
 // Static snapshot: real publication dates are preserved; only demo events are randomized.
-export const EVENTS: MarketEvent[] = [...reportedEvents, ...demoEvents] as MarketEvent[];
+export const EVENTS: MarketEvent[] = [...reportedEvents, ...demoEvents, ...nuggetScenarioEvents] as MarketEvent[];
 
 const timestamp = (date: string) => Date.parse(`${date}T00:00:00Z`);
 export const daysBetween = (start: string, end: string) =>
   Math.round((timestamp(end) - timestamp(start)) / DAY) + 1;
 /** Resize the selected interval around its midpoint, clamped to available dates. */
-export function zoomRange(range: Range, delta: number): Range {
+export function zoomRange(range: Range, delta: number, maxDate = MAX_DATE): Range {
   if (!Number.isFinite(delta) || delta === 0) return range;
-  const total = daysBetween(MIN_DATE, MAX_DATE);
+  const total = daysBetween(MIN_DATE, maxDate);
   const current = daysBetween(range.start, range.end);
   const scaled = current * Math.exp(Math.max(-1, Math.min(1, delta * 0.002)));
   const size = Math.max(
@@ -144,9 +145,9 @@ export function zoomRange(range: Range, delta: number): Range {
   return { start: date(start), end: date(start + size - 1) };
 }
 /** Pan a window without changing its duration or crossing available data bounds. */
-export function panRange(range: Range, offsetDays: number): Range {
+export function panRange(range: Range, offsetDays: number, maxDate = MAX_DATE): Range {
   if (!Number.isFinite(offsetDays)) return range;
-  const offset = Math.max(daysBetween(range.start, MIN_DATE) - 1, Math.min(daysBetween(range.end, MAX_DATE) - 1, Math.round(offsetDays)));
+  const offset = Math.max(daysBetween(range.start, MIN_DATE) - 1, Math.min(daysBetween(range.end, maxDate) - 1, Math.round(offsetDays)));
   const shift = (date: string) => new Date(timestamp(date) + offset * DAY).toISOString().slice(0,10);
   return {start:shift(range.start),end:shift(range.end)};
 }
@@ -160,7 +161,7 @@ export function presetRange(preset: string): Range {
     end: MAX_DATE,
   };
 }
-export function validateRange(range: Range): string | undefined {
+export function validateRange(range: Range, maxDate = MAX_DATE): string | undefined {
   if (
     ![range.start, range.end].every(
       (d) =>
@@ -171,8 +172,8 @@ export function validateRange(range: Range): string | undefined {
   )
     return "시작일과 종료일을 올바른 날짜로 입력하세요.";
   if (range.start > range.end) return "종료일은 시작일 이후여야 합니다.";
-  if (range.start < MIN_DATE || range.end > MAX_DATE)
-    return `조회 가능 기간은 ${MIN_DATE}~${MAX_DATE}입니다.`;
+  if (range.start < MIN_DATE || range.end > maxDate)
+    return `조회 가능 기간은 ${MIN_DATE}~${maxDate}입니다.`;
 }
 export function grainFor(range: Range): Grain {
   const days = daysBetween(range.start, range.end);
@@ -194,7 +195,7 @@ export function buildPerformance(range: Range, grain: Grain = grainFor(range)) {
       days: number;
     }
   >();
-  for (let t = timestamp(range.start); t <= timestamp(range.end); t += DAY) {
+  for (let t = Math.max(timestamp(range.start), timestamp(MIN_DATE)); t <= Math.min(timestamp(range.end), timestamp(MAX_DATE)); t += DAY) {
     const i = Math.round((t - timestamp(MIN_DATE)) / DAY);
     const key = bucketKey(new Date(t).toISOString(), grain);
     const date = new Date(t).toISOString().slice(0, 10);

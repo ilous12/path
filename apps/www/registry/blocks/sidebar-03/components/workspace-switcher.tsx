@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronsUpDown } from "lucide-react";
+import { House, ChevronsUpDown } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import {
@@ -14,12 +14,14 @@ import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
 import { useWorkspaceTransition } from "./workspace-transition";
 
 const workspaces = [
+  { id: "home", name: "Home" },
   { id: "air", name: "air" },
   { id: "tds", name: "TDS" },
   { id: "mvno", name: "MVNO" },
 ] as const;
 
 function WorkspaceIcon({ id }: { id: (typeof workspaces)[number]["id"] }) {
+  if (id === "home") return <span aria-hidden className="flex size-8 items-center justify-center"><House className="size-5" /></span>;
   const size = id === "mvno" ? "size-8" : id === "air" ? "h-5 w-6" : "size-5";
   return (
     <span aria-hidden="true" className="flex size-8 shrink-0 items-center justify-center">
@@ -34,7 +36,7 @@ function useWorkspace() {
   const params = useSearchParams();
   return (
     workspaces.find((item) => item.id === params.get("workspace")) ??
-    workspaces[0]
+    workspaces[1]
   );
 }
 
@@ -84,6 +86,9 @@ export function WorkspaceSwitcher() {
         {workspaces.map((workspace) => {
           const query = new URLSearchParams(params.toString());
           query.set("workspace", workspace.id);
+          const homeTransition = workspace.id === "home" || active.id === "home";
+          if (homeTransition) { for (const key of [...query.keys()]) if (key !== "workspace") query.delete(key); }
+          const targetPath = homeTransition ? "/" : pathname;
           return (
             <DropdownMenuLinkItem
               aria-current={active.id === workspace.id ? "page" : undefined}
@@ -91,12 +96,12 @@ export function WorkspaceSwitcher() {
               key={workspace.id}
               render={
                 <Link
-                  href={`${pathname}?${query}`}
+                  href={`${targetPath}?${query}`}
                   onNavigate={(event) => {
                     if (!navigate) return;
                     event.preventDefault();
                     navigate(
-                      `${pathname}?${query}`,
+                      `${targetPath}?${query}`,
                       workspace.id,
                       workspace.name,
                     );

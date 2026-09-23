@@ -91,3 +91,48 @@ html[data-sketch="on"] .recharts-cartesian-grid line {
 html[data-sketch="on"] .recharts-text {
   fill: var(--muted-foreground);
 }
+
+/* Hand-drawn wireframe treatment; the font loads only while this mode is on. */
+@font-face {
+  font-family: "MARS Hand";
+  src: url("/fonts/nanum-pen-script/NanumPenScript-Regular.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+html[data-sketch="on"] :where(body, button, input, textarea, select, p, span, a, label, h1, h2, h3, h4, div, td, th, dt, dd, text) {
+  font-family: "MARS Hand", cursive !important;
+}
+html[data-sketch="on"] body {
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--foreground) 5%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--foreground) 5%, transparent) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+html[data-sketch="on"] :where([data-slot="card"], section.border, article.border) {
+  border-width: 2px;
+  border-radius: 4px 17px 7px 19px / 15px 5px 18px 6px;
+  box-shadow: 3px 3px 0 -1px var(--background), 4px 4px 0 var(--foreground);
+  background-image: repeating-linear-gradient(132deg, transparent 0 7px, color-mix(in srgb, var(--foreground) 6%, transparent) 7px 8px);
+}
+html[data-sketch="on"] :where([data-slot="popover-content"], [data-slot="popover-popup"], [data-slot="dialog-popup"], [data-slot="dialog-content"], [data-slot="dropdown-menu-content"]) {
+  border-width: 2px;
+  box-shadow: 4px 4px 0 color-mix(in srgb, var(--foreground) 30%, transparent);
+}
+html[data-sketch="on"] :where(button.border, input, select, textarea, [data-slot="toggle-group"]) {
+  border-style: solid;
+  border-width: 1.5px;
+  box-shadow: 1px 1px 0 color-mix(in srgb, var(--foreground) 40%, transparent);
+}
+html[data-sketch="on"] :where(button[aria-pressed="true"], [role="tab"][aria-selected="true"], [data-slot="badge"]) {
+  background-image: repeating-linear-gradient(125deg, transparent 0 4px, color-mix(in srgb, currentColor 18%, transparent) 4px 5px);
+}
+html[data-sketch="on"] :where(h1, h2, h3) {
+  text-decoration-style: double;
+  text-decoration-color: color-mix(in srgb, var(--foreground) 55%, transparent);
+}
+html[data-sketch="on"] .lucide {
+  stroke-width: 1.6px;
+  stroke-linecap: round;
+  filter: drop-shadow(.65px .45px 0 color-mix(in srgb, currentColor 28%, transparent));
+}

@@ -34,9 +34,9 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
-const DEFAULT_WIDTH = "25%";
-const MAX_WIDTH = "25%";
-const MIN_WIDTH = "15%";
+const DEFAULT_WIDTH = "232px";
+const MAX_WIDTH = "280px";
+const MIN_WIDTH = "200px";
 const SIDEBAR_KEYBOARD_SHORTCUT = "b";
 const ICON_MODE_WIDTH_PX = 48;
 // If the percentage in the cookie is below this, we assume it's collapsed
@@ -110,7 +110,7 @@ const SidebarProvider = ({
             [SIDEBAR_ID]: sidebar,
             [MAIN_CONTENT_ID]: main,
           });
-          setIsCollapsed(sidebar < COLLAPSED_PERCENTAGE_THRESHOLD);
+          setIsCollapsed(sidebarRef.current?.isCollapsed() ?? false);
         }
       }
     } catch {
