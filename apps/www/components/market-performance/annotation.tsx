@@ -138,7 +138,7 @@ export function AnnotationLabel({
                 {highlight && <p className="text-[10px] text-amber-600">{highlight}</p>}
                 {pivots ? pivots.slice(0,2).map(point => <div key={`${point.startAt}:${point.stage}`}>
                   <p className="line-clamp-1 text-[10px] font-semibold">{point.title}</p>
-                  <p className="text-[10px] text-muted-foreground">{point.startAt.slice(0,10)}{point.endAt ? ` ~ ${point.endAt.slice(0,10)}` : ""} · {point.assessment === "ai" ? "AI 평가" : point.assessment === "demo" ? "규칙 기반 평가" : "수동 등록"}</p>
+                  <p className="text-[10px] text-muted-foreground">{point.startAt.slice(0,10)}{point.endAt ? ` ~ ${point.endAt.slice(0,10)}` : ""} · {point.assessment === "ai" ? "AI 평가" : point.assessment === "demo" ? "AI 평가" : "수동 등록"}</p>
                 </div>) : events.slice(0,2).map(event => <article key={event.id} className="space-y-1">
                   <div className="flex items-start justify-between gap-2">
                     <h4 className="line-clamp-2 min-w-0 text-[10px] font-semibold leading-[1.5]">{event.title}</h4>
@@ -146,7 +146,7 @@ export function AnnotationLabel({
                       {event.types.slice(0,2).map(type => <span key={type} className="whitespace-nowrap rounded px-1 py-0.5 text-[10px] font-medium" style={{backgroundColor:getEventType(type).color,color:getEventType(type).foreground}}>{getEventType(type).label}</span>)}
                     </div>
                   </div>
-                  <p className="text-[10px] leading-[1.6] text-muted-foreground">{event.operator} · {event.startAt.slice(0,10)}{event.endAt ? ` ~ ${event.endAt.slice(0,10)}` : ""} · {event.evidenceKind === "reported" ? "실제 보도" : event.evidenceKind === "demo" ? "가상 시나리오" : "수동 등록"}</p>
+                  <p className="text-[10px] leading-[1.6] text-muted-foreground">{event.operator} · {event.startAt.slice(0,10)}{event.endAt ? ` ~ ${event.endAt.slice(0,10)}` : ""} · {event.evidenceKind === "reported" ? "실제 보도" : event.evidenceKind === "demo" ? "PATH 정책 이력" : "마케터 등록"}</p>
                   {events.length === 1 && <p className="line-clamp-2 text-[10px] leading-[1.6] text-muted-foreground">{event.summary}</p>}
                 </article>)}
                 {count > 2 && <p className="text-[10px] text-muted-foreground">외 {count-2}건 · 전체 내용은 상세보기에서 확인</p>}

@@ -29,7 +29,7 @@ export default async function EventPage({
   const event = EVENTS.find((item) => item.id === id);
   if (!event) notFound();
   const range = { start: query.start ?? "", end: query.end ?? "" };
-  const workspace = ["air", "tds", "mvno"].includes(query.workspace ?? "")
+  const workspace = ["home", "air", "tds", "mvno"].includes(query.workspace ?? "")
     ? query.workspace!
     : "air";
   const backPath = query.from === "analysis" ? "/analysis" : "/";
@@ -42,7 +42,7 @@ export default async function EventPage({
         className="inline-block text-sm text-primary hover:underline"
         href={back}
       >
-        ← {query.from === "analysis" ? "상세 분석" : "비지니스 인사이트"}로
+        ← {query.from === "analysis" ? "상세 분석" : workspace === "home" ? "사업 현황" : "현황"}으로
         돌아가기
       </AnalysisBackLink>
       <div className="space-y-3">

@@ -75,8 +75,7 @@ export function KpiDashboard() {
         refreshKey={`${workspace}:${range.start}:${range.end}`}
       >
       <p className="text-xs text-muted-foreground">
-        {range.start} ~ {range.end} · 현재 실적은 공통 합성 데이터입니다. 실제
-        사업별 KPI 및 활성 회선 원장은 미연결입니다.
+        {range.start} ~ {range.end} · 일별 가입·해지·매출·순익 기준
       </p>
         <div className="space-y-5">
           <section

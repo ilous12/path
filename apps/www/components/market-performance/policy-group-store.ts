@@ -19,7 +19,7 @@ function validateStore(value: Store) {
 function read(){
  try{
   const raw=localStorage.getItem(key);
-  if(raw){const parsed=JSON.parse(raw);validateStore(parsed);state=parsed;error="";return;}
+  if(raw){const parsed=JSON.parse(raw);validateStore(parsed);state=normalizePresentation(parsed);error="";return;}
   const old=localStorage.getItem(legacyKey);
   let alternatives=normalizePresentation(seeds) as PolicyAlternative[];
   if(old){
@@ -74,7 +74,7 @@ export function usePolicyGroups(){
    const run=p.simulations.findLast(s=>s.revisionId===r.id&&s.inputHash===policyHash(r));if(!run)throw Error("시뮬레이션 결과가 현재 버전과 다릅니다.");
    for(const other of state.policies.filter(o=>o.id!==id&&o.workspace===p.workspace)){const execution=other.executions.at(-1);if(!execution||execution.stoppedAt)continue;const previous=other.revisions.find(v=>v.id===execution.revisionId)!;if(r.items.some(a=>a.enabled&&previous.items.some(b=>b.enabled&&overlap(a,b,r,previous))))throw Error(`실행 중인 ‘${previous.name}’과 적용 대상·기간이 중복됩니다. 기존 정책을 중지하거나 대상을 분리하세요.`);}
    const previous=p.executions.at(-1);if(previous&&!previous.stoppedAt){previous.stoppedAt=isoNow();previous.reason="새 버전 실행";}
-   p.executions.push({id:uid("execution"),revisionId:r.id,simulationId:run.id,at:isoNow(),externalStatus:"not_connected"});p.isNew=true;return event(p,`v${r.number} MARS 실행 · 외부 판매 시스템 미연결`);
+   p.executions.push({id:uid("execution"),revisionId:r.id,simulationId:run.id,at:isoNow(),externalStatus:"not_connected"});p.isNew=true;return event(p,`v${r.number} PATH 실행`);
   }),
   stop:(id:string)=>update(id,p=>{const current=p.executions.at(-1);if(current&&!current.stoppedAt){current.stoppedAt=isoNow();current.reason="담당자 중지";}return event(p,"실행 중지 · 발생한 지급 의무는 유지");}),
   markSeen:(ids:string[])=>{if(!state.policies.some(p=>p.isNew&&ids.includes(p.id)))return;write({...state,policies:state.policies.map(p=>ids.includes(p.id)?{...p,isNew:false}:p)});},

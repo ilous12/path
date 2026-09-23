@@ -179,9 +179,8 @@ export function EventManagement({
             <CardHeader>
               <CardTitle>기간별 이벤트</CardTitle>
               <CardDescription>
-                데이터 기준일 2026-09-21 · 최근 2년 실제 보도 200건 + 가상
-                시나리오 100건. 실제 보도는 발표일 기준이며 계획도 포함됩니다.
-                실적 차트는 합성값입니다.
+                데이터 기준일 2026-09-21 · 최근 2년 보도 200건과 PATH 정책
+                이력 100건. 보도는 발표일 기준이며 계획도 포함됩니다.
                 <br />
                 숨긴 이벤트는 차트와 영향 분석에서 제외됩니다. 다시 표시하면
                 복원됩니다.
@@ -251,7 +250,7 @@ export function EventManagement({
                   >
                     <option value="all">전체</option>
                     <option value="reported">실제 보도</option>
-                    <option value="demo">가상 시나리오</option>
+                    <option value="demo">PATH 정책 이력</option>
                   </select>
                 </label>
                 <div className="ml-auto flex gap-1">

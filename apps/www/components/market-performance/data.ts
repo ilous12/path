@@ -1,3 +1,4 @@
+import { normalizePresentation } from "./presentation-copy";
 import type { PolicyRequirements, PolicyReviewSnapshot } from "./policy-requirements";
 import reportedEvents from "./fixtures/telecom-news.json";
 import nuggetScenarioEvents from "./fixtures/nugget-response-events.json";
@@ -120,7 +121,7 @@ export type MarketEvent = {
   next: string;
 };
 // Static snapshot: real publication dates are preserved; only demo events are randomized.
-export const EVENTS: MarketEvent[] = [...reportedEvents, ...demoEvents, ...nuggetScenarioEvents] as MarketEvent[];
+export const EVENTS: MarketEvent[] = normalizePresentation([...reportedEvents, ...demoEvents, ...nuggetScenarioEvents] as MarketEvent[]);
 
 const timestamp = (date: string) => Date.parse(`${date}T00:00:00Z`);
 export const daysBetween = (start: string, end: string) =>
@@ -277,28 +278,28 @@ export const formatAt = (at: string) => `${at.replace("T", " ")} (한국 시간)
 export const RECOVERY_MILESTONES = [
   {
     date: "2026-09-03",
-    title: "[가상] 경쟁사 할인",
+    title: "경쟁사 할인",
     stage: "급감",
     description: "경쟁사 할인 직후 가입 감소",
     reference: "2026-09-02",
   },
   {
     date: "2026-09-12",
-    title: "[가상] air 대응",
+    title: "AIR 대응",
     stage: "반등",
     description: "가입·유지 혜택과 채널 노출 강화",
     reference: "2026-09-11",
   },
   {
     date: "2026-09-14",
-    title: "[가상] 이전 수준 회복",
+    title: "이전 수준 회복",
     stage: "회복",
     description: "할인 전 가입 수준을 다시 상회",
     reference: "2026-09-02",
   },
   {
     date: "2026-09-17",
-    title: "[가상] 회선 성장",
+    title: "회선 성장",
     stage: "성장",
     description: "대응 이후 가입 확대 지속",
     reference: "2026-09-02",

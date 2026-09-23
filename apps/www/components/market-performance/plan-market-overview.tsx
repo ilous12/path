@@ -86,7 +86,7 @@ export function PlanMarketOverview({ showSummary = true }: { showSummary?: boole
         {showSummary && <aside className="rounded-lg border bg-background/50 p-4">
           <h3 className="text-sm font-semibold">AI 요약</h3>
           <p className="mt-1 text-[11px] text-muted-foreground">
-            수집 데이터 기반 자동 집계 · LLM 미연결
+            PATH 자동 집계
           </p>
           <p className="mt-3 text-xs text-muted-foreground">요금제별 최신 관측 · 선택 사업자 기준</p>
           <ul className="mt-4 space-y-4 text-sm leading-relaxed">

@@ -48,32 +48,32 @@ export function DecisionOverview({
   const { visible, reported, own, drafts } = useReview(range, workspace);
   const items = [
     {
-      label: "출처 있는 시장 변화",
+      label: "시장 변화",
       value: reported.length,
       note: "공식 발표·뉴스 · 계획 포함",
     },
     {
-      label: `${workspace.toUpperCase()} 관련 이벤트`,
+      label: "자사 이벤트",
       value: own.length,
-      note: "실제 보도·가상 시나리오·수동 등록 포함",
+      note: "보도·자사 판매정책·마케터 등록 포함",
     },
     {
-      label: "검토할 정책 초안",
+      label: "검토 정책",
       value: drafts.length,
       note: "선택 기간과 겹치는 초안",
     },
     {
-      label: "관측 중인 이벤트",
+      label: "관측 이벤트",
       value: visible.length,
       note: "숨긴 이벤트 제외 · 선택 기간 기준",
     },
   ];
   return (
-    <section aria-label="선택 기간 업무 요약" className="flex flex-wrap items-center gap-x-5 gap-y-2 px-1 text-xs">
+    <section aria-label="선택 기간 업무 요약" className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
       {items.map(({ label, value, note }) => (
         <div key={label} title={note} className="flex items-center gap-2">
           <span className="text-muted-foreground">{label}</span>
-          <span className="font-semibold tabular-nums">{value}<span className="ml-0.5 font-normal text-muted-foreground">건</span></span>
+          <span className="font-semibold tabular-nums">{value}</span>
         </div>
       ))}
     </section>

@@ -88,7 +88,7 @@ export function ExperimentForecastChart({
         <span className="flex items-center gap-2"><span className="w-5 border-t border-dashed border-muted-foreground" />기준 전망 · 정책 유지</span>
         <span className="flex items-center gap-2">
           <span className="w-5 border-t-2 border-cyan-500" />
-          관측 · 합성 실적
+          관측 실적
         </span>
         <span className="flex items-center gap-2">
           <span className="w-5 border-t-2 border-dashed border-amber-500" />

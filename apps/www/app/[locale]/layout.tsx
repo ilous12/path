@@ -61,8 +61,8 @@ export const metadata: Metadata = {
     url: "https://lumiui.dev",
   },
   title: {
-    default: siteConfig.name,
-    template: `%s - ${siteConfig.name}`,
+    default: "PATH · 판매정책 의사결정",
+    template: "%s - PATH",
   },
   twitter: {
     card: "summary_large_image",

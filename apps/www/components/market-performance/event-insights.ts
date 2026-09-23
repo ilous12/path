@@ -81,7 +81,7 @@ export function buildEventInsights(
   const daily = buildPerformance(range, "day");
   const first = daily[0];
   const last = daily[daily.length - 1];
-  result.impact = `${events.length}건의 개별 실적 영향은 미확인입니다. 뉴스·보도와 합성 실적 사이의 인과관계는 추정하지 않습니다.`;
-  result.progress = `합성 실적의 일별 가입은 ${number(first.customers)} → ${number(last.customers)}회선(${percent((last.customers / first.customers - 1) * 100)})입니다. 실제 통신사 실적이나 이벤트 효과를 의미하지 않습니다.`;
+  result.impact = `${events.length}건의 개별 실적 영향은 미확인입니다. 원인 가설은 변곡점 판단에서 확인하세요.`;
+  result.progress = `일별 가입은 ${number(first.customers)} → ${number(last.customers)}회선(${percent((last.customers / first.customers - 1) * 100)})입니다.`;
   return result;
 }

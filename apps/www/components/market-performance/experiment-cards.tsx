@@ -111,7 +111,7 @@ function ExperimentCard({
         </ResponsiveContainer>
       </div>
       <p className="text-[11px] text-muted-foreground">
-        실선: 관측 · 점선: 예측 · 현재 관측 계열은 합성 실적
+        실선: 관측 · 점선: 예측
       </p>
       <table className="w-full text-xs">
         <caption className="pb-2 text-left font-medium">

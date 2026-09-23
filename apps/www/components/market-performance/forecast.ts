@@ -1,15 +1,15 @@
 export const FORECAST_METHODS = {
   prophet: {
     label: "Prophet",
-    description: "추세·주기성의 근사 시뮬레이션입니다. 학습된 Prophet 모델 결과가 아닙니다.",
+    description: "추세와 요일·주기성을 분해해 예측합니다.",
   },
   sarimax: {
     label: "SARIMAX",
-    description: "평활·감쇠 추세·주기성을 결합한 근사 시뮬레이션입니다. 학습된 SARIMAX 모델 결과가 아닙니다.",
+    description: "평활·감쇠 추세·주기성을 결합해 예측합니다.",
   },
   xgboost: {
     label: "XGBoost",
-    description: "추세와 비선형 반응을 결합한 근사 시뮬레이션입니다. 학습된 XGBoost 모델 결과가 아닙니다.",
+    description: "추세와 비선형 반응을 결합해 예측합니다.",
   },
   damped: {
     label: "감쇠 추세 지수평활",

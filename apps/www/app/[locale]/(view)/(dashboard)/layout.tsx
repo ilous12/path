@@ -1,6 +1,8 @@
 import { AnalysisNavigationTracker } from "@/components/market-performance/analysis-navigation";
 import { TimelineRangeProvider } from "@/components/market-performance/timeline-range";
 import { Suspense } from "react";
+import { AIChat } from "@/registry/blocks/sidebar-03/components/ai-chat";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function PlaygroundLayout({
   children,
@@ -20,7 +22,10 @@ export default function PlaygroundLayout({
           />
         }
       >
-        {children}
+        <AIChat>
+          {/* Same overlay scrollbar as in-page lists (Lumi ScrollArea). */}
+          <ScrollArea className="h-dvh">{children}</ScrollArea>
+        </AIChat>
       </Suspense>
     </TimelineRangeProvider>
   );

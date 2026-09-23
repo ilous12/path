@@ -179,7 +179,7 @@ export function AlternativeManager({
           <p className="text-xs text-muted-foreground">
             내용과 기간만 입력하면 등록됩니다. 가격 변화율만 명시된 문장에서
             추출하며, 혜택의 비용·수요 효과는 자동 추정하지 않습니다. 입력 내용은
-            규칙 기반으로 정리합니다.
+            AI가 정형 요건으로 정리합니다.
           </p>
           <div className="grid grid-cols-2 gap-3">
             <label className="grid gap-1 text-sm">
@@ -253,7 +253,7 @@ export function AlternativeManager({
               ))}
             </div>
             <p className="mt-3 text-xs text-muted-foreground">
-              미입력 효과는 0으로 가정합니다. 적용 직전 최대 7일 합성 실적 평균
+              미입력 효과는 0으로 가정합니다. 적용 직전 최대 7일 실적 평균
               기준이며, 적용 종료 후 효과가 사라지는 단순 계산입니다.
               타임라인에서는 강조만 표시합니다.
             </p>

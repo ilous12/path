@@ -7,6 +7,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import {
   MainContent,
@@ -36,7 +37,8 @@ export default function Page() {
           groupId={GROUP_ID}
         >
           <AppSidebar />
-          <MainContent className="bg-background">
+          <MainContent className="overflow-hidden bg-background">
+            <ScrollArea className="h-full">
             <header className="flex h-12 bg-background z-10 sticky top-0 items-center gap-2 p-2 sm:p-4">
               <SidebarTrigger />
               <Separator className="mr-2 h-4" orientation="vertical" />
@@ -58,6 +60,7 @@ export default function Page() {
             <div className="flex flex-1 flex-col gap-4 p-2 sm:p-4 sm:pt-2">
               <DashboardView />
             </div>
+            </ScrollArea>
           </MainContent>
         </SidebarProvider>
       </WorkspaceTransition>

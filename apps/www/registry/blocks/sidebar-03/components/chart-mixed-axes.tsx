@@ -1,5 +1,6 @@
 "use client";
-import { chartDisplayRange, chartPaddingLabel } from "@/components/market-performance/chart-period";
+import { chartDisplayRange } from "@/components/market-performance/chart-period";
+import { TodayLine } from "@/components/market-performance/today-line";
 import { appliesToChannel, channelPerformance } from "@/components/market-performance/channel-scope";
 import { hasChannelData } from "@/components/market-performance/channel-data";
 import { pivotPeriod, withPivotInfluence } from "@/components/market-performance/timeline-data";
@@ -203,6 +204,8 @@ export function ChartMixedAxes({
         )
       : [];
   const chartEnd = displayRange.end;
+  const [today] = React.useState(() => new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10));
+  const todayKey = bucketKey(today, grain);
   const previewExperiments = activeSeries.includes("events")
     ? visibleExperiments.filter(a => hasChannelData(a.targetChannels) && bucketKey(a.start < displayRange.start ? displayRange.start : a.start, grain) === hoveredExperimentKey)
     : [];
@@ -329,9 +332,9 @@ export function ChartMixedAxes({
   return (
     <Card className="w-full gap-0 overflow-hidden rounded-xl border shadow-none">
       <div className="flex flex-col">
-        <CardHeader className="flex flex-col items-stretch gap-3 p-4 xl:p-5">
+        <CardHeader className="flex flex-col items-stretch gap-1.5 p-3 xl:px-4">
           <div className="flex w-full flex-wrap items-center justify-between gap-3">
-            <CardTitle className="text-lg">{channel ? `${scopeLabel} · ` : ""}시장·실적 타임라인</CardTitle>
+            <CardTitle className="flex items-baseline gap-2 text-[13px] font-semibold">{channel ? `${scopeLabel} · ` : ""}타임라인<span className="text-[11px] font-normal text-muted-foreground tabular-nums">{range.start} ~ {range.end} · {{ day: "일간", month: "월간", year: "연간" }[grain]} · Ctrl+휠 확대 · 드래그 이동</span></CardTitle>
             <div className="ml-auto flex max-w-full flex-wrap items-center gap-4">
               <ToggleGroup
                 aria-label="차트 표시 항목"
@@ -360,7 +363,7 @@ export function ChartMixedAxes({
                   className="min-h-8 cursor-pointer gap-1.5 text-sm"
                   value="events"
                 >
-                  업계 동향
+                  시장·타사
                 </ToggleGroupItem>
               </ToggleGroup>
               {periodControl && <div className="ml-1 flex shrink-0 items-center">{periodControl}</div>}
@@ -369,14 +372,8 @@ export function ChartMixedAxes({
               </div>}
             </div>
           </div>
-          <CardDescription>
-            관측 실적은 실선, 정책 예측은 노란색(회선)·보라색(해지) 점선입니다. 정책에 마우스를 올리면 끝점에 시작 직전 대비 증감률이 표시됩니다. Ctrl + 휠: 확대·축소 · 차트 드래그: 기간 이동.
-          </CardDescription>
-          <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
-            <span>
-              {range.start} ~ {range.end} ·{" "}
-              {{ day: "일간", month: "월간", year: "연간" }[grain]} 집계 · 표시 {displayRange.start} ~ {displayRange.end} ({chartPaddingLabel(range)})
-            </span>
+          <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-muted-foreground">
+            <span>실선: 관측 · 점선: 정책 예측(노랑 회선·보라 해지)</span>
             <EventTypeLegend
               split={EVENT_TIMELINE_LAYOUT !== "combined"}
               pivot={pivotLayout}
@@ -385,7 +382,7 @@ export function ChartMixedAxes({
           </div>
         </CardHeader>
         <CardContent
-          className="shrink-0 flex flex-col gap-4"
+          className="shrink-0 flex flex-col gap-2 px-3 pb-3 xl:px-4"
         >
           <div ref={chartRegionRef} className={dragging ? "cursor-grabbing select-none" : "cursor-grab select-none"} style={{touchAction:"pan-y"}}>
           <ChartContainer
@@ -416,7 +413,7 @@ export function ChartMixedAxes({
                   aria-hidden="true"
                 >
                   <text x={4} y={38}>
-                    업계 동향
+                    시장·타사
                   </text>
                   {pivotLayout && (
                     <text x={4} y={82}>
@@ -428,7 +425,7 @@ export function ChartMixedAxes({
                   </text>
                   {showAlternativeLane && pivotLayout && (
                     <text x={4} y={170}>
-                      {channel ? `${channel} · 정책` : "정책"}
+                      {channel ? `${channel} · 실행` : "실행 정책"}
                     </text>
                   )}
                   {(pivotLayout
@@ -450,6 +447,10 @@ export function ChartMixedAxes({
                 </g>
               )}
               <ReferenceArea x1={range.start} x2={range.end} yAxisId="users" fill="var(--primary)" fillOpacity={0.025} />
+              {timelineRows.some(row => row.key === todayKey) && (
+                <ReferenceLine x={todayKey} yAxisId="users" zIndex={3000}
+                  shape={(p: { x1?: number; y2?: number }) => <TodayLine x={p.x1 ?? 0} bottom={p.y2 ?? 0} label={`오늘 ${today.slice(5)}`} />} />
+              )}
               <CartesianGrid
                 strokeDasharray="4 4"
                 strokeOpacity={0.5}
@@ -591,7 +592,6 @@ export function ChartMixedAxes({
                         <dd className="font-medium tabular-nums">{typeof row[metric.key] === "number" ? `${Number(row[metric.key]).toLocaleString("ko-KR")}${metric.unit}` : "—"}</dd>
                       </div>)}
                     </dl>
-                    <p className="mt-2 text-[10px] text-muted-foreground">합성 실적</p>
                   </div>;
                 }}
                 cursor={false}
@@ -683,7 +683,7 @@ export function ChartMixedAxes({
                               : "var(--color-gray-600)"
                             : undefined
                         }
-                        highlight={group.highlight || (group.events.some(e=>nearPivot(e.startAt,e.endAt)) ? "변곡점 직전 7일 영향 검토 후보 · 인과관계 미확정" : undefined)}
+                        highlight={group.highlight || (group.events.some(e=>nearPivot(e.startAt,e.endAt)) ? "변곡 직전 7일 안의 원인 후보" : undefined)}
                         label={
                           group.key !== group.endKey
                             ? `${group.key} ~ ${group.endKey} 묶음`
@@ -749,11 +749,10 @@ export function ChartMixedAxes({
             </ComposedChart>
           </ChartContainer>
           </div>
-          <fieldset aria-label="전체 기간 탐색" className="space-y-2 border-t pt-3">
-            <div className="flex flex-wrap justify-between gap-2 text-xs text-muted-foreground"><span>기간 탐색</span><span>{range.start} ~ {range.end} · 양 끝: 기간 조정 / 가운데: 이동</span></div>
-            <ChartContainer className="h-16 w-full aspect-auto" config={chartConfig}>
+          <fieldset aria-label="전체 기간 탐색" className="border-t pt-2">
+            <ChartContainer className="h-9 w-full aspect-auto" config={chartConfig}>
               <AreaChart data={overview} margin={{top:0,right:8,bottom:0,left:8}}>
-                <Brush dataKey="key" height={48} y={4} startIndex={Math.max(0,overview.findIndex(row=>row.key===range.start))} endIndex={Math.max(0,overview.findIndex(row=>row.key===range.end))} travellerWidth={8} fill="var(--muted)" stroke="var(--primary)" ariaLabel="조회 기간 선택" tickFormatter={value=>String(value)} onChange={({startIndex,endIndex})=>{
+                <Brush dataKey="key" height={32} y={2} startIndex={Math.max(0,overview.findIndex(row=>row.key===range.start))} endIndex={Math.max(0,overview.findIndex(row=>row.key===range.end))} travellerWidth={8} fill="var(--muted)" stroke="var(--primary)" ariaLabel="조회 기간 선택" tickFormatter={value=>String(value)} onChange={({startIndex,endIndex})=>{
                   if(startIndex===undefined || endIndex===undefined) return;
                   const next={start:overview[startIndex].key,end:overview[endIndex].key};
                   if(next.start!==range.start || next.end!==range.end) {setSelectedGroup(undefined);setHoveredExperimentKey(undefined);onRangeChange(next);}

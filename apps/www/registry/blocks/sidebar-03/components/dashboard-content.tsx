@@ -1,7 +1,6 @@
 "use client";
 import { MAX_DATE } from "@/components/market-performance/data";
 import { dayShift } from "@/components/market-performance/alternative-model";
-import { WorkspaceHeader } from "@/components/market-performance/workspace-header";
 
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
@@ -12,6 +11,8 @@ import { AnalysisRangeControl } from "@/components/market-performance/analysis-r
 import { RefreshingAnalysis } from "@/components/market-performance/refreshing-analysis";
 import { DecisionOverview } from "@/components/market-performance/decision-workspace";
 import { daysBetween } from "@/components/market-performance/data";
+import { WorkspaceIntelligence } from "@/components/market-performance/intelligence-ui";
+import type { HomeBusiness } from "@/components/market-performance/home-performance";
 
 export function DashboardContent({
   showOnboarding: _showOnboarding = true,
@@ -22,41 +23,30 @@ export function DashboardContent({
   const [refreshRevision, setRefreshRevision] = useState(0);
   const workspace = params.get("workspace") ?? "air";
   const [range, , rangeMode, selectRange] = useTimelineRange(workspace);
+  const name = workspace === "air" ? "AIR" : workspace.toUpperCase();
   return (
-    <div className="@container mx-auto flex w-full min-w-0 max-w-none flex-1 flex-col gap-5">
-      <section aria-label="타임라인 공통 분석 조건" className="space-y-3">
-        <WorkspaceHeader>
-          <div>
-
-            <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
-              시장.정책 현황
-            </h1>
-          </div>
-          <div className="flex items-center gap-2 rounded-lg border bg-card px-3 py-2.5 text-xs tabular-nums sm:text-sm">
-            <CalendarDays
-              aria-hidden
-              className="size-4 text-muted-foreground"
-            />
-            <span>
-              {range.start} — {range.end}
-            </span>
-            <span className="border-l pl-2 text-muted-foreground">
-              {daysBetween(range.start, range.end)}일
-            </span>
-          </div>
-        </WorkspaceHeader>
-      </section>
-      <RefreshingAnalysis refreshKey={`${workspace}:${refreshRevision}`} mode="detail">
-      <DecisionOverview range={range} workspace={workspace} />
-      <section aria-label="시장과 실적 흐름" className="space-y-3">
-        <div className="flex flex-wrap items-end justify-between gap-2">
-          <p className="text-xs font-semibold tracking-wider text-primary">
-            01 · 흐름 관찰
-          </p>
-          
+    <div className="@container mx-auto flex w-full min-w-0 max-w-none flex-1 flex-col gap-3 pb-4">
+      <header aria-label="조회 조건" className="flex min-h-9 flex-wrap items-center gap-x-4 gap-y-2">
+        <div className="flex flex-wrap items-baseline gap-x-3">
+          <h1 className="text-xl font-semibold tracking-tight">{name} 현황</h1>
+          <p className="text-xs text-muted-foreground">시장 변화 → 변곡점 → 판매정책</p>
         </div>
-        <ChartMixedAxes range={range} onRangeChange={(next) => selectRange(next, "custom")} periodControl={<AnalysisRangeControl maxSelectableDate={dayShift(MAX_DATE,180)} range={range} mode={rangeMode} onChange={(next, mode) => {selectRange(next, mode);setRefreshRevision(value=>value+1);}} />} />
-      </section>
+        <div className="ml-auto flex flex-wrap items-center gap-3">
+          <DecisionOverview range={range} workspace={workspace} />
+          <div className="flex h-8 items-center gap-2 rounded-lg border bg-card px-2.5 text-xs tabular-nums">
+            <CalendarDays aria-hidden className="size-3.5 text-muted-foreground" />
+            <span>{range.start} — {range.end}</span>
+            <span className="border-l pl-2 text-muted-foreground">{daysBetween(range.start, range.end)}일</span>
+          </div>
+        </div>
+      </header>
+      <RefreshingAnalysis refreshKey={`${workspace}:${refreshRevision}`} mode="detail">
+        <div className="flex flex-col gap-3">
+          {["air", "tds", "mvno"].includes(workspace) && (
+            <WorkspaceIntelligence business={workspace as HomeBusiness} range={range} />
+          )}
+          <ChartMixedAxes range={range} onRangeChange={(next) => selectRange(next, "custom")} periodControl={<AnalysisRangeControl maxSelectableDate={dayShift(MAX_DATE,180)} range={range} mode={rangeMode} onChange={(next, mode) => {selectRange(next, mode);setRefreshRevision(value=>value+1);}} />} />
+        </div>
       </RefreshingAnalysis>
     </div>
   );

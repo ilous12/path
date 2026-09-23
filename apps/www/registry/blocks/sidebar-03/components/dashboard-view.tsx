@@ -9,6 +9,7 @@ import { PlanWorkspaceSummary, CurrentSettings } from "@/components/market-perfo
 import { HomeKpi } from "@/components/market-performance/home-kpi";
 import { HomeDashboard } from "@/components/market-performance/home-dashboard";
 import { EventOverview } from "@/components/market-performance/event-overview";
+import { PolicyLedger } from "@/components/market-performance/policy-ledger";
 import { EventManagement } from "./event-management";
 import { ManagementConsole } from "./management-console";
 import { DashboardContent } from "./dashboard-content";
@@ -45,7 +46,7 @@ const titles: Record<string, string> = {
   channels: "채널 · 스펙트럼",
   "channels-search": "채널 검색",
   "plans-competitiveness": "요금제 · 경쟁력",
-  summary: "타임라인",
+  summary: "현황",
   events: "업계 동향 · 오버뷰",
   "events-search": "검색",
   experiments: "캠페인 · 오버뷰",
@@ -57,12 +58,13 @@ const titles: Record<string, string> = {
   "settings-current": "현재 설정",
   plans: "요금제 · 스펙트럼",
   "plans-search": "요금제 검색",
+  policies: "판매정책",
   admin: "설정",
   data: "데이터",
 };
 export function DashboardViewTitle() {
   const query = useSearchParams();
-  if (query.get("workspace") === "home" && query.get("view") !== "data") return <>{query.get("view") === "kpi" ? "실적" : "사업 현황"}</>;
+  if (query.get("workspace") === "home" && !["data", "policies"].includes(query.get("view") ?? "")) return <>{query.get("view") === "kpi" ? "실적" : "사업 현황"}</>;
   return (
     <>{titles[query.get("view") ?? "summary"] ?? titles.summary}</>
   );
@@ -70,6 +72,7 @@ export function DashboardViewTitle() {
 export function DashboardView() {
   const params = useSearchParams();
   const view = params.get("view") ?? "summary";
+  if (view === "policies") return <PolicyLedger key={params.get("workspace") ?? "air"} />;
   if (params.get("workspace") === "home" && view !== "data") return view === "kpi" ? <HomeKpi /> : <HomeDashboard />;
   if (view === "channels" || view === "channels-search") return <Suspense fallback={<div className="space-y-6"><WorkspaceHeader><h1>{titles[view]}</h1></WorkspaceHeader><DetailLoading mode="page" /></div>}><ChannelPages search={view === "channels-search"} key={`${params.get("workspace")}:${view}`} /></Suspense>;
   if (view === "plans-competitiveness") return <Suspense fallback={<div className="space-y-6"><WorkspaceHeader><h1>요금제 · 경쟁력</h1></WorkspaceHeader><DetailLoading mode="page" /></div>}><PlanCompetitiveness /></Suspense>;

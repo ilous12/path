@@ -57,7 +57,7 @@ function read() {
       if (a.id !== "seed-telecom-experiment-01" || a.demoCustomerForecast) return a;
       const seed = seeds.find(item => item.id === a.id)!;
       return {...a, demoCustomerForecast: seed.demoCustomerForecast, demoEvaluationDate: seed.demoEvaluationDate,
-        description: `${a.description}\n회선 예측은 합성 관측값보다 조금 낮게 구성한 사후 구성 시나리오이며, 실제 예측 성능이나 정책 인과효과가 아닙니다.`};
+        description: a.description};
     });
     const savedIds = new Set(value.alternatives.map((a: PolicyAlternative) => a.id));
     snapshot = {...value, alternatives:[...value.alternatives,...seeds.filter(a=>!savedIds.has(a.id))],types:[...new Set([...value.types,...seeds.map(a=>a.type)])]};

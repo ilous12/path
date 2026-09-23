@@ -444,7 +444,7 @@ export function RegistrationWizard({
           "타임라인에 반영했어요",
         ]
       : [
-          "판매판매정책 등록",
+          "판매정책 등록",
           "어떤 정책을 검증할까요?",
           "정책 기간을 지정해주세요",
           inputMode==="prompt"?"어떤 정책을 검토할까요?":"가정과 요청을 확인하세요",
@@ -455,7 +455,7 @@ export function RegistrationWizard({
       <header className="flex shrink-0 items-start justify-between gap-4 border-b px-6 py-5 sm:px-8">
         <div>
           <p className="mb-1 text-[9px] font-semibold tracking-[0.18em] text-primary">
-            MARS · NEW SIGNAL
+            PATH · 판매정책
           </p>
           <DialogTitle className="text-xl font-semibold">
             {phase === "processing"
@@ -508,7 +508,7 @@ export function RegistrationWizard({
                 ? "출처를 남기고 변화의 맥락을 기록합니다."
                 : "이벤트 연결 없이 정책 가정을 검증합니다."}
             </p>
-            <p className="mt-4">브라우저 저장</p>
+            <p className="mt-4">제안·수정·승인 이력은 학습 데이터로 저장됩니다</p>
           </div>
         </aside>
         <div className="min-h-0 overflow-y-auto overscroll-contain px-6 py-6 sm:px-8">
@@ -582,7 +582,7 @@ export function RegistrationWizard({
           ) : (
             <div className="space-y-6">
               {step === 0 && choosingMethod && !choosingPriorities && (
-                <section className="space-y-5" aria-label="판매판매정책 등록 방식">
+                <section className="space-y-5" aria-label="판매정책 등록 방식">
                   <div className="space-y-2">
                     <h3 className="text-xl font-semibold">판매정책을 어떻게 시작할까요?</h3>
                     <p className="text-sm text-muted-foreground">제안된 정책을 검토하거나 직접 정책 요건을 선택하세요.</p>
@@ -785,7 +785,7 @@ export function RegistrationWizard({
                     <div className="space-y-2">
                       <p className="text-xs font-medium text-muted-foreground">
                         {kind === "event"
-                          ? "이벤트 템플릿 · 가상 예시를 선택하고 실제 내용으로 수정하세요"
+                          ? "이벤트 템플릿을 고르고 실제 내용으로 수정하세요"
                           : "추천 시나리오 · 선택 후 자유롭게 수정하세요"}
                       </p>
                       <div className="grid gap-2">

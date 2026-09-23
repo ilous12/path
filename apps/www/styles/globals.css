@@ -74,7 +74,8 @@ body {
 .mars-page-shell { padding: clamp(16px, 1.25vw, 28px); min-width: 0; }
 .mars-page-shell > * { min-width: 0; }
 .mars-home-chart { height: clamp(260px, 30dvh, 460px); }
-.mars-timeline-chart { height: clamp(440px, 54dvh, 740px); }
+.mars-timeline-chart { height: clamp(400px, 46dvh, 680px); }
+.mars-home-timeline { height: clamp(280px, 25dvh, 580px); }
 .mars-detail-page { width: 100%; max-width: 1760px; margin-inline: auto; padding: clamp(16px, 1.5vw, 32px); }
 .mars-home-metrics { display: grid; gap: 8px; }
 @media (min-width: 1280px) {
@@ -85,4 +86,19 @@ body {
 @media (max-width: 767px) {
   .mars-timeline-chart { height: 440px; }
   .mars-home-chart { height: 280px; }
+  .mars-home-timeline { height: 500px; }
+}
+
+/* PATH briefing: staggered reveal for generated insight lines. */
+@keyframes path-reveal {
+  from {
+    opacity: 0;
+    translate: 0 6px;
+  }
+}
+@utility animate-reveal {
+  animation: path-reveal 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 }

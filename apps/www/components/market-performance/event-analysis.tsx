@@ -97,7 +97,7 @@ export function EventAnalysis() {
         ],
         [
           "추가 검증",
-          "비교군·동일 요일·충분한 관측 기간으로 재검증합니다. AI 모델·신뢰도는 현재 미연결입니다.",
+          "비교군·동일 요일·충분한 관측 기간으로 재검증합니다.",
         ],
       ]
     : own
@@ -122,7 +122,7 @@ export function EventAnalysis() {
           ],
           [
             "우리 사업 영향",
-            "외부 사업자의 실적은 제공되지 않습니다. 아래 차트는 우리 사업의 합성 실적이며 경쟁사 성과가 아닙니다.",
+            "외부 사업자의 실적은 제공되지 않습니다. 아래 차트는 우리 사업의 실적입니다.",
           ],
           [
             "대응 검토",
@@ -155,8 +155,7 @@ export function EventAnalysis() {
           <h2 className="text-lg font-semibold">{p.title}</h2>
           <p className="text-sm">시작 {p.date} · 종료 미지정(단일 시점)</p>
           <p className="text-sm text-muted-foreground">
-            {p.description} · 합성 실적에 구성한 설명이며 인과관계는
-            미확인입니다.
+            {p.description} · 원인 가설은 연결된 이벤트로 확인합니다.
           </p>
         </section>
       ))}
@@ -207,7 +206,7 @@ export function EventAnalysis() {
               : "우리 사업의 동시기 실적 관찰"}
         </h2>
         <p className="text-xs leading-5 text-muted-foreground">
-          {workspace.toUpperCase()} 공통 합성 실적 · 최초 선택 시점 {anchor} 전{" "}
+          {workspace.toUpperCase()} 실적 · 최초 선택 시점 {anchor} 전{" "}
           {before.length}일 / 이후 {after.length}일의 일평균 비교. 조회 기간과
           별개인 전후 관찰 구간이며, 순수 정책 효과를 뜻하지 않습니다.
         </p>
