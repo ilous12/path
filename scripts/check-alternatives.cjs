@@ -129,20 +129,20 @@ for(const seed of demoSeeds){
 assert.ok(validateAlternative({...a,demoCustomerForecast:[-1]}));
 console.log('PASS: retrospective success/miss demos, growth attainment, inflection alignment, curve validation.');
 
-const airPriceDemo=load('fixtures/telecom-experiments.json').find(a=>a.id==='seed-telecom-experiment-01');
-assert.equal(validateAlternative(airPriceDemo),null);
-assert.equal(airPriceDemo.pricePct,-5);
-assert.equal(airPriceDemo.demoCustomerForecast.length,airPriceDemo.days);
-const airForecast=projectAlternative(airPriceDemo);
-for(const actual of buildPerformance({start:airPriceDemo.start,end:MAX_DATE},'day')) {
- const forecast=airForecast.find(row=>row.key===actual.key);
+const aiirPriceDemo=load('fixtures/telecom-experiments.json').find(a=>a.id==='seed-telecom-experiment-01');
+assert.equal(validateAlternative(aiirPriceDemo),null);
+assert.equal(aiirPriceDemo.pricePct,-5);
+assert.equal(aiirPriceDemo.demoCustomerForecast.length,aiirPriceDemo.days);
+const aiirForecast=projectAlternative(aiirPriceDemo);
+for(const actual of buildPerformance({start:aiirPriceDemo.start,end:MAX_DATE},'day')) {
+ const forecast=aiirForecast.find(row=>row.key===actual.key);
  assert.ok(forecast.customers < actual.customers);
  assert.ok(forecast.customers >= actual.customers*0.96);
 }
-assert.equal(airForecast.find(row=>row.key==='2026-09-21').customers,391);
-console.log('PASS: AIR 5% price-cut demo follows observed growth within 4% below, without changing policy price.');
+assert.equal(aiirForecast.find(row=>row.key==='2026-09-21').customers,391);
+console.log('PASS: AIIR 5% price-cut demo follows observed growth within 4% below, without changing policy price.');
 const {experimentChartData}=load('experiment-chart-data.ts');
-const detail=experimentChartData(airPriceDemo,'customers');
+const detail=experimentChartData(aiirPriceDemo,'customers');
 assert.equal(detail.rows.find(r=>r.date==='2026-09-13').forecast,245);
 assert.equal(detail.rows.find(r=>r.date==='2026-09-21').observed,400);
 assert.equal(detail.rows.find(r=>r.date==='2026-09-21').forecast,391);
@@ -239,7 +239,7 @@ assert.match(securePolicy.title,/보호/);
 assert.match(securePolicy.reason,/이벤트 1건 · 변곡점 1건/);
 assert.notEqual(growthPolicy.reason,proposePolicy({start:'2026-08-01',end:'2026-08-31'},['WEB'],['growth','retention','profit'],[],[]).reason);
 const {registrationScenario}=load('registration-scenarios.ts');
-const contextual={...a,applyDays:28,days:42,analysisContext:{...scope,workspace:'air',channels:['APP'],reason:growthPolicy.reason,priorities:['growth','retention','profit']},demandPct:8};
+const contextual={...a,applyDays:28,days:42,analysisContext:{...scope,workspace:'aiir',channels:['APP'],reason:growthPolicy.reason,priorities:['growth','retention','profit']},demandPct:8};
 assert.equal(registrationScenario(contextual,0).demandPct,0);
 assert.equal(registrationScenario(contextual,1).applyDays,7);
 assert.equal(registrationScenario(contextual,2).applyDays,28);

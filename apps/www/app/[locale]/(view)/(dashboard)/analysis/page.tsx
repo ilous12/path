@@ -98,10 +98,10 @@ function AnalysisContent() {
       : error
         ? presetRange("1M")
         : requested;
-  const workspace = ["air", "tds", "mvno"].includes(single("workspace"))
+  const workspace = ["aiir", "tdds", "mvvno"].includes(single("workspace"))
     ? single("workspace")
-    : "air";
-  const workspaceName = workspace === "air" ? "air" : workspace.toUpperCase();
+    : "aiir";
+  const workspaceName = workspace === "aiir" ? "aiir" : workspace.toUpperCase();
   const { preferences } = useAnalysisPreferences();
   const report = buildAnalysis(
     range,

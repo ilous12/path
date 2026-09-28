@@ -64,7 +64,7 @@ export function subPolicyFromAlternative(source: PolicyAlternative, origin: SubP
 }
 export function migrateAlternative(a: PolicyAlternative): PolicyGroup {
   const r = syncPeriod({...emptyRevision(a.title,a.start), id:`revision-${a.id}-1`, status:a.status === "draft"?"draft":"registered",end:dayShift(a.start,(a.applyDays ?? a.days)-1),forecastEnd:dayShift(a.start,Math.max(a.days,a.applyDays??a.days)-1),method:a.forecastMethod??"average",items:[subPolicyFromAlternative(a)],objective:a.description});
-  return {id:a.id,legacyId:a.id,workspace:a.workspace??"air",createdAt:a.createdAt,version:1,isNew:a.isNew,revisions:[r],simulations:[],executions:a.status === "draft"?[]:[{id:`execution-${a.id}`,revisionId:r.id,simulationId:"legacy",at:a.createdAt,...(a.status === "paused"?{stoppedAt:a.createdAt}:{}),externalStatus:"not_connected"}],history:[...a.history,{at:isoNow(),action:"v1 정책을 캠페인 1개·판매정책 1개로 이전"}]};
+  return {id:a.id,legacyId:a.id,workspace:a.workspace??"aiir",createdAt:a.createdAt,version:1,isNew:a.isNew,revisions:[r],simulations:[],executions:a.status === "draft"?[]:[{id:`execution-${a.id}`,revisionId:r.id,simulationId:"legacy",at:a.createdAt,...(a.status === "paused"?{stoppedAt:a.createdAt}:{}),externalStatus:"not_connected"}],history:[...a.history,{at:isoNow(),action:"v1 정책을 캠페인 1개·판매정책 1개로 이전"}]};
 }
 export function policyHash(r: PolicyRevision) {
   // Exact canonical input, rather than a lossy/non-cryptographic hash. No secrets in local policy inputs.

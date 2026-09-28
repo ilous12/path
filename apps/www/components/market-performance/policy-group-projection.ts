@@ -6,9 +6,9 @@ import { projectSeries } from "./forecast";
 import type { GroupProjectionRow, SubPolicy } from "./policy-group-model";
 
 export function policyObservations(range: Range, workspace: string, channels?: string[]) {
-  if (workspace === "air") return scopedPerformance(range, channels);
+  if (workspace === "aiir") return scopedPerformance(range, channels);
   const weight = channels?.length ? CHANNELS.filter(c=>channels.includes(c.id)).reduce((sum,c)=>sum+c.weight,0)/100 : 1;
-  return buildHomePerformance(range,workspace === "tds" ? "tds" : "mvno").map(row=>({...row,customers:Math.round(row.customers*weight),cancellations:Math.round(row.cancellations*weight),revenue:Math.round(row.revenue*weight),expenses:Math.round(row.expenses*weight),netProfit:Math.round(row.netProfit*weight)}));
+  return buildHomePerformance(range,workspace === "tdds" ? "tdds" : "mvvno").map(row=>({...row,customers:Math.round(row.customers*weight),cancellations:Math.round(row.cancellations*weight),revenue:Math.round(row.revenue*weight),expenses:Math.round(row.expenses*weight),netProfit:Math.round(row.netProfit*weight)}));
 }
 
 /** Baseline is counted once per channel/customer segment. Same-target changes compose
@@ -28,7 +28,7 @@ export function projectPolicyGroup(a: PolicyAlternative): GroupProjectionRow[] {
   const totals: GroupProjectionRow[]=Array.from({length:horizon},(_,i)=>({key:dayShift(r.start,i),customers:0,cancellations:0,revenue:0,netProfit:0,customersDelta:0,cancellationsDelta:0,revenueDelta:0,netProfitDelta:0,baseRevenue:0,baseProfit:0,rewardProvision:0,remainingRewards:0}));
   const obligations:{date:string;amount:number}[]=[];
   for(const channel of channels){
-    const history=workspace==="air"?scopedPerformance({start,end},[channel.id]):buildHomePerformance({start,end},workspace==="tds"?"tds":"mvno").map(row=>({...row,customers:row.customers*channel.weight/100,cancellations:row.cancellations*channel.weight/100,revenue:row.revenue*channel.weight/100,expenses:row.expenses*channel.weight/100}));
+    const history=workspace==="aiir"?scopedPerformance({start,end},[channel.id]):buildHomePerformance({start,end},workspace==="tdds"?"tdds":"mvvno").map(row=>({...row,customers:row.customers*channel.weight/100,cancellations:row.cancellations*channel.weight/100,revenue:row.revenue*channel.weight/100,expenses:row.expenses*channel.weight/100}));
     if(!history.length)continue;
     const forecast=(key:"customers"|"cancellations"|"revenue"|"expenses")=>projectSeries(history.map(row=>row[key]),a.forecastMethod??r.method,horizon+gap).slice(gap).map(n=>Math.max(0,n));
     const customerBase=forecast("customers"),cancelBase=forecast("cancellations"),revenueBase=forecast("revenue"),costBase=forecast("expenses");

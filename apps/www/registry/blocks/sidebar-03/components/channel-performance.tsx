@@ -74,7 +74,7 @@ export function ChannelPerformance({
           <CardHeader>
             <div className="flex items-center justify-between gap-3">
               <CardTitle>
-                {workspace === "air" ? "air" : workspace.toUpperCase()} · 전체
+                {workspace === "aiir" ? "aiir" : workspace.toUpperCase()} · 전체
                 채널
               </CardTitle>
               <span className="text-xs text-muted-foreground">

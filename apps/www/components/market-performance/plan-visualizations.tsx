@@ -17,8 +17,8 @@ import {
 import catalog from "./fixtures/plan-catalog.json";
 type Offer = (typeof catalog.offers)[number];
 const sources = [
-  { id: "air-official", name: "AIR 공식", color: "var(--chart-1)" },
-  { id: "air-kakaopay", name: "AIR · 카카오페이", color: "var(--chart-3)" },
+  { id: "aiir-official", name: "AIIR 공식", color: "var(--chart-1)" },
+  { id: "aiir-kakaopay", name: "AIIR · 카카오페이", color: "var(--chart-3)" },
   { id: "moyo", name: "모요", color: "var(--chart-2)" },
 ];
 const buckets = [
@@ -48,7 +48,7 @@ function bucket(p: Offer) {
 const price = (v: number) => `${v.toLocaleString("ko-KR")}원`;
 export function PlanTrend({ offer, range = presetRange("1M") }: { offer: Offer; range?: { start: string; end: string } }) {
   const displayRange=chartDisplayRange(range);
-  const sourceGroup = offer.sourceId.startsWith("air-") ? "air-" : "moyo";
+  const sourceGroup = offer.sourceId.startsWith("aiir-") ? "aiir-" : "moyo";
   const history = catalog.history.filter(
     (h) =>
       h.productId === offer.productId && h.sourceId.startsWith(sourceGroup) && (!range || (new Date(Date.parse(h.observedAt) + 9 * 3600000).toISOString().slice(0, 10) >= displayRange.start && new Date(Date.parse(h.observedAt) + 9 * 3600000).toISOString().slice(0, 10) <= displayRange.end)),
@@ -136,7 +136,7 @@ export function PlanTrend({ offer, range = presetRange("1M") }: { offer: Offer; 
   );
 }
 export function PlanVisualizations({ offers }: { offers: Offer[] }) {
-  const [selected, setSelected] = useState("air-official:NA00009066");
+  const [selected, setSelected] = useState("aiir-official:NA00009066");
   const [metric, setMetric] = useState<"effective" | "billed">("effective");
   const offer = offers.find((p) => p.offerId === selected) ?? offers[0];
   const eligible = offers.filter(

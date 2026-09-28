@@ -12,20 +12,20 @@ import { RefreshingAnalysis } from "./refreshing-analysis";
 import { AnalysisRangeControl } from "./analysis-range-control";
 import { presetRange, validateRange, type Range } from "./data";
 const money = (v: number | null) => v === null ? "미확인" : `${v.toLocaleString("ko-KR")}원`;
-const sourceNames: Record<string, string> = { "air-official": "AIR 공식", "air-kakaopay": "AIR · 카카오페이", moyo: "모요" };
+const sourceNames: Record<string, string> = { "aiir-official": "AIIR 공식", "aiir-kakaopay": "AIIR · 카카오페이", moyo: "모요" };
 export function PlanAnalysis({ id }: { id: string }) {
   const q = useSearchParams();
   const requested = { start: q.get("start") ?? "", end: q.get("end") ?? "" };
   const [range, setRange] = useState<Range>(() => validateRange(requested) ? presetRange("1M") : requested);
   const offer = catalog.offers.find(p => p.offerId === id);
-  const back = `/?workspace=${encodeURIComponent(q.get("workspace") ?? "air")}&view=plans-search`;
+  const back = `/?workspace=${encodeURIComponent(q.get("workspace") ?? "aiir")}&view=plans-search`;
   if (!offer) return <main className="mx-auto max-w-6xl space-y-6 p-6"><WorkspaceHeader><h1>요금제 상세 분석</h1></WorkspaceHeader><p>해당 요금제를 찾을 수 없습니다.</p><div className="flex items-center justify-between gap-3"><AnalysisBackLink href={back}>요금제 검색으로 돌아가기</AnalysisBackLink><AIChatTrigger /></div></main>;
   const history = catalog.history.filter(h => h.offerId === id && planDay(h.observedAt) >= range.start && planDay(h.observedAt) <= range.end).sort((a,b) => a.observedAt.localeCompare(b.observedAt));
   const priced = history.filter(h => h.effectiveKrw !== null);
   const first = priced[0]?.effectiveKrw ?? null;
   const last = priced.at(-1)?.effectiveKrw ?? null;
   const delta = priced.length >= 2 && first !== null && last !== null ? last-first : null;
-  const peers = catalog.offers.filter(p => p.productId === offer.productId && (offer.sourceId.startsWith("air-") ? p.sourceId.startsWith("air-") : p.sourceId === offer.sourceId) && planDay(p.observedAt) >= range.start && planDay(p.observedAt) <= range.end);
+  const peers = catalog.offers.filter(p => p.productId === offer.productId && (offer.sourceId.startsWith("aiir-") ? p.sourceId.startsWith("aiir-") : p.sourceId === offer.sourceId) && planDay(p.observedAt) >= range.start && planDay(p.observedAt) <= range.end);
   const chooseRange = (next: Range) => { setRange(next); const url = new URL(window.location.href); url.searchParams.set("start", next.start); url.searchParams.set("end", next.end); window.history.replaceState(window.history.state, "", url); };
   return <main className="mars-detail-page space-y-5">
     <div className="flex items-center justify-between gap-3"><AnalysisBackLink href={back} className="text-sm text-muted-foreground hover:text-foreground">← 이전 화면</AnalysisBackLink><AIChatTrigger /></div>

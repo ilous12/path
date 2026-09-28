@@ -8,17 +8,25 @@ import {
 } from "./analysis-preferences";
 import { useEventCatalog } from "./event-catalog";
 import { getEventType } from "./data";
+import { legacyWorkspaceId, normalizeLegacyBranding } from "./workspace-identity";
 const snapshots = new Map<string, AnalysisPreferences>();
 const listeners = new Set<() => void>();
 const key = (workspace: string) => `mars-analysis-preferences-${workspace}`;
 export function useAnalysisPreferences() {
-  const workspace = useSearchParams().get("workspace") ?? "air";
+  const workspace = useSearchParams().get("workspace") ?? "aiir";
   const preferences = useSyncExternalStore(
     (listener) => {
       if (!snapshots.has(workspace)) {
         let saved;
         try {
-          saved = JSON.parse(localStorage.getItem(key(workspace)) ?? "null");
+          const current = localStorage.getItem(key(workspace));
+          const legacy = legacyWorkspaceId(workspace);
+          const legacyValue = legacy ? localStorage.getItem(key(legacy)) : null;
+          saved = normalizeLegacyBranding(JSON.parse(current ?? legacyValue ?? "null"));
+          if (!current && legacyValue) {
+            localStorage.setItem(key(workspace), JSON.stringify(saved));
+            localStorage.removeItem(key(legacy!));
+          }
         } catch {}
         snapshots.set(workspace, normalizePreferences(saved));
       }

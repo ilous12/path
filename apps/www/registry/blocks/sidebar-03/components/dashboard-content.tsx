@@ -21,9 +21,9 @@ export function DashboardContent({
 }) {
   const params = useSearchParams();
   const [refreshRevision, setRefreshRevision] = useState(0);
-  const workspace = params.get("workspace") ?? "air";
+  const workspace = params.get("workspace") ?? "aiir";
   const [range, , rangeMode, selectRange] = useTimelineRange(workspace);
-  const name = workspace === "air" ? "AIR" : workspace.toUpperCase();
+  const name = workspace === "aiir" ? "AIIR" : workspace.toUpperCase();
   return (
     <div className="@container mx-auto flex w-full min-w-0 max-w-none flex-1 flex-col gap-3 pb-4">
       <header aria-label="조회 조건" className="flex min-h-9 flex-wrap items-center gap-x-4 gap-y-2">
@@ -42,7 +42,7 @@ export function DashboardContent({
       </header>
       <RefreshingAnalysis refreshKey={`${workspace}:${refreshRevision}`} mode="detail">
         <div className="flex flex-col gap-3">
-          {["air", "tds", "mvno"].includes(workspace) && (
+          {["aiir", "tdds", "mvvno"].includes(workspace) && (
             <WorkspaceIntelligence business={workspace as HomeBusiness} range={range} />
           )}
           <ChartMixedAxes range={range} onRangeChange={(next) => selectRange(next, "custom")} periodControl={<AnalysisRangeControl maxSelectableDate={dayShift(MAX_DATE,180)} range={range} mode={rangeMode} onChange={(next, mode) => {selectRange(next, mode);setRefreshRevision(value=>value+1);}} />} />

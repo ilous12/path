@@ -7,22 +7,22 @@ import {
   homePivotCandidates,
 } from "./home-performance";
 import { competitiveness, similarPlan } from "./plan-competitiveness-model";
-import { isAir, planDay } from "./plan-market-model";
+import { isAiir, planDay } from "./plan-market-model";
 
 export const BUSINESSES: { id: HomeBusiness; name: string; color: string }[] = [
-  { id: "air", name: "AIR", color: "var(--color-blue-500)" },
-  { id: "tds", name: "TDS", color: "var(--color-emerald-500)" },
-  { id: "mvno", name: "MVNO", color: "var(--color-violet-500)" },
+  { id: "aiir", name: "AIIR", color: "var(--color-blue-500)" },
+  { id: "tdds", name: "TDDS", color: "var(--color-emerald-500)" },
+  { id: "mvvno", name: "MVVNO", color: "var(--color-violet-500)" },
 ];
 export const businessName = (id: string) =>
   BUSINESSES.find((b) => b.id === id)?.name ?? id.toUpperCase();
 
 /** Timeline layers shown on HOME, top to bottom. */
-export type Layer = "news" | "rival" | "skt" | "own";
+export type Layer = "news" | "rival" | "skkt" | "own";
 export const LAYER_LABEL: Record<Layer, string> = {
   news: "시장 소식",
   rival: "타사 판매정책",
-  skt: "SKT 판매정책",
+  skkt: "SKKT 판매정책",
   own: "사업별 판매정책",
 };
 const SALES_WEIGHT: Record<string, number> = {
@@ -35,37 +35,37 @@ const SALES_WEIGHT: Record<string, number> = {
 };
 const isSales = (e: MarketEvent) => e.types.some((t) => t in SALES_WEIGHT);
 
-/** Reported "mvno" items are MVNO market news; only our own records belong to the MVNO business. */
-const isMvnoNews = (e: MarketEvent) =>
-  e.operator.toLowerCase() === "mvno" && e.evidenceKind === "reported";
+/** Reported "mvvno" items are MVVNO market news; only our own records belong to the MVVNO business. */
+const isMvvnoNews = (e: MarketEvent) =>
+  e.operator.toLowerCase() === "mvvno" && e.evidenceKind === "reported";
 export function eventBusiness(e: MarketEvent): HomeBusiness | null {
   const id = e.operator.toLowerCase();
-  if (isMvnoNews(e)) return null;
-  return id === "air" || id === "tds" || id === "mvno" ? id : null;
+  if (isMvvnoNews(e)) return null;
+  return id === "aiir" || id === "tdds" || id === "mvvno" ? id : null;
 }
 export function eventLayer(e: MarketEvent): Layer {
   if (eventBusiness(e)) return "own";
-  if (isMvnoNews(e) || !isSales(e)) return "news";
-  return e.operator === "SKT" ? "skt" : "rival";
+  if (isMvvnoNews(e) || !isSales(e)) return "news";
+  return e.operator === "SKKT" ? "skkt" : "rival";
 }
 /** Detailed source of an event, used for tags and colors. */
-export type EventKind = "mnoNews" | "mvnoNews" | "rival" | "skt" | HomeBusiness;
+export type EventKind = "mnoNews" | "mvvnoNews" | "rival" | "skkt" | HomeBusiness;
 export const EVENT_KINDS: Record<EventKind, { label: string; color: string }> = {
   mnoNews: { label: "MNO", color: "var(--color-gray-500)" },
-  mvnoNews: { label: "MVNO", color: "var(--color-slate-400)" },
+  mvvnoNews: { label: "MVVNO", color: "var(--color-slate-400)" },
   rival: { label: "타사", color: "var(--color-orange-600)" },
-  skt: { label: "SKT", color: "var(--color-rose-700)" },
-  air: { label: "AIR", color: "var(--color-blue-500)" },
-  tds: { label: "TDS", color: "var(--color-emerald-600)" },
-  mvno: { label: "MVNO", color: "var(--color-violet-500)" },
+  skkt: { label: "SKKT", color: "var(--color-rose-700)" },
+  aiir: { label: "AIIR", color: "var(--color-blue-500)" },
+  tdds: { label: "TDDS", color: "var(--color-emerald-600)" },
+  mvvno: { label: "MVVNO", color: "var(--color-violet-500)" },
 };
 export function eventKind(e: MarketEvent): EventKind {
   const own = eventBusiness(e);
   if (own) return own;
-  if (isMvnoNews(e) || e.marketSegment === "MVNO")
-    return isSales(e) && !isMvnoNews(e) ? "rival" : "mvnoNews";
+  if (isMvvnoNews(e) || e.marketSegment === "MVVNO")
+    return isSales(e) && !isMvvnoNews(e) ? "rival" : "mvvnoNews";
   if (!isSales(e)) return "mnoNews";
-  return e.operator === "SKT" ? "skt" : "rival";
+  return e.operator === "SKKT" ? "skkt" : "rival";
 }
 
 /** HOME timeline lanes, top to bottom. */
@@ -80,7 +80,7 @@ export const TIMELINE_LANES: {
   { id: "pivot", label: "변곡점", color: "var(--color-blue-600)" },
   { id: "campaign", label: "캠페인", color: "var(--color-yellow-300)" },
 ];
-/** 시장 소식 = MNO·MVNO news and competitor/SKT terms; 온라인정책 = AIR·TDS·MVNO terms. */
+/** 시장 소식 = MNO·MVVNO news and competitor/SKKT terms; 온라인정책 = AIIR·TDDS·MVVNO terms. */
 export function timelineLane(e: MarketEvent): "market" | "online" {
   return eventBusiness(e) ? "online" : "market";
 }
@@ -153,7 +153,7 @@ export function relationOf(e: MarketEvent, business: HomeBusiness) {
     return eventBusiness(e) === business
       ? `자사 ${type}`
       : `${businessName(eventBusiness(e)!)} ${type}`;
-  if (layer === "skt") return `SKT ${type}`;
+  if (layer === "skkt") return `SKKT ${type}`;
   if (layer === "rival") return `${e.operator} ${type}`;
   return "시장 소식";
 }
@@ -172,7 +172,7 @@ export function hypothesesFor(
       const layer = eventLayer(e);
       return (
         layer === "rival" ||
-        layer === "skt" ||
+        layer === "skkt" ||
         (layer === "own" && eventBusiness(e) === business)
       );
     })
@@ -236,15 +236,15 @@ export function precedentFor(
 }
 
 let competitivenessCache: number | null | undefined;
-/** Average AIR score against similar plans observed on the same day (50 = parity). */
-export function airCompetitiveness() {
+/** Average AIIR score against similar plans observed on the same day (50 = parity). */
+export function aiirCompetitiveness() {
   if (competitivenessCache !== undefined) return competitivenessCache;
-  const airs = catalog.offers.filter((p) => p.sourceId === "air-official");
-  const scores = airs.flatMap((a) =>
+  const aiirs = catalog.offers.filter((p) => p.sourceId === "aiir-official");
+  const scores = aiirs.flatMap((a) =>
     catalog.offers
       .filter(
         (p) =>
-          !isAir(p) &&
+          !isAiir(p) &&
           similarPlan(a, p) &&
           planDay(p.observedAt) === planDay(a.observedAt),
       )
@@ -279,7 +279,7 @@ export function pulseOf(
   const rivalMoves = events
     .filter(
       (e) =>
-        (eventLayer(e) === "rival" || eventLayer(e) === "skt") &&
+        (eventLayer(e) === "rival" || eventLayer(e) === "skkt") &&
         e.startAt.slice(0, 10) <= end &&
         e.startAt.slice(0, 10) >= dayShift(end, -13),
     )
@@ -367,7 +367,7 @@ export function pulseOf(
     pivot,
     hypotheses,
     precedent,
-    competitiveness: business === "air" ? airCompetitiveness() : null,
+    competitiveness: business === "aiir" ? aiirCompetitiveness() : null,
     spark: rows.map((r) => r.customers),
   };
 }
@@ -449,15 +449,15 @@ export function briefing(
       e.startAt.slice(0, 10) >= dayShift(end, -6),
   );
   const rival = week.filter((e) => eventLayer(e) === "rival");
-  const skt = week.filter((e) => eventLayer(e) === "skt");
+  const skkt = week.filter((e) => eventLayer(e) === "skkt");
   const news = week.filter((e) => eventLayer(e) === "news");
-  const top = [...rival, ...skt].sort(
+  const top = [...rival, ...skkt].sort(
     (a, b) => weight(b) - weight(a) || b.startAt.localeCompare(a.startAt),
   )[0];
   const lines: BriefLine[] = [
     {
       kind: "사실",
-      text: `7일 시장: 타사 ${rival.length} · SKT ${skt.length} · 소식 ${news.length}건${top ? ` — 최대 변화 ‘${top.title}’` : ""}`,
+      text: `7일 시장: 타사 ${rival.length} · SKKT ${skkt.length} · 소식 ${news.length}건${top ? ` — 최대 변화 ‘${top.title}’` : ""}`,
     },
     {
       kind: "사실",

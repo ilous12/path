@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { DetailLoading } from "./detail-loading";
 import { EVENTS } from "./data";
 
-function Shell({title = "상세 분석", workspace = "air", period, mode = "analysis"}: {title?: string; workspace?: string; period?: string; mode?: "analysis" | "detail"}) {
+function Shell({title = "상세 분석", workspace = "aiir", period, mode = "analysis"}: {title?: string; workspace?: string; period?: string; mode?: "analysis" | "detail"}) {
   return <main className="mars-detail-page space-y-5">
     <Link href={`/?workspace=${encodeURIComponent(workspace)}`} className="text-sm text-primary">← 타임라인</Link>
     <WorkspaceHeader><div className="space-y-2">
@@ -19,7 +19,7 @@ function Shell({title = "상세 분석", workspace = "air", period, mode = "anal
 }
 function Pending() {
   const q = useSearchParams();
-  const workspace = q.get("workspace") || "air";
+  const workspace = q.get("workspace") || "aiir";
   const ids = (q.get("events") || "").split(",").filter(Boolean);
   const selected = EVENTS.filter(e => ids.includes(e.id));
   const own = ids.length > 0 && selected.length === ids.length && selected.every(e => e.operator.toLowerCase() === workspace);

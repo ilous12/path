@@ -1,6 +1,6 @@
 import catalog from "./fixtures/plan-catalog.json";
 export type PlanOffer = (typeof catalog.offers)[number];
-export const isAir = (p: { sourceId: string }) => p.sourceId.startsWith("air-");
+export const isAiir = (p: { sourceId: string }) => p.sourceId.startsWith("aiir-");
 export const planDay = (value: string) =>
   new Date(Date.parse(value) + 9 * 3600000).toISOString().slice(0, 10);
 export function planChanges(history: typeof catalog.history) {
@@ -29,7 +29,7 @@ export const lastChanged = new Map(
     .map((h) => [h.offerId, h.observedAt]),
 );
 export const operatorName = (p: PlanOffer) =>
-  isAir(p) ? "AIR" : (p.operator ?? "사업자 미확인");
+  isAiir(p) ? "AIIR" : (p.operator ?? "사업자 미확인");
 const colors = [
   "var(--color-blue-500)",
   "var(--color-violet-500)",
@@ -42,12 +42,12 @@ const colors = [
 ];
 const count = new Map<string, number>();
 for (const p of catalog.offers)
-  if (!isAir(p))
+  if (!isAiir(p))
     count.set(operatorName(p), (count.get(operatorName(p)) ?? 0) + 1);
 export const operatorGroups = [
   {
-    name: "AIR",
-    count: catalog.offers.filter(isAir).length,
+    name: "AIIR",
+    count: catalog.offers.filter(isAiir).length,
     color: "var(--color-red-500)",
   },
   ...[...count]

@@ -30,7 +30,7 @@ const tooltipStyle = {
   fontSize: 12,
 };
 export function KpiDashboard() {
-  const workspace = useSearchParams().get("workspace") ?? "air";
+  const workspace = useSearchParams().get("workspace") ?? "aiir";
   const [range, , mode, selectRange] = useTimelineRange(workspace);
   const base = null;
   const contribution = 20;

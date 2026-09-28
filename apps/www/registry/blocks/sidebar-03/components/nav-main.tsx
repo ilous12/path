@@ -37,7 +37,7 @@ export function NavMain({
   const current = params.get("view") ?? "summary";
   const href = (view: string) => {
     const next = new URLSearchParams();
-    next.set("workspace", params.get("workspace") ?? "air");
+    next.set("workspace", params.get("workspace") ?? "aiir");
     if (view === "summary") next.delete("view");
     else next.set("view", view);
     return `/?${next.toString()}`;

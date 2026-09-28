@@ -10,7 +10,7 @@ import { useEventVisibility } from "./event-visibility";
 import { getEventType, presetRange } from "./data";
 import { EventManagement } from "@/registry/blocks/sidebar-03/components/event-management";
 export function EventOverview({ promotionsOnly = false }: { promotionsOnly?: boolean }) {
-  const workspace = useSearchParams().get("workspace") ?? "air";
+  const workspace = useSearchParams().get("workspace") ?? "aiir";
   const [range, setRange] = useState(presetRange("1M"));
   const { events } = useEventCatalog();
   const { hiddenIds } = useEventVisibility();

@@ -2,7 +2,7 @@
 import { currentSalesSchema } from "./sales-metric-store";
 import { applyMetricDefaults, normalizeSalesTerms } from "./sales-metric-values";
 import { PolicyPeriodEditor } from "./policy-period-editor";
-import { AirSalesTermsEditor, initialAirTerms, airTermsSummary } from "./air-sales-terms";
+import { AiirSalesTermsEditor, initialAiirTerms, aiirTermsSummary } from "./aiir-sales-terms";
 import { useAnalysisPreferences } from "./use-analysis-preferences";
 import { RequirementOptions } from "./requirement-options";
 
@@ -110,7 +110,7 @@ export function RegistrationWizard({
   onSaved: (start: string, end: string) => void;
 }) {
   const router = useRouter();
-  const [rawSalesTerms, setSalesTerms] = useState(()=>applyMetricDefaults(initialAirTerms(),currentSalesSchema(workspace)));
+  const [rawSalesTerms, setSalesTerms] = useState(()=>applyMetricDefaults(initialAiirTerms(),currentSalesSchema(workspace)));
   const salesTerms=normalizeSalesTerms(rawSalesTerms);
 
   const { preferences } = useAnalysisPreferences();
@@ -129,7 +129,7 @@ export function RegistrationWizard({
   const [step, setStep] = useState(initialKind === "event" ? 1 : 0);
   const [choosingMethod, setChoosingMethod] = useState(initialKind === "experiment");
   const kind = initialKind;
-  const airPolicy = workspace === "air" && kind === "experiment";
+  const aiirPolicy = workspace === "aiir" && kind === "experiment";
   const directPolicy = kind === "experiment" && inputMode === "direct" && !automatic;
   const [phase, setPhase] = useState<
     "edit" | "processing" | "review" | "saving" | "done"
@@ -178,11 +178,11 @@ export function RegistrationWizard({
   );
   const operators = [
     ...new Set([
-      "AIR",
-      "TDS",
-      "MVNO",
+      "AIIR",
+      "TDDS",
+      "MVVNO",
       "MNO",
-      "SKT",
+      "SKKT",
       "KT",
       "LG U+",
       ...catalog.events.map((e) => e.operator.toUpperCase()),
@@ -196,16 +196,16 @@ export function RegistrationWizard({
     Math.round((Date.parse(end) - Date.parse(start)) / 86400000) + 1;
   const [forecastMethod, setForecastMethod] = useState<NonNullable<PolicyAlternative["forecastMethod"]>>("average");
   const candidate = (): PolicyAlternative => ({
-    salesTerms: airPolicy ? salesTerms : undefined,
+    salesTerms: aiirPolicy ? salesTerms : undefined,
     forecastMethod,
     id: "",
     title: form.title.trim(),
-    description: directPolicy ? (airPolicy ? airTermsSummary(salesTerms) : summarizeRequirements(requirements ?? {pricePct:form.pricePct,benefits:"",points:"",freeOffers:"",other:form.experimentType})) : form.prompt.trim(),
+    description: directPolicy ? (aiirPolicy ? aiirTermsSummary(salesTerms) : summarizeRequirements(requirements ?? {pricePct:form.pricePct,benefits:"",points:"",freeOffers:"",other:form.experimentType})) : form.prompt.trim(),
     type: form.experimentType,
     workspace,
     operator,
-    channel: airPolicy ? salesTerms.channel : targetChannels.join(", ") || "전체",
-    targetChannels: airPolicy ? [salesTerms.channel] : targetChannels,
+    channel: aiirPolicy ? salesTerms.channel : targetChannels.join(", ") || "전체",
+    targetChannels: aiirPolicy ? [salesTerms.channel] : targetChannels,
     analysisContext: automatic ? generatedContext : seed?.analysisContext,
     start: start <= MIN_DATE ? dayShift(MIN_DATE, 1) : start,
     days: kind === "event" ? 14 : days(form.forecastEnd),
@@ -213,7 +213,7 @@ export function RegistrationWizard({
       kind === "event"
         ? Math.max(1, Math.min(14, form.end ? days(form.end.slice(0, 10)) : 7))
         : days(form.applyEnd),
-    pricePct: airPolicy ? (salesTerms.monthlyPrice / salesTerms.baselinePrice - 1) * 100 * salesTerms.eligibilityPct / 100 : form.pricePct,
+    pricePct: aiirPolicy ? (salesTerms.monthlyPrice / salesTerms.baselinePrice - 1) * 100 * salesTerms.eligibilityPct / 100 : form.pricePct,
     demandPct: form.demandPct,
     cancellationPct: form.cancellationPct,
     variableCostPct: form.variableCostPct,
@@ -224,7 +224,7 @@ export function RegistrationWizard({
     history: [],
     prompt: directPolicy ? undefined : form.prompt.trim(),
     requirements: requirements
-      ? { ...requirements, pricePct: airPolicy ? (salesTerms.monthlyPrice / salesTerms.baselinePrice - 1) * 100 : form.pricePct, ...(airPolicy ? {points: airTermsSummary(salesTerms)} : {}) }
+      ? { ...requirements, pricePct: aiirPolicy ? (salesTerms.monthlyPrice / salesTerms.baselinePrice - 1) * 100 : form.pricePct, ...(aiirPolicy ? {points: aiirTermsSummary(salesTerms)} : {}) }
       : undefined,
   });
   function validate(current: number) {
@@ -278,7 +278,7 @@ export function RegistrationWizard({
     setError("");
     if (step === 0 && kind === "experiment") setChoosingMethod(true);
     else if(step===2 && directPolicy){
-      setRequirements(requirements ?? {pricePct:form.pricePct,benefits:"",points:airPolicy?airTermsSummary(salesTerms):"",freeOffers:"",other:form.experimentType});
+      setRequirements(requirements ?? {pricePct:form.pricePct,benefits:"",points:aiirPolicy?aiirTermsSummary(salesTerms):"",freeOffers:"",other:form.experimentType});
       setSelectedScenario(2);setStep(3);setPhase("review");
     } else setStep(step + 1);
   }
@@ -292,7 +292,7 @@ export function RegistrationWizard({
     const selectedPivots=(query.has("pivots") ? (query.get("pivots")||"").split(",") : RECOVERY_MILESTONES.map(p=>p.date)).filter(d=>d>=basis.start && d<=basis.end);
     const suggestion = proposePolicy(basis,targetChannels,priorities,selectedEvents,selectedPivots);
     const prompt = suggestion.prompt;
-    if(workspace === "air") setSalesTerms(current=>({...current,monthlyPrice:Math.round(current.baselinePrice*(1+suggestion.pricePct/100)),channel:targetChannels[0] || current.channel}));
+    if(workspace === "aiir") setSalesTerms(current=>({...current,monthlyPrice:Math.round(current.baselinePrice*(1+suggestion.pricePct/100)),channel:targetChannels[0] || current.channel}));
     setGeneratedContext({...basis,workspace,channels:[...targetChannels],priorities:[...priorities],eventIds:selectedEvents.map(e=>e.id),pivotDates:selectedPivots,reason:suggestion.reason});
     setChoosingPriorities(false);
     const result = extractPolicyRequirements(prompt);
@@ -332,7 +332,7 @@ export function RegistrationWizard({
         setRequirements(result);
         setSelectedScenario(null);
         setForm(current=>({...current,title:current.title.trim()||`${workspace.toUpperCase()} · ${current.prompt.trim().slice(0,60)}`,pricePct:result.pricePct??0}));
-        if(airPolicy && result.pricePct !== null)setSalesTerms(current=>({...current,monthlyPrice:Math.round(current.baselinePrice*(1+result.pricePct!/100))}));
+        if(aiirPolicy && result.pricePct !== null)setSalesTerms(current=>({...current,monthlyPrice:Math.round(current.baselinePrice*(1+result.pricePct!/100))}));
         setPhase("review");
         submitting.current = false;
       }, 3000),
@@ -397,7 +397,7 @@ export function RegistrationWizard({
           } else {
             const policyId = store.attach({
               ...registrationScenario(candidate(), selectedScenario),
-              description: `${form.title.trim()} · ${scenario.label}${airPolicy ? "\n" + airTermsSummary(salesTerms) : ""}\n${summarizeRequirements(registrationScenario(candidate(), selectedScenario).requirements!)}`,
+              description: `${form.title.trim()} · ${scenario.label}${aiirPolicy ? "\n" + aiirTermsSummary(salesTerms) : ""}\n${summarizeRequirements(registrationScenario(candidate(), selectedScenario).requirements!)}`,
               reviewScenario: scenario,
               id: `alt-${crypto.randomUUID()}`,
               history: [
@@ -593,7 +593,7 @@ export function RegistrationWizard({
                       <h4 className="font-semibold">AI 자동 제안</h4>
                       <p className="mt-2 text-xs leading-5 text-muted-foreground">입력 단계를 건너뛰고 중점 지표에 맞춘 정책 후보와 예상 차트를 바로 검토합니다.</p>
                     </button>
-                    <button type="button" onClick={() => {setChoosingMethod(false);setAutomatic(false);setInputMode("direct");if(workspace === "air"){setTargetChannels([salesTerms.channel]);setForm(current=>({...current,title:current.title || `AIR · ${salesTerms.planName} · ${salesTerms.channel} 판매조건`,prompt:current.prompt || airTermsSummary(salesTerms)}));}setStep(1);}} className="group rounded-xl border bg-card p-5 text-left transition-colors hover:border-primary hover:bg-primary/5 focus-visible:outline-2 focus-visible:outline-ring">
+                    <button type="button" onClick={() => {setChoosingMethod(false);setAutomatic(false);setInputMode("direct");if(workspace === "aiir"){setTargetChannels([salesTerms.channel]);setForm(current=>({...current,title:current.title || `AIIR · ${salesTerms.planName} · ${salesTerms.channel} 판매조건`,prompt:current.prompt || aiirTermsSummary(salesTerms)}));}setStep(1);}} className="group rounded-xl border bg-card p-5 text-left transition-colors hover:border-primary hover:bg-primary/5 focus-visible:outline-2 focus-visible:outline-ring">
                       <FlaskConical className="mb-5 size-6 text-primary" />
                       <h4 className="font-semibold">직접 입력</h4>
                       <p className="mt-2 text-xs leading-5 text-muted-foreground">정책 유형·채널·기간·정책 요건을 직접 정하고 예상 결과를 비교합니다.</p>
@@ -617,7 +617,7 @@ export function RegistrationWizard({
 
                 </section>
               )}
-              {airPolicy && (step === 1 || phase === "review") && <AirSalesTermsEditor value={salesTerms} onChange={v=>{setSalesTerms(v);setTargetChannels([v.channel]);setForm(current=>({...current,title:`AIR · ${v.planName} · ${v.channel} 판매조건`,prompt:airTermsSummary(v)}));setSelectedScenario(null);}} channels={targetChannels} />}
+              {aiirPolicy && (step === 1 || phase === "review") && <AiirSalesTermsEditor value={salesTerms} onChange={v=>{setSalesTerms(v);setTargetChannels([v.channel]);setForm(current=>({...current,title:`AIIR · ${v.planName} · ${v.channel} 판매조건`,prompt:aiirTermsSummary(v)}));setSelectedScenario(null);}} channels={targetChannels} />}
               {step === 1 && (
                 <>
                   <Field label={kind === "event" ? "이벤트 유형" : "정책 유형"}>
@@ -669,7 +669,7 @@ export function RegistrationWizard({
                       </select>
                     </Field>
                   </div>
-                  {!airPolicy && <ChannelSelector
+                  {!aiirPolicy && <ChannelSelector
                     value={targetChannels}
                     onChange={setTargetChannels}
                     extra={[
@@ -697,7 +697,7 @@ export function RegistrationWizard({
                   )}
                 </>
               )}
-              {step===1 && directPolicy && !airPolicy && <RequirementOptions value={requirements??{pricePct:form.pricePct,benefits:"",points:"",freeOffers:"",other:""}} price={form.pricePct} onPrice={v=>set("pricePct",v)} onChange={setRequirements}/>}
+              {step===1 && directPolicy && !aiirPolicy && <RequirementOptions value={requirements??{pricePct:form.pricePct,benefits:"",points:"",freeOffers:"",other:""}} price={form.pricePct} onPrice={v=>set("pricePct",v)} onChange={setRequirements}/>}
               {step === 2 && (
                 <>
                   {kind === "event" && <div className="grid gap-4 sm:grid-cols-2">
@@ -705,7 +705,7 @@ export function RegistrationWizard({
                     <Field label="종료 일시 · 선택"><Input type="datetime-local" value={form.end} min={form.start} max={`${MAX_DATE}T23:59`} onInput={e=>set("end",e.currentTarget.value)}/></Field>
                   </div>}
                   {kind === "experiment" ? (
-                    <PolicyPeriodEditor value={{start,applyEnd:form.applyEnd,forecastEnd:form.forecastEnd}} channels={airPolicy?[salesTerms.channel]:targetChannels} onChange={v=>{setForm(current=>({...current,start:`${v.start}T09:00`,applyEnd:v.applyEnd,forecastEnd:v.forecastEnd}));setError("");}} />
+                    <PolicyPeriodEditor value={{start,applyEnd:form.applyEnd,forecastEnd:form.forecastEnd}} channels={aiirPolicy?[salesTerms.channel]:targetChannels} onChange={v=>{setForm(current=>({...current,start:`${v.start}T09:00`,applyEnd:v.applyEnd,forecastEnd:v.forecastEnd}));setError("");}} />
                   ) : (
                     <>
                       <div className="grid gap-4 sm:grid-cols-2">
@@ -821,7 +821,7 @@ export function RegistrationWizard({
                           {directPolicy ? "입력한 정책 · 요약" : "AI 요건 분석 · 요약"}
                         </p>
                         <p className="text-sm leading-6">
-                          {airPolicy ? airTermsSummary(salesTerms) : summarizeRequirements({
+                          {aiirPolicy ? aiirTermsSummary(salesTerms) : summarizeRequirements({
                             ...requirements,
                             pricePct: form.pricePct,
                           })}
@@ -844,7 +844,7 @@ export function RegistrationWizard({
 
                         </div>
                       )}
-                      {kind === "experiment" && <PolicyPeriodEditor value={{start,applyEnd:form.applyEnd,forecastEnd:form.forecastEnd}} channels={airPolicy?[salesTerms.channel]:targetChannels} onChange={v=>{setForm(current=>({...current,start:`${v.start}T09:00`,applyEnd:v.applyEnd,forecastEnd:v.forecastEnd}));setError("");}} />}
+                      {kind === "experiment" && <PolicyPeriodEditor value={{start,applyEnd:form.applyEnd,forecastEnd:form.forecastEnd}} channels={aiirPolicy?[salesTerms.channel]:targetChannels} onChange={v=>{setForm(current=>({...current,start:`${v.start}T09:00`,applyEnd:v.applyEnd,forecastEnd:v.forecastEnd}));setError("");}} />}
                       <RegistrationScenarioReview
                         base={candidate()}
                         onMethodChange={kind === "experiment" ? setForecastMethod : undefined}
@@ -861,7 +861,7 @@ export function RegistrationWizard({
                           하지 않습니다.
                         </p>
                       )}
-                      {!airPolicy && <details className="rounded-xl border p-4">
+                      {!aiirPolicy && <details className="rounded-xl border p-4">
                         <summary className="cursor-pointer text-sm font-medium">
                           변경 요건 상세 · 수정
                         </summary>

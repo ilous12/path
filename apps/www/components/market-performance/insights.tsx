@@ -42,7 +42,7 @@ function HighlightMetrics({ text }: { text: string }) {
 }
 
 export function PerformanceInsights({ range }: { range: Range }) {
-  const workspace = useSearchParams().get("workspace") ?? "air";
+  const workspace = useSearchParams().get("workspace") ?? "aiir";
   const { events } = useEventCatalog();
   const { preferences } = useAnalysisPreferences();
   const focus = preferences.focus;

@@ -14,9 +14,9 @@ import { presetRange, validateRange, type Range } from "./data";
 import { scopeAnalysis } from "./channel-analysis-model";
 export function ChannelAnalysis() {
   const q = useSearchParams();
-  const workspace = ["air", "tds", "mvno"].includes(q.get("workspace") ?? "")
+  const workspace = ["aiir", "tdds", "mvvno"].includes(q.get("workspace") ?? "")
     ? q.get("workspace")!
-    : "air";
+    : "aiir";
   const channel = q.get("channel") || "APP";
   const requested = { start: q.get("start") ?? "", end: q.get("end") ?? "" };
   const [range, setRange] = useState<Range>(

@@ -36,7 +36,7 @@ export function AnalysisEvents({
       <div className="flex flex-wrap items-center gap-2">
         {[
           ["all", "전체"],
-          ["own", workspace === "air" ? "air" : workspace.toUpperCase()],
+          ["own", workspace === "aiir" ? "aiir" : workspace.toUpperCase()],
           ["competitor", "경쟁사·기타"],
         ].map(([id, label]) => (
           <Button

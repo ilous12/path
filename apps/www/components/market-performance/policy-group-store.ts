@@ -6,6 +6,7 @@ import { normalizePresentation } from "./presentation-copy";
 import { projectAlternative, validateAlternative, type PolicyAlternative } from "./alternative-model";
 import { DATA_VERSION, clone, emptyRevision, groupAlternative, isoNow, latestRevision, migrateAlternative, overlap, policyHash, subPolicyFromAlternative, syncPeriod, uid, validateGroup, type PolicyGroup, type PolicyRevision, type SubPolicy } from "./policy-group-model";
 import { MAX_DATE } from "./data";
+import { normalizeLegacyBranding } from "./workspace-identity";
 type Store = { version:2; generation:number; policies:PolicyGroup[]; inbox:SubPolicy[] };
 const key="mars-policy-groups-v2",legacyKey="mars-policy-alternatives-v1";
 const empty:Store={version:2,generation:0,policies:[],inbox:[]};
@@ -19,11 +20,11 @@ function validateStore(value: Store) {
 function read(){
  try{
   const raw=localStorage.getItem(key);
-  if(raw){const parsed=JSON.parse(raw);validateStore(parsed);state=normalizePresentation(parsed);error="";return;}
+  if(raw){const parsed=normalizeLegacyBranding<Store>(JSON.parse(raw));validateStore(parsed);state=normalizePresentation(parsed);if(JSON.stringify(parsed)!==raw)localStorage.setItem(key,JSON.stringify(parsed));error="";return;}
   const old=localStorage.getItem(legacyKey);
   let alternatives=normalizePresentation(seeds) as PolicyAlternative[];
   if(old){
-   const parsed=JSON.parse(old);
+   const parsed=normalizeLegacyBranding(JSON.parse(old));
    if(parsed.version!==1||!Array.isArray(parsed.alternatives)||parsed.alternatives.some((a:PolicyAlternative)=>!a?.id||!["draft","applied","paused"].includes(a.status)||!Array.isArray(a.history)||validateAlternative(a)))throw Error("기존 정책 데이터가 올바르지 않아 이전을 중단했습니다.");
    alternatives=[...parsed.alternatives,...alternatives.filter(a=>!parsed.alternatives.some((b:PolicyAlternative)=>a.id===b.id))];
    if(!localStorage.getItem(`${legacyKey}-backup`))localStorage.setItem(`${legacyKey}-backup`,old);
@@ -46,23 +47,23 @@ export function usePolicyGroups(){
  const snapshot=useSyncExternalStore(subscribe,()=>state,()=>empty);
  return {...snapshot,error,ready:initialized,
   create:(workspace:string,name:string,start=MAX_DATE)=>{
-   if(!["air","tds","mvno"].includes(workspace))throw Error("AIR·TDS·MVNO 사업을 선택한 뒤 캠페인을 만드세요.");
+   if(!["aiir","tdds","mvvno"].includes(workspace))throw Error("AIIR·TDDS·MVVNO 사업을 선택한 뒤 캠페인을 만드세요.");
    const id=uid("policy");const policy:PolicyGroup={id,workspace,version:1,createdAt:isoNow(),revisions:[emptyRevision(name,start)],executions:[],simulations:[],history:[{at:isoNow(),action:"캠페인 초안 생성"}]};write({...state,policies:[...state.policies,policy]});return id;
   },
   saveDraft:(id:string,r:PolicyRevision,expectedVersion:number)=>update(id,p=>{if(p.version!==expectedVersion)throw Error("정책이 변경되었습니다. 다시 열어주세요.");const draft=editable(p);Object.assign(draft,syncPeriod({...clone(r),id:draft.id,number:draft.number,status:"draft"}));return event(p,"캠페인 초안 저장");}),
   attach:(source:PolicyAlternative,parentId?:string,origin:SubPolicy["origin"]="direct")=>{
-   if(!["air","tds","mvno"].includes(source.workspace??"air"))throw Error("AIR·TDS·MVNO 사업을 선택한 뒤 판매정책을 작성하세요.");
+   if(!["aiir","tdds","mvvno"].includes(source.workspace??"aiir"))throw Error("AIIR·TDDS·MVVNO 사업을 선택한 뒤 판매정책을 작성하세요.");
    if(source.composition)throw Error("캠페인은 구성 화면에서 새 버전으로 수정하세요.");
-   if(origin!=="legacy"&&source.workspace==="air"&&(!source.salesTerms?.metricSchema||JSON.stringify(source.salesTerms.metricSchema)!==JSON.stringify(currentSalesSchema(source.workspace))))throw Error("판매조건 기준이 변경되었습니다. 등록 화면을 다시 열어 최신 메트릭으로 작성하세요.");
+   if(origin!=="legacy"&&source.workspace==="aiir"&&(!source.salesTerms?.metricSchema||JSON.stringify(source.salesTerms.metricSchema)!==JSON.stringify(currentSalesSchema(source.workspace))))throw Error("판매조건 기준이 변경되었습니다. 등록 화면을 다시 열어 최신 메트릭으로 작성하세요.");
    const invalid=validateAlternative(source);if(invalid)throw Error(invalid);
    const sub=subPolicyFromAlternative(source,origin);
    if(parentId==="inbox"){write({...state,inbox:[...state.inbox,sub]});return "inbox";}
-   if(parentId){update(parentId,p=>{if(p.workspace!==(source.workspace??"air"))throw Error("다른 사업의 캠페인에 반영할 수 없습니다.");editable(p).items.push(sub);return event(p,`판매정책 완료·반영: ${sub.title}`);});return parentId;}
+   if(parentId){update(parentId,p=>{if(p.workspace!==(source.workspace??"aiir"))throw Error("다른 사업의 캠페인에 반영할 수 없습니다.");editable(p).items.push(sub);return event(p,`판매정책 완료·반영: ${sub.title}`);});return parentId;}
    const p=migrateAlternative({...source,status:"draft"});p.legacyId=undefined;p.revisions[0].items=[sub];p.history=[{at:isoNow(),action:"판매정책에서 캠페인 초안 생성"}];write({...state,policies:[...state.policies,p]});return p.id;
   },
   attachInbox:(id:string,subId:string)=>{
-   const sub=state.inbox.find(i=>i.id===subId);const policy=state.policies.find(p=>p.id===id);if(!sub||!policy)throw Error("판매정책을 찾을 수 없습니다.");if((sub.source.workspace??"air")!==policy.workspace)throw Error("사업을 확인하세요.");
-   if(policy.workspace==="air"&&JSON.stringify(sub.source.salesTerms?.metricSchema)!==JSON.stringify(currentSalesSchema(policy.workspace)))throw Error("작업함 판매조건이 최신 기준과 다릅니다. 최신 메트릭으로 판매정책을 다시 작성하세요.");
+   const sub=state.inbox.find(i=>i.id===subId);const policy=state.policies.find(p=>p.id===id);if(!sub||!policy)throw Error("판매정책을 찾을 수 없습니다.");if((sub.source.workspace??"aiir")!==policy.workspace)throw Error("사업을 확인하세요.");
+   if(policy.workspace==="aiir"&&JSON.stringify(sub.source.salesTerms?.metricSchema)!==JSON.stringify(currentSalesSchema(policy.workspace)))throw Error("작업함 판매조건이 최신 기준과 다릅니다. 최신 메트릭으로 판매정책을 다시 작성하세요.");
    const p=clone(policy);editable(p).items.push({...clone(sub),id:uid("sub")});p.version++;event(p,`작업함 판매정책 반영: ${sub.title}`);write({...state,policies:state.policies.map(v=>v.id===id?p:v),inbox:state.inbox.filter(i=>i.id!==subId)});
   },
   newDraft:(id:string)=>update(id,p=>{editable(p);return event(p,"새 초안 버전 생성");}),

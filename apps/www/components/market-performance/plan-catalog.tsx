@@ -15,8 +15,8 @@ import catalog from "./fixtures/plan-catalog.json";
 
 type Offer = (typeof catalog.offers)[number];
 const sources: Record<string, string> = {
-  "air-official": "AIR 공식",
-  "air-kakaopay": "AIR · 카카오페이",
+  "aiir-official": "AIIR 공식",
+  "aiir-kakaopay": "AIIR · 카카오페이",
   moyo: "모요",
 };
 const money = (n: number | null) =>
@@ -173,7 +173,7 @@ export function PlanCatalog() {
               }}
             >
               <option value="all">모든 망</option>
-              {["SKT", "KT", "LG U+"].map((n) => (
+              {["SKKT", "KT", "LG U+"].map((n) => (
                 <option key={n}>{n}</option>
               ))}
             </select>
@@ -325,12 +325,12 @@ export function PlanCatalog() {
                             <h3 className="mb-2 text-sm font-semibold">
                               채널별 조건
                             </h3>
-                            {p.sourceId.startsWith("air-") ? (
+                            {p.sourceId.startsWith("aiir-") ? (
                               catalog.offers
                                 .filter(
                                   (other) =>
                                     other.productId === p.productId &&
-                                    other.sourceId.startsWith("air-"),
+                                    other.sourceId.startsWith("aiir-"),
                                 )
                                 .map((other) => (
                                   <p
@@ -370,7 +370,7 @@ export function PlanCatalog() {
                               "VISIBLE_VS_JSONLD_PRICE_MISMATCH",
                             ) && (
                               <p className="mt-2 text-xs text-foreground">
-                                공식 AIR X: 화면 20,000원 / 내장 데이터
+                                공식 AIIR X: 화면 20,000원 / 내장 데이터
                                 28,500원. 구독 평가액 반영 차이이며 추가 확인이
                                 필요합니다.
                               </p>

@@ -16,7 +16,7 @@ import { RecordMenu } from "./record-menu";
 const number = (n: number) => n.toLocaleString("ko-KR");
 const selectClass = "h-9 rounded-md border border-input bg-background px-3 text-sm";
 export function ChannelPages({ search = false }: { search?: boolean }) {
-  const workspace = useSearchParams().get("workspace") ?? "air";
+  const workspace = useSearchParams().get("workspace") ?? "aiir";
   const [range, , mode, selectRange] = useTimelineRange(workspace);
   const [query, setQuery] = useHistoryViewState("channel-pages:query", "");
   const [channel, setChannel] = useHistoryViewState("channel-pages:channel", "");

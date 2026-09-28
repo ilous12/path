@@ -45,11 +45,11 @@ function MarketDetail() {
     end: params.get("end") ?? "",
   };
   const range = validateRange(requested) ? presetRange("1M") : requested;
-  const workspace = ["air", "tds", "mvno"].includes(
+  const workspace = ["aiir", "tdds", "mvvno"].includes(
     params.get("workspace") ?? "",
   )
     ? params.get("workspace")!
-    : "air";
+    : "aiir";
   const kind = params.get("kind");
   const value = params.get("value") ?? "";
   const valid = (kind === "type" || kind === "operator") && !!value;

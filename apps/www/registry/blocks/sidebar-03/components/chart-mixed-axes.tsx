@@ -91,8 +91,8 @@ export function ChartMixedAxes({
 }) {
   const { events } = useEventCatalog();
   const alternativeStore = useAlternatives();
-  const workspace = useSearchParams().get("workspace") ?? "air";
-  const workspaceName = workspace === "air" ? "air" : workspace.toUpperCase();
+  const workspace = useSearchParams().get("workspace") ?? "aiir";
+  const workspaceName = workspace === "aiir" ? "aiir" : workspace.toUpperCase();
   const scopeLabel = channel ? `${workspace.toUpperCase()} · ${channel}` : workspaceName;
   const hiddenIds = useAnalysisExclusions();
   const [activeSeries, setActiveSeries] = React.useState<string[]>([
@@ -192,15 +192,15 @@ export function ChartMixedAxes({
       events.some(
         (e) =>
           e.id === a.eventId &&
-          e.operator.toLowerCase() === "air" &&
+          e.operator.toLowerCase() === "aiir" &&
           !hiddenIds.includes(e.id),
       ),
   );
-  const showAlternativeLane = ["air", "tds", "mvno"].includes(workspace);
+  const showAlternativeLane = ["aiir", "tdds", "mvvno"].includes(workspace);
   const visibleExperiments =
     showAlternativeLane
       ? knownAlternatives.filter(
-          (a) => a.status === "applied" && (a.workspace ?? "air") === workspace && (!channel || appliesToChannel(a,channel)) && a.start <= displayRange.end && dayShift(a.start, Math.max(a.applyDays ?? a.days,a.days)-1) >= displayRange.start,
+          (a) => a.status === "applied" && (a.workspace ?? "aiir") === workspace && (!channel || appliesToChannel(a,channel)) && a.start <= displayRange.end && dayShift(a.start, Math.max(a.applyDays ?? a.days,a.days)-1) >= displayRange.start,
         )
       : [];
   const chartEnd = displayRange.end;
@@ -649,7 +649,7 @@ export function ChartMixedAxes({
                         open={openExperimentKey === key}
                         onOpenChange={open => setOpenExperimentKey(current => open ? key : current === key ? undefined : current)}
                         periodLabel={visibleExperiments
-                          .filter((a) => a.status === "applied" && (a.workspace ?? "air") === workspace && bucketKey(a.start < displayRange.start ? displayRange.start : a.start, grain) === key)
+                          .filter((a) => a.status === "applied" && (a.workspace ?? "aiir") === workspace && bucketKey(a.start < displayRange.start ? displayRange.start : a.start, grain) === key)
                           .map(
                             (a) =>
                               `${a.groupName ? `[${a.groupName}] ` : ""}${a.title}\n${a.description}\n적용 ${a.start} ~ ${dayShift(a.start, (a.applyDays ?? a.days) - 1)} · 예측 ${a.start} ~ ${dayShift(a.start, a.days - 1)}`,

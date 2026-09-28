@@ -8,7 +8,7 @@ import { ExperimentForecastChart } from "./experiment-forecast-chart";
 import { RequirementsSummary, ReviewSummary } from "./requirements-summary";
 import { hasChannelData } from "./channel-data";
 import Link from "next/link";
-import { airTermsSummary } from "./air-sales-terms";
+import { aiirTermsSummary } from "./aiir-sales-terms";
 import { AnalysisBackLink } from "./analysis-navigation";
 import { useAlternatives } from "./alternative-store";
 import { dayShift, projectAlternative, evaluateDemoExperiment } from "./alternative-model";
@@ -34,9 +34,9 @@ export function ExperimentInsight({id}: {id: string}) {
     {key:"netProfit",delta:"netProfitDelta",label:"순익",unit:"원"},
   ] as const;
   return <main className="mars-detail-page space-y-5">
-    <div className="flex items-center justify-between gap-3"><AnalysisBackLink href={`/?workspace=${encodeURIComponent(a.workspace ?? "air")}`} className="text-sm text-muted-foreground hover:text-foreground">← 이전 화면</AnalysisBackLink><AIChatTrigger /></div>
-<WorkspaceHeader><div className="space-y-2"><p className="text-sm font-medium text-primary">정책 상세</p><h1 className="text-2xl font-semibold">{a.title}</h1><p className="text-sm text-muted-foreground">{(a.workspace ?? "air").toUpperCase()} · {a.type} · {a.groupName || "미분류"}</p></div></WorkspaceHeader><RefreshingAnalysis mode="detail" refreshKey={id}>
-    {a.salesTerms && <section className="rounded-xl border bg-card p-4"><h2 className="font-semibold">요금제 · 채널 판매조건</h2><p className="mt-2 text-sm leading-6">{airTermsSummary(a.salesTerms)}</p></section>}
+    <div className="flex items-center justify-between gap-3"><AnalysisBackLink href={`/?workspace=${encodeURIComponent(a.workspace ?? "aiir")}`} className="text-sm text-muted-foreground hover:text-foreground">← 이전 화면</AnalysisBackLink><AIChatTrigger /></div>
+<WorkspaceHeader><div className="space-y-2"><p className="text-sm font-medium text-primary">정책 상세</p><h1 className="text-2xl font-semibold">{a.title}</h1><p className="text-sm text-muted-foreground">{(a.workspace ?? "aiir").toUpperCase()} · {a.type} · {a.groupName || "미분류"}</p></div></WorkspaceHeader><RefreshingAnalysis mode="detail" refreshKey={id}>
+    {a.salesTerms && <section className="rounded-xl border bg-card p-4"><h2 className="font-semibold">요금제 · 채널 판매조건</h2><p className="mt-2 text-sm leading-6">{aiirTermsSummary(a.salesTerms)}</p></section>}
     <section className="space-y-4 rounded-xl border bg-card p-5"><h2 className="text-lg font-semibold">정책 목적과 기간</h2><p className="whitespace-pre-wrap leading-7">{a.description}</p><div className="flex flex-wrap gap-x-8 gap-y-2 text-sm"><p>적용 {a.start} ~ {dayShift(a.start,(a.applyDays??a.days)-1)}</p><p>예측 {a.start} ~ {dayShift(a.start,a.days-1)}</p></div>{a.prompt && <p className="border-t pt-4 text-sm text-muted-foreground">입력 프롬프트: {a.prompt}</p>}</section>
     <section className="rounded-xl border bg-card p-4 text-sm"><p>적용 채널 · {a.targetChannels?.length?a.targetChannels.join(", "):"전체 채널"}</p>{a.analysisContext&&<p className="mt-2 text-xs leading-5 text-muted-foreground">분석 근거 · {a.analysisContext.start} ~ {a.analysisContext.end} · {a.analysisContext.channels.join(", ")||"전체 채널"}<br/>{a.analysisContext.reason}</p>}</section>
     <ExperimentForecastChart key={a.id} experiment={a}/>
@@ -62,5 +62,5 @@ export function ExperimentInsight({id}: {id: string}) {
 export function ExperimentInsightGroup({ids}: {ids:string[]}) {
   const {alternatives}=useAlternatives();
   const items=alternatives.filter(a=>ids.includes(a.id));
-  return <main className="mx-auto max-w-5xl space-y-5 p-6"><div className="flex items-center justify-between gap-3"><AnalysisBackLink href={`/?workspace=${encodeURIComponent(items[0]?.workspace ?? "air")}`} className="text-sm text-muted-foreground">← 이전 화면</AnalysisBackLink><AIChatTrigger /></div><WorkspaceHeader><div><h1 className="text-2xl font-semibold">정책 상세 {items.length}건</h1><p className="mt-2 text-sm text-muted-foreground">같은 시점의 정책입니다. 상세 분석할 정책을 선택하세요.</p></div></WorkspaceHeader><RefreshingAnalysis mode="detail" refreshKey={ids.join(",")}><div className="space-y-3">{items.map(a=><Link key={a.id} href={`/analysis?experiment=${encodeURIComponent(a.id)}`} className="block space-y-2 rounded-xl border bg-card p-5 hover:bg-accent"><h2 className="font-semibold">{a.title} →</h2><p className="text-sm text-muted-foreground">{a.start} · {a.type}</p><p className="line-clamp-2 text-sm">{a.description}</p></Link>)}</div></RefreshingAnalysis></main>;
+  return <main className="mx-auto max-w-5xl space-y-5 p-6"><div className="flex items-center justify-between gap-3"><AnalysisBackLink href={`/?workspace=${encodeURIComponent(items[0]?.workspace ?? "aiir")}`} className="text-sm text-muted-foreground">← 이전 화면</AnalysisBackLink><AIChatTrigger /></div><WorkspaceHeader><div><h1 className="text-2xl font-semibold">정책 상세 {items.length}건</h1><p className="mt-2 text-sm text-muted-foreground">같은 시점의 정책입니다. 상세 분석할 정책을 선택하세요.</p></div></WorkspaceHeader><RefreshingAnalysis mode="detail" refreshKey={ids.join(",")}><div className="space-y-3">{items.map(a=><Link key={a.id} href={`/analysis?experiment=${encodeURIComponent(a.id)}`} className="block space-y-2 rounded-xl border bg-card p-5 hover:bg-accent"><h2 className="font-semibold">{a.title} →</h2><p className="text-sm text-muted-foreground">{a.start} · {a.type}</p><p className="line-clamp-2 text-sm">{a.description}</p></Link>)}</div></RefreshingAnalysis></main>;
 }

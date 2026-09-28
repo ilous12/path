@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Button } from "@/components/ui/button";
-import type { ChatScenarioPoint } from "./air-chat-scenario";
+import type { ChatScenarioPoint } from "./aiir-chat-scenario";
 
 const metrics = {
   customers: { label: "가입 회선", color: "var(--chart-1)", unit: "회선", divisor: 1 },

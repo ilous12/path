@@ -36,7 +36,7 @@ export function Notifications() {
   );
   const mobile = useIsMobile();
   const params = useSearchParams();
-  const workspace = params.get("workspace") ?? "air";
+  const workspace = params.get("workspace") ?? "aiir";
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState("all");
   const [read, setRead] = useState<Set<string>>(() => new Set());
@@ -106,7 +106,7 @@ export function Notifications() {
     <>
       <div className="border-b px-4 py-3 space-y-2 shrink-0">
         <div className="flex items-center justify-between pr-5">
-          <h2 className="text-sm font-semibold">시장·air 이벤트 알림</h2>
+          <h2 className="text-sm font-semibold">시장·aiir 이벤트 알림</h2>
           <Button
             size="sm"
             variant="ghost"

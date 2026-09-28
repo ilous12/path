@@ -56,7 +56,7 @@ export function groupTimelineLanes(
     stages: { date: string; title: string; stage: string }[];
   })[],
   layout: "split" | "combined" | "pivot" = EVENT_TIMELINE_LAYOUT,
-  workspace = "air",
+  workspace = "aiir",
 ) {
   const lanes =
     layout !== "combined"
@@ -71,7 +71,7 @@ export function groupTimelineLanes(
           const own =
             layout === "pivot"
               ? event.operator.toLowerCase() === workspace.toLowerCase()
-              : ["air", "tds", "mvno"].includes(event.operator.toLowerCase());
+              : ["aiir", "tdds", "mvvno"].includes(event.operator.toLowerCase());
           return lane === "combined" || (lane === "own" ? own : !own);
         }),
       }))

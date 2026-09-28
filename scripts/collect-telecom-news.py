@@ -10,11 +10,11 @@ def fetch(url):
 def clean(s):return re.sub(r'\s+',' ',html.unescape(re.sub('<[^>]+>',' ',s))).strip()
 def archive(job):
  brand,page=job
- base='https://news.sktelecom.com/category/press-center' if brand=='SKT' else 'https://news.lguplus.com/category/'+quote('프레스센터/보도자료')
+ base='https://news.sktelecom.com/category/press-center' if brand=='SKKT' else 'https://news.lguplus.com/category/'+quote('프레스센터/보도자료')
  url=base+(f'/page/{page}' if page>1 else '')
  s=fetch(url);rows=[]
  for block in s.split('</li>'):
-  title=re.search(r'<h2 class="item-title">(.*?)</h2>',block,re.S) if brand=='SKT' else re.search(r'class="post-title">(.*?)</a>',block,re.S)
+  title=re.search(r'<h2 class="item-title">(.*?)</h2>',block,re.S) if brand=='SKKT' else re.search(r'class="post-title">(.*?)</a>',block,re.S)
   if not title:continue
   links=re.findall(r'href="\s*(https://news\.(?:sktelecom|lguplus)\.com/\d+)"',block)
   date=re.search(r'class="(?:item-date[^"\n]*|post-date)">(\d{4}\.\d{2}\.\d{2})',block)
@@ -25,7 +25,7 @@ def archive(job):
 if __name__=='__main__':
  rows=[]
  with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
-  for i,result in enumerate(pool.map(archive,[(b,p) for b in ['SKT','LG U+'] for p in range(1,66)])):
+  for i,result in enumerate(pool.map(archive,[(b,p) for b in ['SKKT','LG U+'] for p in range(1,66)])):
    rows+=result
    if i%10==0: print('archive',i,'articles',len(rows),flush=True)
  rows=list({r['url']:r for r in rows}.values())

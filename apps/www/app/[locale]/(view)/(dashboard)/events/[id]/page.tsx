@@ -29,9 +29,9 @@ export default async function EventPage({
   const event = EVENTS.find((item) => item.id === id);
   if (!event) notFound();
   const range = { start: query.start ?? "", end: query.end ?? "" };
-  const workspace = ["home", "air", "tds", "mvno"].includes(query.workspace ?? "")
+  const workspace = ["home", "aiir", "tdds", "mvvno"].includes(query.workspace ?? "")
     ? query.workspace!
-    : "air";
+    : "aiir";
   const backPath = query.from === "analysis" ? "/analysis" : "/";
   const back = validateRange(range)
     ? `${backPath}?workspace=${workspace}`

@@ -1,6 +1,6 @@
 import { EVENT_TYPES, type EventType, type MarketEvent } from "./data";
 export const SOURCES = [
-  ...["SKT", "KT", "LG U+"].flatMap((name, index) =>
+  ...["SKKT", "KT", "LG U+"].flatMap((name, index) =>
     ["공식", "APP", "WEB"].map((channel) => ({
       id: `mno-${index}-${channel}`,
       group: "MNO · 사업자별 채널",
@@ -89,7 +89,7 @@ const LEGACY_TURNING_POINT_PROMPT = `선택한 기간의 실적과 참조 대상
 
 [현재 이벤트 사례]
 1. 2026-09-03 경쟁사 할인: 회선이 256에서 90으로 감소했다. 직전 수준 대비 약 64.8% 감소한 급감 구간으로 판단한다.
-2. 2026-09-12 air 대응: 회선이 180으로 반등했다. 급감 시점의 90회선 대비 100% 증가했으나, 이전 256회선 수준에는 미달하므로 반등으로 분류한다.
+2. 2026-09-12 aiir 대응: 회선이 180으로 반등했다. 급감 시점의 90회선 대비 100% 증가했으나, 이전 256회선 수준에는 미달하므로 반등으로 분류한다.
 3. 2026-09-14 회복: 295회선으로 이전 256회선을 넘어섰다. 기준 수준 대비 약 15.2% 증가하여 회복으로 판단한다.
 4. 2026-09-17 성장: 400회선으로 기준 수준 대비 약 56.3% 증가했다. 회복 이후 성장 흐름으로 분류하되, 일시적 효과인지 추가 관찰한다.
 
@@ -247,7 +247,7 @@ export function sourceFor(event: MarketEvent) {
   if (channel === "MOYO") return "moyo";
   if (channel === "TOSS") return "toss";
   if (channel === "KAKAOPAY" || channel === "KAKAO") return "kakaopay";
-  const own = ["air", "tds", "mvno"].includes(event.operator.toLowerCase());
+  const own = ["aiir", "tdds", "mvvno"].includes(event.operator.toLowerCase());
   return (
     SOURCES.find(
       (s) =>

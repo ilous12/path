@@ -72,13 +72,13 @@ export function DashboardViewTitle() {
 export function DashboardView() {
   const params = useSearchParams();
   const view = params.get("view") ?? "summary";
-  if (view === "policies") return <PolicyLedger key={params.get("workspace") ?? "air"} />;
+  if (view === "policies") return <PolicyLedger key={params.get("workspace") ?? "aiir"} />;
   if (params.get("workspace") === "home" && view !== "data") return view === "kpi" ? <HomeKpi /> : <HomeDashboard />;
   if (view === "channels" || view === "channels-search") return <Suspense fallback={<div className="space-y-6"><WorkspaceHeader><h1>{titles[view]}</h1></WorkspaceHeader><DetailLoading mode="page" /></div>}><ChannelPages search={view === "channels-search"} key={`${params.get("workspace")}:${view}`} /></Suspense>;
   if (view === "plans-competitiveness") return <Suspense fallback={<div className="space-y-6"><WorkspaceHeader><h1>요금제 · 경쟁력</h1></WorkspaceHeader><DetailLoading mode="page" /></div>}><PlanCompetitiveness /></Suspense>;
   if (view === "plans-summary") return <PlanWorkspaceSummary />;
   if (view === "settings-current") return <CurrentSettings />;
-  if (view === "promotions") return <EventOverview promotionsOnly key={params.get("workspace") ?? "air"} />;
+  if (view === "promotions") return <EventOverview promotionsOnly key={params.get("workspace") ?? "aiir"} />;
   if (view === "promotions-search") return <EventManagement promotionsOnly key={params.toString()} />;
   if (!titles[view] || view === "summary")
     return <DashboardContent showOnboarding={false} />;
@@ -98,7 +98,7 @@ export function DashboardView() {
         {view === "experiments" ? (
           <ExperimentCards />
         ) : (
-          <ExperimentSearch key={params.get("workspace") ?? "air"} />
+          <ExperimentSearch key={params.get("workspace") ?? "aiir"} />
         )}
       </Suspense>
     );
@@ -107,12 +107,12 @@ export function DashboardView() {
       <Suspense
         fallback={<div className="space-y-6"><WorkspaceHeader><h1>{titles[view]}</h1></WorkspaceHeader><DetailLoading mode="page" /></div>}
       >
-        <KpiDashboard key={params.get("workspace") ?? "air"} />
+        <KpiDashboard key={params.get("workspace") ?? "aiir"} />
       </Suspense>
     );
-  if (view === "events") return <EventOverview key={params.get("workspace") ?? "air"} />;
+  if (view === "events") return <EventOverview key={params.get("workspace") ?? "aiir"} />;
   if (view === "events-search") return <EventManagement key={params.toString()} />;
   if (view === "data")
-    return <DataExplorer key={params.get("workspace") ?? "air"} />;
-  return <ManagementConsole key={params.get("workspace") ?? "air"} />;
+    return <DataExplorer key={params.get("workspace") ?? "aiir"} />;
+  return <ManagementConsole key={params.get("workspace") ?? "aiir"} />;
 }

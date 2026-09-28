@@ -11,7 +11,7 @@ import { RefreshingAnalysis } from "./refreshing-analysis";
 import { AnalysisRangeControl } from "./analysis-range-control";
 import { validateRange, type Range } from "./data";
 import { RecordMenu } from "./record-menu";
-const specs=[{id:"air",name:"AIR",color:"var(--color-blue-500)"},{id:"tds",name:"TDS",color:"var(--color-emerald-500)"},{id:"mvno",name:"MVNO",color:"var(--color-violet-500)"}] as const;
+const specs=[{id:"aiir",name:"AIIR",color:"var(--color-blue-500)"},{id:"tdds",name:"TDDS",color:"var(--color-emerald-500)"},{id:"mvvno",name:"MVVNO",color:"var(--color-violet-500)"}] as const;
 const number=(n:number)=>n.toLocaleString("ko-KR");
 export function HomeKpi({detail=false}:{detail?:boolean}) {
  const q=useSearchParams();

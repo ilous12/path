@@ -6,7 +6,7 @@ import catalog from "./fixtures/plan-catalog.json";
 import {
   changes,
   groupFor,
-  isAir,
+  isAiir,
   operatorGroups,
   type PlanOffer,
 } from "./plan-market-model";
@@ -20,7 +20,7 @@ export function PlanMarketOverview({ showSummary = true }: { showSummary?: boole
   const shown = offers.filter(
     (p) => groups.length === 0 || groups.includes(groupFor(p).name),
   );
-  const air = shown.filter(isAir);
+  const aiir = shown.filter(isAiir);
   const prices = shown.flatMap(p => p.displayedEffectiveKrw == null ? [] : [p.displayedEffectiveKrw]);
   const counts = operatorGroups.map(g => ({...g, count: shown.filter(p => groupFor(p).name === g.name).length})).sort((a,b) => b.count-a.count);
   const dayChanges = changes.filter(h => observations.get(h.offerId)?.observedAt === h.observedAt && shown.some(p => p.offerId === h.offerId) && h.kind === "price");
@@ -92,13 +92,13 @@ export function PlanMarketOverview({ showSummary = true }: { showSummary?: boole
           <ul className="mt-4 space-y-4 text-sm leading-relaxed">
             <li>{shown.length ? `${shown.length.toLocaleString("ko-KR")}개 판매 조건이 관측됐습니다. ${counts[0].name}가 ${counts[0].count}개로 가장 많습니다.` : "선택 사업자의 수집 데이터가 없어 요약할 수 없습니다."}</li>
             {prices.length > 0 && <li>체감가 분포는 {won(Math.min(...prices))} ~ {won(Math.max(...prices))}입니다. 서로 다른 상품 스펙을 포함하므로 가격 순위가 경쟁력을 뜻하지 않습니다.</li>}
-            {shown.length > 0 && <li>AIR {air.length}개 조건 · 이전 관측 대비 확인된 체감가 변경 {dayChanges.length}건. 최초 관측은 가격 변경으로 집계하지 않습니다.</li>}
+            {shown.length > 0 && <li>AIIR {aiir.length}개 조건 · 이전 관측 대비 확인된 체감가 변경 {dayChanges.length}건. 최초 관측은 가격 변경으로 집계하지 않습니다.</li>}
           </ul>
           <p className="mt-4 border-t pt-3 text-xs text-muted-foreground">요금제별 마지막 관측값을 사용하므로 수집 시점은 서로 다를 수 있습니다. 체감가는 청구 금액과 다를 수 있으며, 관측 이력이 부족한 경우 변경 추세를 판단하지 않습니다.</p>
         </aside>}
       </div>
       <p className="text-[11px] text-muted-foreground">
-        사업자를 여러 개 선택해 비교할 수 있습니다. AIR 고정 강조색 · 타사 상위 8개 사업자는 수집 요금제 수 순서로 색상 배정
+        사업자를 여러 개 선택해 비교할 수 있습니다. AIIR 고정 강조색 · 타사 상위 8개 사업자는 수집 요금제 수 순서로 색상 배정
         · 나머지는 기타 사업자로 묶음. 시야는 고정되어 있으며 가격·제공량은 원자료 기준입니다.
       </p>
     </section>
@@ -125,11 +125,11 @@ export function PlanMarketTimeline() {
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
         {[true, false].map((own) => {
-          const h = daily.filter((r) => isAir(r) === own);
+          const h = daily.filter((r) => isAiir(r) === own);
           return (
             <div key={String(own)} className="rounded-xl border bg-card p-4">
               <h3 className="text-sm font-medium">
-                {own ? "AIR · 공식 / 카카오페이" : "타사 · 모요 중개 채널 포함"}
+                {own ? "AIIR · 공식 / 카카오페이" : "타사 · 모요 중개 채널 포함"}
               </h3>
               <div className="mt-3 flex items-baseline gap-2">
                 <strong className="text-3xl tabular-nums">
@@ -170,8 +170,8 @@ export function PlanMarketTimeline() {
                   {d}
                 </button>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  AIR {h.filter(isAir).length}건 · 타사{" "}
-                  {h.filter((r) => !isAir(r)).length.toLocaleString("ko-KR")}건
+                  AIIR {h.filter(isAiir).length}건 · 타사{" "}
+                  {h.filter((r) => !isAiir(r)).length.toLocaleString("ko-KR")}건
                   관측 · 최초{" "}
                   {h
                     .filter((r) => r.kind === "first")

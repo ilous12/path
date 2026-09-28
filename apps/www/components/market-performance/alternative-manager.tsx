@@ -101,11 +101,11 @@ export function AlternativeManager({
       {" "}
       {embedded ? (
         <p className="text-sm text-muted-foreground">
-          AIR 정책 · 브라우저 로컬 저장 · 실제 정책 변경 없음
+          AIIR 정책 · 브라우저 로컬 저장 · 실제 정책 변경 없음
         </p>
       ) : (
         <DialogHeader>
-          <DialogTitle>AIR 정책실</DialogTitle>
+          <DialogTitle>AIIR 정책실</DialogTitle>
           <DialogDescription>
             변경하고 싶은 내용과 기간으로 정책을 만듭니다. 브라우저 로컬 저장 ·
             실제 정책 변경 없음.
@@ -306,11 +306,11 @@ export function AlternativeManager({
 }
 export function AlternativeEventList({ events }: { events: MarketEvent[] }) {
   const store = useAlternatives();
-  const own = events.filter((e) => e.operator.toLowerCase() === "air");
+  const own = events.filter((e) => e.operator.toLowerCase() === "aiir");
   return (
     <div className="space-y-3 border-t p-4">
       <h3 className="font-semibold text-sm">
-        AIR 이벤트 하단 · 정책 시뮬레이션
+        AIIR 이벤트 하단 · 정책 시뮬레이션
       </h3>
       <p className="text-xs text-muted-foreground">
         초안 → 적용 → 점선 예측 비교. 적용은 실제 정책 실행이 아닙니다.
@@ -343,7 +343,7 @@ export function AlternativeEventList({ events }: { events: MarketEvent[] }) {
       </div>
       {!own.length && (
         <p className="text-xs text-muted-foreground">
-          현재 조회 범위에 AIR 이벤트가 없습니다. 이벤트 페이지에서 AIR 이벤트를
+          현재 조회 범위에 AIIR 이벤트가 없습니다. 이벤트 페이지에서 AIIR 이벤트를
           선택해 정책을 등록하세요.
         </p>
       )}
@@ -430,7 +430,7 @@ export function AlternativeLaneMarker({
           {experiments.map(a => <article key={a.id} className="space-y-2.5 border-b px-3.5 py-3 last:border-0">
             <div className="flex items-start justify-between gap-2">
               <h4 className="min-w-0 break-words pt-1 text-[10px] font-semibold leading-[1.5]">{a.title}</h4>
-              <div className="shrink-0"><AnalysisMenu onOpenChange={next=>{setMenuOpen(next);onOpenChange(next);onHover(next);}} label={`${a.title} 정책 상세 메뉴`} href={`/analysis?experiment=${encodeURIComponent(a.id)}&workspace=${encodeURIComponent(a.workspace ?? "air")}`} /></div>
+              <div className="shrink-0"><AnalysisMenu onOpenChange={next=>{setMenuOpen(next);onOpenChange(next);onHover(next);}} label={`${a.title} 정책 상세 메뉴`} href={`/analysis?experiment=${encodeURIComponent(a.id)}&workspace=${encodeURIComponent(a.workspace ?? "aiir")}`} /></div>
             </div>
             <dl className="grid grid-cols-[2rem_1fr] gap-x-2 gap-y-1 rounded-md bg-muted/40 px-2.5 py-2 text-[10px] leading-[1.5] tabular-nums">
               <dt className="text-muted-foreground">적용</dt><dd>{a.start} ~ {dayShift(a.start,(a.applyDays??a.days)-1)}</dd>
@@ -468,7 +468,7 @@ export function RegisteredExperiments({start,end,keyword=''}:{start:string;end:s
             return (
               <article key={a.id} className="min-w-0 space-y-3 rounded-lg border bg-muted/20 p-4 sm:p-5">
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant="outline">{a.type}</Badge><Badge variant="secondary">{(a.workspace??"air").toUpperCase()}</Badge>
+                  <Badge variant="outline">{a.type}</Badge><Badge variant="secondary">{(a.workspace??"aiir").toUpperCase()}</Badge>
                   <Badge
                     variant={a.status === "applied" ? "default" : "secondary"}
                   >
@@ -480,7 +480,7 @@ export function RegisteredExperiments({start,end,keyword=''}:{start:string;end:s
                   </Badge>
                 </div>
                 <h4 className="font-semibold">{a.title}</h4>
-                <AnalysisMenu href={`/analysis?workspace=${a.workspace??"air"}&policy=${encodeURIComponent(a.id)}`} label="캠페인 구성" />
+                <AnalysisMenu href={`/analysis?workspace=${a.workspace??"aiir"}&policy=${encodeURIComponent(a.id)}`} label="캠페인 구성" />
                 <p className="whitespace-pre-wrap text-sm text-muted-foreground">
                   {a.description}
                 </p>

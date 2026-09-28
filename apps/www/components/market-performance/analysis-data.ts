@@ -9,7 +9,7 @@ export function buildAnalysis(
   hiddenIds: readonly string[] = [],
   sourceEvents: MarketEvent[] = EVENTS,
   focus?: Focus,
-  workspace = "air",
+  workspace = "aiir",
 ) {
   const summary = buildEventInsights(range, hiddenIds, sourceEvents, workspace);
   const daily = buildPerformance(range, "day");
@@ -52,9 +52,9 @@ export function buildAnalysis(
     }))
     .sort((a, b) => b.count - a.count);
   const response =
-    workspace.toLowerCase() === "air" &&
+    workspace.toLowerCase() === "aiir" &&
     summary.events.some((event) =>
-      ["air-0912", "moyo-0912"].includes(event.id),
+      ["aiir-0912", "moyo-0912"].includes(event.id),
     );
   const shock = summary.events.some((event) => event.id === "market-0903");
   const decision = !summary.events.length
@@ -65,9 +65,9 @@ export function buildAnalysis(
   const reason = !summary.events.length
     ? "등록된 이벤트가 없어 추가 조치의 근거가 없습니다. 실적과 데이터 누락 여부는 계속 확인하세요."
     : decision === "대응 필요"
-      ? "선택 기간에 경쟁사 할인과 가입 감소가 함께 관측되며, 연결된 air 대응은 아직 없습니다. 동일 조건 비교와 제한적 대응 정책을 검토하세요."
+      ? "선택 기간에 경쟁사 할인과 가입 감소가 함께 관측되며, 연결된 aiir 대응은 아직 없습니다. 동일 조건 비교와 제한적 대응 정책을 검토하세요."
       : response
-        ? "air 대응 이후 경과를 확인하는 구간입니다. 추가 확대에 앞서 유지 효과와 혜택 비용을 검증하세요."
+        ? "aiir 대응 이후 경과를 확인하는 구간입니다. 추가 확대에 앞서 유지 효과와 혜택 비용을 검증하세요."
         : "시장 변화는 관측되지만 개별 효과가 확정되지 않았습니다. 가격·혜택 조건을 확인한 뒤 대응 여부를 판단하세요.";
   const assessment = focus ? assessFocus(range, focus) : null;
   return {

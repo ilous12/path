@@ -285,7 +285,7 @@ export const RECOVERY_MILESTONES = [
   },
   {
     date: "2026-09-12",
-    title: "AIR 대응",
+    title: "AIIR 대응",
     stage: "반등",
     description: "가입·유지 혜택과 채널 노출 강화",
     reference: "2026-09-11",
@@ -322,14 +322,14 @@ export function buildRecoveryInsights(range: Range) {
             : "성장 전환";
   const summary =
     phase === "이벤트 이전"
-      ? "선택 기간에는 경쟁사 할인과 air 대응이 아직 발생하지 않았습니다."
+      ? "선택 기간에는 경쟁사 할인과 aiir 대응이 아직 발생하지 않았습니다."
       : phase === "가입 급감"
         ? "경쟁사 할인 이후 가입이 감소하고 해지가 늘어난 구간입니다. 혜택과 채널 대응 검토가 필요합니다."
         : phase === "반등 진행"
-          ? "air 대응 이후 가입이 반등 중입니다. 회복 지속 여부와 혜택 비용을 함께 관찰하세요."
+          ? "aiir 대응 이후 가입이 반등 중입니다. 회복 지속 여부와 혜택 비용을 함께 관찰하세요."
           : phase === "이전 수준 회복"
             ? "가입이 경쟁사 할인 이전 수준을 회복했습니다. 단기 반등의 지속 여부를 확인하세요."
-            : "air 대응 이후 가입이 할인 이전 수준을 넘어섰습니다. 혜택 유지 비용과 순익을 함께 점검하세요.";
+            : "aiir 대응 이후 가입이 할인 이전 수준을 넘어섰습니다. 혜택 유지 비용과 순익을 함께 점검하세요.";
   const milestones = RECOVERY_MILESTONES.filter(
     (item) => item.date >= range.start && item.date <= range.end,
   ).map((item) => {
@@ -363,7 +363,7 @@ export const EVENT_OWNERSHIP = {
   own: {
     label: "우리 이벤트",
     color: "var(--color-red-600)",
-    description: "air 정책·혜택 및 air 채널 이벤트",
+    description: "aiir 정책·혜택 및 aiir 채널 이벤트",
   },
   competitor: {
     label: "경쟁사 이벤트",
@@ -376,7 +376,7 @@ export const EVENT_OWNERSHIP = {
     description: "같은 구간에 우리와 경쟁사 이벤트가 함께 포함",
   },
 } as const;
-export function eventOwnership(events: MarketEvent[], workspace = "air") {
+export function eventOwnership(events: MarketEvent[], workspace = "aiir") {
   const own = events.some(
     (event) => event.operator.toLowerCase() === workspace.toLowerCase(),
   );
@@ -400,7 +400,7 @@ export function buildTurningPoints(
     if (
       item.date === "2026-09-03"
         ? hiddenIds.includes("market-0903")
-        : hiddenIds.includes("air-0912") && hiddenIds.includes("moyo-0912")
+        : hiddenIds.includes("aiir-0912") && hiddenIds.includes("moyo-0912")
     )
       continue;
     if (item.date < range.start || item.date > range.end) continue;

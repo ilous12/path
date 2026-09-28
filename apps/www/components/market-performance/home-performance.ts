@@ -1,7 +1,7 @@
 import { buildPerformance, MIN_DATE, MAX_DATE, type Range } from "./data";
-export type HomeBusiness = "air" | "tds" | "mvno";
+export type HomeBusiness = "aiir" | "tdds" | "mvvno";
 /** Home comparison fixtures, not measured business performance or market-share estimates.
- * AIR retains the existing scenario. TDS/MVNO use independent deterministic
+ * AIIR retains the existing scenario. TDDS/MVVNO use independent deterministic
  * assumptions; these fixtures must be replaced by business-scoped source data.
  */
 export function buildHomePerformance(range: Range, business: HomeBusiness) {
@@ -9,16 +9,16 @@ export function buildHomePerformance(range: Range, business: HomeBusiness) {
   const end = range.end > MAX_DATE ? MAX_DATE : range.end;
   if (start > end) return [];
   return buildPerformance({start,end}, "day").map(row => {
-    if (business === "air") return row;
+    if (business === "aiir") return row;
     const t = Math.round((Date.parse(row.key)-Date.parse("2026-09-01"))/86400000);
-    const phase = business === "tds" ? 0 : 1.4;
-    const baseline = business === "tds" ? 340 : 185;
-    const shock = t >= 2 && t < 11 ? (business === "tds" ? 0.92 : 1.08) : 1;
-    const recovery = Math.max(0,Math.min(9,t-10)) * (business === "tds" ? 4 : 2);
+    const phase = business === "tdds" ? 0 : 1.4;
+    const baseline = business === "tdds" ? 340 : 185;
+    const shock = t >= 2 && t < 11 ? (business === "tdds" ? 0.92 : 1.08) : 1;
+    const recovery = Math.max(0,Math.min(9,t-10)) * (business === "tdds" ? 4 : 2);
     const customers = Math.max(1,Math.round((baseline + Math.sin(t*.55+phase)*18)*shock+recovery));
-    const cancellations = Math.round(customers*(business === "tds" ? .16 : .23));
-    const revenue = customers*(business === "tds" ? 9500 : 6200);
-    const expenses = Math.round(revenue*(business === "tds" ? .76 : .82));
+    const cancellations = Math.round(customers*(business === "tdds" ? .16 : .23));
+    const revenue = customers*(business === "tdds" ? 9500 : 6200);
+    const expenses = Math.round(revenue*(business === "tdds" ? .76 : .82));
     return {...row,customers,cancellations,revenue,expenses,netProfit:revenue-expenses,profitMargin:(revenue-expenses)/revenue*100};
   });
 }

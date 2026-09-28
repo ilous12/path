@@ -21,7 +21,7 @@ export const useWorkspaceTransition = () =>
 export function WorkspaceTransition({ children }: { children: ReactNode }) {
   const router = useRouter();
   const params = useSearchParams();
-  const workspace = params.get("workspace") ?? "air";
+  const workspace = params.get("workspace") ?? "aiir";
   const [pending, setPending] = useState<{ id: string; name: string } | null>(
     null,
   );

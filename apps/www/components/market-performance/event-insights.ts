@@ -14,7 +14,7 @@ const number = (value: number) => value.toLocaleString("ko-KR");
 const percent = (value: number) =>
   `${value > 0 ? "+" : ""}${value.toFixed(1)}%`;
 const highlights = (events: MarketEvent[]) => {
-  const priority = new Set(["market-0903", "air-0912", "moyo-0912"]);
+  const priority = new Set(["market-0903", "aiir-0912", "moyo-0912"]);
   const sorted = [...events].sort(
     (a, b) =>
       Number(priority.has(b.id)) - Number(priority.has(a.id)) ||
@@ -35,7 +35,7 @@ export function buildEventInsights(
   range: Range,
   hiddenIds: readonly string[] = [],
   sourceEvents: MarketEvent[] = EVENTS,
-  workspace = "air",
+  workspace = "aiir",
 ) {
   const events = groupEvents(range, "day", hiddenIds, sourceEvents)
     .flatMap((group) => group.events)

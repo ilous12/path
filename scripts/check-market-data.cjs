@@ -32,7 +32,7 @@ for (const range of [{start: MIN_DATE, end: MAX_DATE}, {start:'2026-08-19',end:M
   for (const channel of channels) assert.equal(channel.total,channel.newLines+channel.transfers);
   const hidden = EVENTS.filter((_,i) => i % 3 === 0).map(e => e.id);
   const grouped = groupEvents(range,'day',hidden).flatMap(g => g.events);
-  for (const workspace of ['air','tds','mvno']) {
+  for (const workspace of ['aiir','tdds','mvvno']) {
     const insights = buildEventInsights(range,hidden,EVENTS,workspace);
     const analysis = buildAnalysis(range,hidden,EVENTS,'growth',workspace);
     assert.deepEqual(insights.events.map(e=>e.id).sort(),grouped.map(e=>e.id).sort());
@@ -53,7 +53,7 @@ for (const range of [{start: MIN_DATE, end: MAX_DATE}, {start:'2026-08-19',end:M
 const custom = {...EVENTS[0],id:'custom-test',startAt:'2026-09-01T12:00',endAt:undefined,types:['price']};
 assert.equal(mergeCustomEvents(EVENTS,[custom,custom]).length,EVENTS.length+1);
 for (const invalid of [{...custom,startAt:'2026-02-30T12:00'},{...custom,endAt:'2026-08-01T12:00'},{...custom,types:[]},{...custom,sourceName:12}]) assert.equal(mergeCustomEvents(EVENTS,[invalid]).length,EVENTS.length);
-assert.equal(eventOwnership([{...custom,operator:'air'}],'tds').label,'경쟁사 이벤트');
+assert.equal(eventOwnership([{...custom,operator:'aiir'}],'tdds').label,'경쟁사 이벤트');
 assert.equal(buildEventInsights({start:'2026-08-19',end:MAX_DATE},EVENTS.map(e=>e.id)).events.length,0);
 console.log('PASS: daily/monthly/yearly totals, channel reconciliation, workspace ownership, hidden-event consistency, event validation, all forecast methods.');
 

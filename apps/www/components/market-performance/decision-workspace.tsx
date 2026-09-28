@@ -30,7 +30,7 @@ function useReview(range: Range, workspace: string) {
   );
   const drafts = alternatives.filter(
     (a) =>
-      (a.workspace ?? "air") === workspace &&
+      (a.workspace ?? "aiir") === workspace &&
       a.status === "draft" &&
       a.start <= range.end &&
       dayShift(a.start, (a.applyDays ?? a.days) - 1) >= range.start,

@@ -1,11 +1,11 @@
-# Mars — AIR Market Intelligence
+# PATH — AIIR Market Intelligence
 
-공식 Lumi UI 저장소를 기반으로 AIR 시장·채널·요금제 변화를 모니터링하는 Next.js 목업입니다.
+공식 Lumi UI 저장소를 기반으로 AIIR 시장·채널·요금제 변화를 모니터링하는 Next.js 목업입니다.
 
 ## 실행
 
 ```sh
-cd /Users/1111304/work/github/mars
+cd path
 pnpm install --frozen-lockfile
 pnpm dev
 ```
@@ -60,16 +60,16 @@ Playground는 원본의 데모 데이터와 모의 동작을 유지합니다. �
 기존 독립 프로젝트 `mars/`(즉, `/Users/1111304/work/github/mars/mars`)는 보존했으며 새 저장소의 Git 추적에서 제외합니다.
 
 
-## AIR 모니터링 목업
+## AIIR 모니터링 목업
 
 - 기간 선택(월간·일간·날짜+시간), 경쟁사 필터, 이벤트 표시, 지표 토글
 - KPI: 매출·비용·이익률·기간 말 활성 회선수. 기간/채널/상품 집계는 같은 데이터셋에서 계산
 - Event Table: 검색·정렬·상태/판단 필터·열 표시·페이지 이동
 - Event Detail: 변경/비교 근거, 영향 범위, 이탈 위험, 후속 검토 조건. 상태 변경은 현재 세션에만 반영
 - Top channels: APP/TOSS/KAKAO/MOYO/기타. 채널 선택은 요금제 순위에 연결
-- Top Plan: AIR 공식 6종, 상품 클릭 시 공식·MOYO 관측 정책 비교
+- Top Plan: AIIR 공식 6종, 상품 클릭 시 공식·MOYO 관측 정책 비교
 - AI 패널: 선택 이벤트·기간을 반영하는 템플릿 응답과 문서 탭. 외부 AI 모델 호출 없음
 - 기본 기간은 2026-09-01~15, 가상 실적 범위는 2026-08-01~09-15. 시간 단위 데이터
-- TDS 내부 상품·실적은 제공되지 않아 별도 수치를 생성하지 않음
+- TDDS 내부 상품·실적은 제공되지 않아 별도 수치를 생성하지 않음
 - 검증: `pnpm --filter www exec tsx scripts/test-mars.ts`
 - 자료 출처와 구분 원칙: `apps/www/components/mars/SOURCES.md`

@@ -128,7 +128,7 @@ export function ManagementConsole() {
         <div>
           <h1 className="text-xl font-semibold">설정</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {workspace === "air" ? "air" : workspace.toUpperCase()} · 분석에
+            {workspace === "aiir" ? "aiir" : workspace.toUpperCase()} · 분석에
             참조할 정보와 판단의 우선순위를 설정합니다.
           </p>
         </div>

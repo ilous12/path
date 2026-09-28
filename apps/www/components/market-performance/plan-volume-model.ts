@@ -60,7 +60,7 @@ export function planVolume(offers: PlanOffer[], width: number) {
       ...cell,
       count: cell.offers.length,
       segments: [...segments.values()].sort((a, b) =>
-        a.name === "AIR" ? 1 : b.name === "AIR" ? -1 : b.count - a.count,
+        a.name === "AIIR" ? 1 : b.name === "AIIR" ? -1 : b.count - a.count,
       ),
     };
   });

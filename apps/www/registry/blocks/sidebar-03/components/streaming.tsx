@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 import { ChatScenarioChart } from "./chat-scenario-chart";
-import { AIR_PRICE_QUESTION, airPriceScenario } from "./air-chat-scenario";
+import { AIIR_PRICE_QUESTION, aiirPriceScenario } from "./aiir-chat-scenario";
 import { useAIChat } from "./ai-chat";
 
 const EMPTY_MESSAGES: import("./ai-chat").ChatMessage[] = [];
@@ -23,7 +23,7 @@ export function ChatStreaming() {
   const workspace = params.get("workspace") ?? "home";
   const channel = params.get("channel");
   const name =
-    workspace === "home" ? "HOME" : workspace === "tds" ? "TDS" : workspace === "mvno" ? "MVNO" : "AIR";
+    workspace === "home" ? "HOME" : workspace === "tdds" ? "TDDS" : workspace === "mvvno" ? "MVVNO" : "AIIR";
   const { conversations, pending, sendReplies, input, setInput } = useAIChat();
   const messages = conversations[workspace] ?? EMPTY_MESSAGES;
   const scrollArea = useRef<HTMLDivElement>(null);
@@ -37,10 +37,10 @@ export function ChatStreaming() {
   const requested = { start: params.get("start") ?? "", end: params.get("end") ?? "" };
   const range = validateRange(requested) ? sharedRange : requested;
   const rows = workspace === "home"
-    ? (["air", "tds", "mvno"] as const).flatMap(business => buildHomePerformance(range, business))
-    : workspace === "air" && channel
+    ? (["aiir", "tdds", "mvvno"] as const).flatMap(business => buildHomePerformance(range, business))
+    : workspace === "aiir" && channel
       ? scopedPerformance(range, [channel])
-      : buildHomePerformance(range, workspace === "tds" ? "tds" : workspace === "mvno" ? "mvno" : "air");
+      : buildHomePerformance(range, workspace === "tdds" ? "tdds" : workspace === "mvvno" ? "mvvno" : "aiir");
   const totals = rows.reduce(
     (sum, row) => ({
       revenue: sum.revenue + row.revenue,
@@ -53,16 +53,16 @@ export function ChatStreaming() {
   const format = (value: number) => value.toLocaleString("ko-KR");
   const focus =
     workspace === "home"
-      ? "AIR·TDS·MVNO의 회선·해지·수익 흐름과 주요 시장 변화를 사업별로 비교하세요."
-      : workspace === "tds"
+      ? "AIIR·TDDS·MVVNO의 회선·해지·수익 흐름과 주요 시장 변화를 사업별로 비교하세요."
+      : workspace === "tdds"
       ? "매출·순익 변동과 운영 지표를 함께 점검하고, 비용 증가 요인을 확인하세요."
-      : workspace === "mvno"
+      : workspace === "mvvno"
         ? "사업자·망·판매 채널별 요금과 혜택을 같은 조건으로 비교하고, 할인 종료일을 확인하세요."
         : "공식 채널과 MOYO의 동일 요금제를 비교하되, 가입 혜택과 유지 조건의 차이를 확인하세요.";
   const examples = [
     {
       question: `${name}의 선택 기간 경영 현황을 요약해줘`,
-      answer: `${name} · 선택 기간 요약\n조회 기간: ${range.start} ~ ${range.end}${workspace === "air" && channel ? ` · ${channel}` : ""}\n\n매출: ₩${format(totals.revenue)}\n순익: ₩${format(totals.netProfit)}\n가입 회선: ${format(totals.customers)}회선\n해지: ${format(totals.cancellations)}건\n\n확인할 사항\n${focus}\n\n현재 합계만으로 성장 여부를 판단할 수 없습니다. 전기·전년 동일 기간과 비교해 추세를 확인하세요.`,
+      answer: `${name} · 선택 기간 요약\n조회 기간: ${range.start} ~ ${range.end}${workspace === "aiir" && channel ? ` · ${channel}` : ""}\n\n매출: ₩${format(totals.revenue)}\n순익: ₩${format(totals.netProfit)}\n가입 회선: ${format(totals.customers)}회선\n해지: ${format(totals.cancellations)}건\n\n확인할 사항\n${focus}\n\n현재 합계만으로 성장 여부를 판단할 수 없습니다. 전기·전년 동일 기간과 비교해 추세를 확인하세요.`,
     },
     {
       question: `${name}에서 주의해야 할 변화는 무엇이야?`,
@@ -75,10 +75,10 @@ export function ChatStreaming() {
   ];
   const send = (question: string) => {
     if (!question.trim() || isPending) return;
-    const isPriceScenario = question === AIR_PRICE_QUESTION || (/air/i.test(question) && /5\s*%/.test(question) && /체감|요금|가격/.test(question));
+    const isPriceScenario = question === AIIR_PRICE_QUESTION || (/aiir/i.test(question) && /5\s*%/.test(question) && /체감|요금|가격/.test(question));
     const match = examples.find(item => item.question === question);
     followLatest.current = true;
-    sendReplies(workspace, question, isPriceScenario ? airPriceScenario() : [match?.answer ?? `현재는 준비된 예시 질문에 응답합니다. ‘${AIR_PRICE_QUESTION}’을 선택하면 가정·예상 결과·검증 방안을 순서대로 확인할 수 있습니다.`]);
+    sendReplies(workspace, question, isPriceScenario ? aiirPriceScenario() : [match?.answer ?? `현재는 준비된 예시 질문에 응답합니다. ‘${AIIR_PRICE_QUESTION}’을 선택하면 가정·예상 결과·검증 방안을 순서대로 확인할 수 있습니다.`]);
     setInput("");
   };
   return (
@@ -97,14 +97,14 @@ export function ChatStreaming() {
             </span>
           </div>
           <div className="max-w-[80%] space-y-2 text-sm">
-            <p>{name}{workspace === "air" && channel ? ` · ${channel}` : ""}의 현황, 변화, 대응 정책을 확인하세요.</p>
+            <p>{name}{workspace === "aiir" && channel ? ` · ${channel}` : ""}의 현황, 변화, 대응 정책을 확인하세요.</p>
             <p className="text-xs text-muted-foreground">{range.start} — {range.end}</p>
             <p className="text-[11px] text-muted-foreground">가정 기반 시뮬레이션 예시 · 실시간 AI 연결 전</p>
           </div>
         </div>
         {messages.length === 0 && (
           <div className="flex flex-col items-start gap-2 pl-10">
-            <Button variant="outline" disabled={isPending} className="h-auto w-full justify-start whitespace-normal rounded-xl border-primary/30 bg-primary/5 px-3 py-3 text-left text-sm leading-relaxed" onClick={() => send(AIR_PRICE_QUESTION)}>{AIR_PRICE_QUESTION}</Button>
+            <Button variant="outline" disabled={isPending} className="h-auto w-full justify-start whitespace-normal rounded-xl border-primary/30 bg-primary/5 px-3 py-3 text-left text-sm leading-relaxed" onClick={() => send(AIIR_PRICE_QUESTION)}>{AIIR_PRICE_QUESTION}</Button>
             {examples.map((item) => (
               <Button
                 key={item.question}
@@ -146,7 +146,7 @@ export function ChatStreaming() {
         {isPending && <div role="status" className="flex items-center gap-2 pl-10 text-xs text-muted-foreground"><span className="flex gap-1" aria-hidden="true">{[0,1,2].map(i => <span key={i} className="size-1.5 animate-pulse rounded-full bg-primary motion-reduce:animate-none" style={{animationDelay:`${i * 180}ms`}} />)}</span>시나리오를 분석하고 있습니다…</div>}
       </div>
       <div className="shrink-0 border-t p-4">
-        {messages.length > 0 && !isPending && <Button variant="ghost" size="sm" className="mb-2 h-auto w-full justify-start whitespace-normal text-left text-xs text-muted-foreground" onClick={() => send(AIR_PRICE_QUESTION)}>추천 · AIR 체감요금 5% 인하 시뮬레이션</Button>}
+        {messages.length > 0 && !isPending && <Button variant="ghost" size="sm" className="mb-2 h-auto w-full justify-start whitespace-normal text-left text-xs text-muted-foreground" onClick={() => send(AIIR_PRICE_QUESTION)}>추천 · AIIR 체감요금 5% 인하 시뮬레이션</Button>}
         <form
           className="relative flex items-center gap-2"
           onSubmit={(event) => {

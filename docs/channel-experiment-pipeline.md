@@ -1,6 +1,6 @@
 # 기간·채널 분석에서 실험까지
 
-- 전체: `/analysis?workspace=air&start=YYYY-MM-DD&end=YYYY-MM-DD` 정책 실험 섹션.
+- 전체: `/analysis?workspace=aiir&start=YYYY-MM-DD&end=YYYY-MM-DD` 정책 실험 섹션.
 - 채널: 가입 흐름과 채널 기여의 채널명 또는 상세 링크 → `/analysis?...&channel=APP`.
 - 기간별 분석 → AI 실험 3건 제안(규칙형 목업) → 선택 → 위저드 → 요건 분석·확인 → 등록.
 - 분석 기간·채널·제안 근거를 `analysisContext`에 저장. 기간 변경 시 제안을 초기화한다.

@@ -12,6 +12,6 @@ for(const event of [...real,...demo]){
  }else{assert.match(event.title,/^\[데모\]/);assert.equal(event.dateBasis,'synthetic');assert.ok(!event.sourceUrl);}
 }
 assert.ok(real.some(e=>e.sourceUrl.includes('/211423')));assert.ok(real.some(e=>e.sourceUrl.includes('20250911001149')));
-for(const workspace of ['air','tds','mvno']) assert.ok(experiments.some(e=>e.workspace===workspace));
+for(const workspace of ['aiir','tdds','mvvno']) assert.ok(experiments.some(e=>e.workspace===workspace));
 assert.ok(experiments.every(e=>e.status==='draft'&&e.title.startsWith('[가상 실험]')));
 console.log('PASS: 200 reported events, 100 labelled demos, 12 draft experiments; dates, sources, IDs and workspace coverage.');

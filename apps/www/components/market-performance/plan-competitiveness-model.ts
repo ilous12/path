@@ -1,9 +1,9 @@
-import { type PlanOffer, isAir } from "./plan-market-model";
+import { type PlanOffer, isAiir } from "./plan-market-model";
 export type PriceBasis = "bill" | "effective";
 export const planPrice=(p:PlanOffer,basis:PriceBasis)=>basis==="bill"?p.monthlyBilledKrw:p.displayedEffectiveKrw;
 const higher=(a:number,b:number)=>a===0&&b===0?50:50+50*(a-b)/Math.max(Math.abs(a),Math.abs(b));
 export function similarPlan(a:PlanOffer,b:PlanOffer) {
-  if(isAir(b)||a.network!==b.network||a.unlimitedData!==b.unlimitedData)return false;
+  if(isAiir(b)||a.network!==b.network||a.unlimitedData!==b.unlimitedData)return false;
   if((a.dailyDataGb??0)!==(b.dailyDataGb??0))return false;
   if(a.unlimitedData)return true;
   return a.monthlyDataGb!==null&&b.monthlyDataGb!==null&&Math.abs(a.monthlyDataGb-b.monthlyDataGb)<=Math.max(2,a.monthlyDataGb*.25);

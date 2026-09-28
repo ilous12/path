@@ -26,9 +26,9 @@ const n = (value: number) =>
   value.toLocaleString("ko-KR", { maximumFractionDigits: 1 });
 export function EventAnalysis() {
   const q = useSearchParams();
-  const workspace = ["air", "tds", "mvno"].includes(q.get("workspace") ?? "")
+  const workspace = ["aiir", "tdds", "mvvno"].includes(q.get("workspace") ?? "")
     ? q.get("workspace")!
-    : "air";
+    : "aiir";
   const { events } = useEventCatalog();
   const hidden = useAnalysisExclusions();
   const ids = (q.get("events") ?? "").split(",");

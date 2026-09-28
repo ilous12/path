@@ -164,14 +164,14 @@ function ExperimentCard({
 }
 export function ExperimentCards() {
   const { alternatives } = useAlternatives();
-  const workspace = useSearchParams().get("workspace") ?? "air";
+  const workspace = useSearchParams().get("workspace") ?? "aiir";
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("all");
   const [page, setPage] = useState(0);
   const rows = alternatives
     .filter(
       (a) =>
-        (a.workspace ?? a.operator ?? "air").toLowerCase() ===
+        (a.workspace ?? a.operator ?? "aiir").toLowerCase() ===
           workspace.toLowerCase() &&
         (status === "all" || a.status === status) &&
         `${a.title} ${a.description}`

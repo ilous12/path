@@ -57,7 +57,7 @@ export function EventManagement({
   const { events } = useEventCatalog();
   const { hiddenIds, hideEvents, restoreEvent } = useEventVisibility();
   const params = useSearchParams();
-  const workspace = params.get("workspace") ?? "air";
+  const workspace = params.get("workspace") ?? "aiir";
   const [range, setRange] = useHistoryViewState("events:range", () => { const requested = { start: params.get("start") ?? "", end: params.get("end") ?? "" }; return validateRange(requested) ? presetRange("1M") : requested; });
   const [draftRange, setDraftRange] = useHistoryViewState("events:draftRange", range);
   const [keyword, setKeyword] = useHistoryViewState("events:keyword", "");

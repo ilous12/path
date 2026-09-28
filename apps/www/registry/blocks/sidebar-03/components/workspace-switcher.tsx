@@ -15,14 +15,14 @@ import { useWorkspaceTransition } from "./workspace-transition";
 
 const workspaces = [
   { id: "home", name: "Home" },
-  { id: "air", name: "air" },
-  { id: "tds", name: "TDS" },
-  { id: "mvno", name: "MVNO" },
+  { id: "aiir", name: "aiir" },
+  { id: "tdds", name: "TDDS" },
+  { id: "mvvno", name: "MVVNO" },
 ] as const;
 
 function WorkspaceIcon({ id }: { id: (typeof workspaces)[number]["id"] }) {
   if (id === "home") return <span aria-hidden className="flex size-8 items-center justify-center"><House className="size-5" /></span>;
-  const size = id === "mvno" ? "size-8" : id === "air" ? "h-5 w-6" : "size-5";
+  const size = id === "mvvno" ? "size-8" : id === "aiir" ? "h-5 w-6" : "size-5";
   return (
     <span aria-hidden="true" className="flex size-8 shrink-0 items-center justify-center">
       {/* CSS switches assets before hydration, including system theme changes. */}

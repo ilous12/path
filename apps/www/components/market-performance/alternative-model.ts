@@ -23,7 +23,7 @@ export type PolicyAlternative = {
   policyRevisionId?: string;
   policyProjection?: { method: ForecastMethod; channels: string[]; rows: import("./policy-group-model").GroupProjectionRow[] };
   subPolicyCount?: number;
-  salesTerms?: import("./air-sales-terms").AirSalesTerms;
+  salesTerms?: import("./aiir-sales-terms").AiirSalesTerms;
   forecastMethod?: ForecastMethod;
   isNew?: boolean;
   requirements?: PolicyRequirements;

@@ -59,7 +59,7 @@ export function AnnotationLabel({
   onSelect?: () => void;
 }) {
   const query = useSearchParams();
-  const workspace = query.get("workspace") ?? "air";
+  const workspace = query.get("workspace") ?? "aiir";
   const pivotDate=pivots?.map(p=>p.startAt.slice(0,10)).sort().at(-1);
   const pivotChange=pivotDate?pivotCustomerChange(pivotDate,query.get("channel")??undefined):undefined;
   const direction=pivots ? pivotChange===undefined?"회선 증감 미확인":pivotChange>0?"회선 증가":pivotChange<0?"회선 감소":"회선 변화 없음" : "";
@@ -169,7 +169,7 @@ export function AnnotationLabel({
 export function EventTypeLegend({
   split = false,
   pivot: _pivot = false,
-  workspace = "air",
+  workspace = "aiir",
 }: {
   split?: boolean;
   pivot?: boolean;

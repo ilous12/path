@@ -3,6 +3,7 @@ import { normalizePresentation } from "./presentation-copy";
 import { useSyncExternalStore } from "react";
 import { EVENTS, type MarketEvent } from "./data";
 import { mergeCustomEvents } from "./event-validation";
+import { normalizeLegacyBranding } from "./workspace-identity";
 const key = "mars-added-events";
 let snapshot = EVENTS;
 let initialized = false;
@@ -11,7 +12,9 @@ function subscribe(listener: () => void) {
   if (!initialized) {
     initialized = true;
     try {
-      const saved = JSON.parse(localStorage.getItem(key) ?? "[]");
+      const raw = localStorage.getItem(key);
+      const saved = normalizeLegacyBranding<MarketEvent[]>(JSON.parse(raw ?? "[]"));
+      if (raw && JSON.stringify(saved) !== raw) localStorage.setItem(key, JSON.stringify(saved));
       snapshot = normalizePresentation(mergeCustomEvents(EVENTS, saved));
     } catch {
       /* Use built-in examples when storage is unavailable. */

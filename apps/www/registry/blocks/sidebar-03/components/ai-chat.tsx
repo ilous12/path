@@ -7,7 +7,7 @@ import type React from "react";
 import { createContext, useCallback, useContext, useState, useEffect, useRef } from "react";
 import { AIChatDialog } from "@/registry/blocks/sidebar-03/components/ai-chat-dialog";
 
-import type { ChatReply } from "./air-chat-scenario";
+import type { ChatReply } from "./aiir-chat-scenario";
 export type ChatMessage = ChatReply & { role: "user" | "ai" };
 type Conversations = Record<string, ChatMessage[]>;
 
